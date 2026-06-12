@@ -1,0 +1,38 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/screens/MapScreen/LocationTrigger.gd" id="1"]
+
+[sub_resource type="SphereShape3D" id="shape"]
+radius = 2.5
+
+[sub_resource type="StandardMaterial3D" id="mat"]
+transparency = 1
+albedo_color = Color(0.224, 1, 0.078, 0.35)
+emission_enabled = true
+emission = Color(0.224, 1, 0.078, 1)
+emission_energy_multiplier = 0.6
+
+[sub_resource type="CylinderMesh" id="mesh"]
+material = SubResource("mat")
+top_radius = 2.0
+bottom_radius = 2.0
+height = 0.3
+
+[node name="LocationTrigger" type="Area3D"]
+script = ExtResource("1")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("shape")
+
+[node name="Marker" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+mesh = SubResource("mesh")
+
+[node name="NameLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8, 0)
+billboard = 1
+modulate = Color(1, 0.843, 0, 1)
+outline_modulate = Color(0.102, 0.039, 0, 1)
+text = "地點"
+font_size = 64
+outline_size = 16

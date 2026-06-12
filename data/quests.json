@@ -1,0 +1,246 @@
+{
+  "ah_ming": {
+    "name": "街頭藝人的最後一場",
+    "location": "ximen_mrt",
+    "npc": "街頭藝人阿明",
+    "available_periods": [1, 2],
+    "stages": [
+      {
+        "dialogue": "quest_ah_ming_s1",
+        "desc": "阿明被警衛驅趕，請你幫他吸引人群",
+        "trigger_minigame": "busking_crowd",
+        "merit": 15
+      },
+      {
+        "dialogue": "quest_ah_ming_s2",
+        "desc": "阿明逃過一劫，感謝無戒",
+        "merit": 10,
+        "unlock_skill": "brahma_resonance",
+        "flag": "ah_ming_saved"
+      }
+    ],
+    "cross_effect": "ah_ming 完成後，古廟新增臨時存檔點"
+  },
+
+  "rei": {
+    "name": "迷路的外國人",
+    "location": "ximen_mrt",
+    "npc": "日本背包客澪",
+    "available_periods": [0, 1, 2],
+    "stages": [
+      {
+        "dialogue": "quest_rei_choice",
+        "desc": "澪搭錯出口，三選一：帶去龍山寺/化緣/推薦林森北路",
+        "branches": {
+          "guide":    {"merit": 25, "gold": 150, "flag": "rei_guided"},
+          "beg":      {"karma": 10, "gold": 300, "flag": "rei_begged"},
+          "linsen":   {"karma": 20, "flag": "rei_linsen", "unlock_flag": "linsen_unlocked"}
+        }
+      }
+    ],
+    "cross_effect": "rei 後續在其他地點以不同狀態出現，影響第二幕劇情"
+  },
+
+  "zheng_ma": {
+    "name": "鄭媽的念珠債",
+    "location": "wannian_mall",
+    "npc": "三樓佛具店老闆娘鄭媽",
+    "available_periods": [0, 1, 2],
+    "stages": [
+      {
+        "dialogue": "quest_zheng_ma_s1",
+        "desc": "討債人威脅鄭媽關店，三選一：業障恐嚇/借錢/帶去古廟",
+        "branches": {
+          "intimidate": {"karma": 20, "merit": 10, "flag": "zheng_ma_saved_karma"},
+          "lend_gold":  {"gold": -2000, "merit": 30, "flag": "zheng_ma_saved_gold"},
+          "temple":     {"merit": 20, "flag": "zheng_ma_temple"}
+        }
+      },
+      {
+        "dialogue": "quest_zheng_ma_s2",
+        "desc": "鄭媽感謝，開放特殊商品",
+        "flag": "zheng_ma_shop_unlocked",
+        "merit": 10
+      }
+    ],
+    "cross_effect": "解鎖鄭媽商店特殊道具（護身符、業障結晶）"
+  },
+
+  "jie": {
+    "name": "電玩少年的挑戰書",
+    "location": "wannian_mall",
+    "npc": "五樓電玩城少年小傑",
+    "available_periods": [0, 1, 2],
+    "stages": [
+      {
+        "dialogue": "quest_jie_challenge",
+        "desc": "小傑挑戰木魚節奏戰，賭 500 金幣",
+        "trigger_minigame": "wooden_fish_rhythm",
+        "win":  {"gold": 500, "unlock_skill": "wooden_fish_fury", "flag": "jie_defeated"},
+        "lose": {"gold": -500}
+      }
+    ],
+    "cross_effect": "小傑父親出現於第二幕，陳阿嬤支線前置條件"
+  },
+
+  "ah_zhong": {
+    "name": "師傅阿忠的最後一鍋",
+    "location": "zen_bbq",
+    "npc": "老廚師阿忠師傅",
+    "available_periods": [2, 3],
+    "stages": [
+      {
+        "dialogue": "quest_ah_zhong_s1",
+        "desc": "阿忠說需要三樣食材，分別在不同地點",
+        "flag": "ah_zhong_started"
+      },
+      {
+        "dialogue": "quest_ah_zhong_s2",
+        "desc": "取得龍山寺藥材（古廟互動獲得）",
+        "require_flag": "got_herb",
+        "location_required": "old_temple"
+      },
+      {
+        "dialogue": "quest_ah_zhong_s3",
+        "desc": "取得西門特製食材（西門 MRT 小販）",
+        "require_flag": "got_ingredient",
+        "location_required": "ximen_mrt"
+      },
+      {
+        "dialogue": "quest_ah_zhong_final",
+        "desc": "阿忠完成最後一道料理，揭露師父的過去",
+        "merit": 40,
+        "flag": "master_past_revealed",
+        "hp_max_up": 100
+      }
+    ],
+    "cross_effect": "解鎖無戒師父的背景故事，影響結局演出"
+  },
+
+  "david": {
+    "name": "失業工程師的第三杯",
+    "location": "zen_bbq",
+    "npc": "失業工程師大衛",
+    "available_periods": [3],
+    "stages": [
+      {
+        "dialogue": "quest_david_choice",
+        "desc": "大衛喝悶酒，三選一：認真傾聽/勸打坐/化緣",
+        "branches": {
+          "listen": {"merit": 20, "flag": "david_listened"},
+          "meditate": {"merit": 10, "flag": "david_meditate"},
+          "beg": {"karma": 15, "gold": 200, "flag": "david_begged"}
+        }
+      }
+    ],
+    "cross_effect": "david 後續在西門出現，listen 路線解鎖被動技「哀兵必勝」"
+  },
+
+  "cherry_debt": {
+    "name": "Cherry 的債（主支線）",
+    "location": "zuijin_club",
+    "npc": "Cherry",
+    "available_periods": [3],
+    "require_flag": "cherry_met",
+    "stages": [
+      {
+        "dialogue": "quest_cherry_debt_s1",
+        "desc": "Cherry 欠老鴇 5 萬，告知無戒"
+      },
+      {
+        "dialogue": "quest_cherry_debt_choice",
+        "desc": "三選一：借錢/談判（需業障≥60）/幫她逃跑（觸發色戒）",
+        "branches": {
+          "lend":      {"gold": -5000, "merit": 30, "flag": "cherry_debt_lend"},
+          "negotiate": {"require_karma": 60, "karma": -30, "flag": "cherry_debt_negotiated"},
+          "escape":    {"trigger_vow": "lust", "flag": "cherry_escape"}
+        }
+      },
+      {
+        "dialogue": "quest_cherry_debt_final",
+        "desc": "依選擇播放不同結果",
+        "flag": "cherry_debt_resolved"
+      }
+    ],
+    "cross_effect": "Cherry 解鎖為戰鬥後援（破色戒後），影響 Cherry 個人結局"
+  },
+
+  "cai_ma": {
+    "name": "媽媽桑的神秘委託",
+    "location": "zuijin_club",
+    "npc": "老鴇蔡媽",
+    "available_periods": [3],
+    "require_flag": "linsen_unlocked",
+    "stages": [
+      {
+        "dialogue": "quest_cai_ma_s1",
+        "desc": "蔡媽委託送包裹到古廟，不能打開"
+      },
+      {
+        "dialogue": "quest_cai_ma_choice",
+        "desc": "到達古廟後：照做/偷看",
+        "location_required": "old_temple",
+        "branches": {
+          "deliver":  {"merit": 30, "flag": "cai_ma_trusted"},
+          "peek_good": {"merit": 20, "flag": "cai_ma_peeked_good"},
+          "peek_bad":  {"karma": 40, "flag": "cai_ma_peeked_bad"}
+        }
+      }
+    ],
+    "cross_effect": "影響第二幕蔡媽立場（敵/友），peek_bad 路線觸發警察遭遇戰"
+  },
+
+  "grandma": {
+    "name": "陳阿嬤找孫子",
+    "location": "old_temple",
+    "npc": "老香客陳阿嬤",
+    "available_periods": [0, 1, 2, 3],
+    "require_completed": "jie",
+    "stages": [
+      {
+        "dialogue": "quest_grandma_s1",
+        "desc": "阿嬤說孫子小傑三天沒回家"
+      },
+      {
+        "dialogue": "quest_grandma_s2",
+        "desc": "去萬年找到小傑，勸他回家",
+        "location_required": "wannian_mall",
+        "require_flag": "jie_defeated"
+      },
+      {
+        "dialogue": "quest_grandma_final",
+        "desc": "小傑與阿嬤和好，父親出場",
+        "merit": 50,
+        "flag": "true_ending_flag_1"
+      }
+    ],
+    "cross_effect": "解鎖真結局旗標之一，小傑父親開啟第二幕副線"
+  },
+
+  "lao_wang": {
+    "name": "流浪漢老王的過去",
+    "location": "old_temple",
+    "npc": "廟前流浪漢老王",
+    "available_periods": [0, 1, 2, 3],
+    "stages": [
+      {
+        "dialogue": "quest_lao_wang_s1",
+        "desc": "老王自稱前董事長，被合夥人背叛"
+      },
+      {
+        "dialogue": "quest_lao_wang_s2",
+        "desc": "帶老王去萬年找人（對質）",
+        "location_required": "wannian_mall"
+      },
+      {
+        "dialogue": "quest_lao_wang_choice",
+        "desc": "最終選擇：復仇 or 放下",
+        "branches": {
+          "revenge":    {"gold": 800, "karma": 30, "flag": "lao_wang_revenge"},
+          "let_go":     {"merit": 60, "flag": "lao_wang_forgave", "true_ending_flag": true}
+        }
+      }
+    ],
+    "cross_effect": "let_go 路線影響尾章結局走向，revenge 路線觸發額外 Boss 小副本"
+  }
+}

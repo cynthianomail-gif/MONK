@@ -1,0 +1,18 @@
+{
+  "slash_red":       "res://assets/audio/sfx/slash_red.wav",
+  "ink_splash":      "res://assets/audio/sfx/ink_splash.wav",
+  "weakness_hit":    "res://assets/audio/sfx/weakness_hit.wav",
+  "encounter_sting": "res://assets/audio/sfx/encounter_sting.wav",
+  "impact_heavy":    "res://assets/audio/sfx/impact_heavy.wav",
+  "karma_surge":     "res://assets/audio/sfx/karma_surge.wav",
+  "merit_chime":     "res://assets/audio/sfx/merit_chime.wav",
+  "gold_collect":    "res://assets/audio/sfx/gold_collect.wav",
+  "ui_select":       "res://assets/audio/sfx/ui_select.wav",
+  "ui_cancel":       "res://assets/audio/sfx/ui_cancel.wav",
+  "save_done":       "res://assets/audio/sfx/save_done.wav",
+  "vow_break":       "res://assets/audio/sfx/vow_break.wav",
+  "heat_buildup":    "res://assets/audio/sfx/heat_buildup.wav",
+  "status_apply":    "res://assets/audio/sfx/status_apply.wav",
+  "combo_up":        "res://assets/audio/sfx/combo_up.wav",
+  "wooden_fish_tap": "res://assets/audio/sfx/wooden_fish_tap.wav"
+}

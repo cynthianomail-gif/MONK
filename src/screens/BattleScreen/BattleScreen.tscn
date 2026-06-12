@@ -1,0 +1,224 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/screens/BattleScreen/BattleManager.gd" id="1"]
+[ext_resource type="Script" path="res://src/screens/BattleScreen/SkillExecutor.gd" id="2"]
+[ext_resource type="Script" path="res://src/screens/BattleScreen/StatusEffects.gd" id="3"]
+[ext_resource type="Script" path="res://src/screens/BattleScreen/BattleUI.gd" id="4"]
+
+[node name="BattleScreen" type="Control" groups=["battle_manager"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="SkillExecutor" type="Node" parent="."]
+script = ExtResource("2")
+
+[node name="StatusEffects" type="Node" parent="SkillExecutor"]
+script = ExtResource("3")
+
+[node name="BattleUI" type="CanvasLayer" parent="."]
+script = ExtResource("4")
+
+[node name="Background" type="ColorRect" parent="BattleUI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.055, 0.024, 0.035, 1)
+
+[node name="EnemyArea" type="HBoxContainer" parent="BattleUI"]
+unique_name_in_owner = true
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -600.0
+offset_top = 120.0
+offset_right = 600.0
+offset_bottom = 420.0
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="PlayerPanel" type="PanelContainer" parent="BattleUI"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -240.0
+offset_right = 520.0
+offset_bottom = -40.0
+
+[node name="Margin" type="MarginContainer" parent="BattleUI/PlayerPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="BattleUI/PlayerPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PlayerName" type="Label" parent="BattleUI/PlayerPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.961, 0.961, 0.941, 1)
+theme_override_font_sizes/font_size = 30
+text = "無戒"
+
+[node name="PlayerHPBar" type="ProgressBar" parent="BattleUI/PlayerPanel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 18)
+layout_mode = 2
+max_value = 500.0
+value = 500.0
+show_percentage = false
+
+[node name="PlayerHPText" type="Label" parent="BattleUI/PlayerPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "500 / 500"
+
+[node name="ResourceLabel" type="Label" parent="BattleUI/PlayerPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.843, 0, 1)
+theme_override_font_sizes/font_size = 22
+text = "業障 0 ｜ 功德 0 ｜ 金幣 1000"
+
+[node name="SkillMenu" type="PanelContainer" parent="BattleUI"]
+unique_name_in_owner = true
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -560.0
+offset_top = -560.0
+offset_right = -40.0
+offset_bottom = -40.0
+
+[node name="Margin" type="MarginContainer" parent="BattleUI/SkillMenu"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="BattleUI/SkillMenu/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SkillTitle" type="Label" parent="BattleUI/SkillMenu/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.176, 0.176, 1)
+theme_override_font_sizes/font_size = 26
+text = "▼ 技能"
+
+[node name="Scroll" type="ScrollContainer" parent="BattleUI/SkillMenu/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SkillButtons" type="VBoxContainer" parent="BattleUI/SkillMenu/Margin/VBox/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="LogLabel" type="Label" parent="BattleUI"]
+unique_name_in_owner = true
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -500.0
+offset_top = -110.0
+offset_right = 500.0
+offset_bottom = -50.0
+theme_override_colors/font_color = Color(0.961, 0.961, 0.941, 1)
+theme_override_font_sizes/font_size = 26
+text = ""
+horizontal_alignment = 1
+
+[node name="ComboLabel" type="Label" parent="BattleUI"]
+unique_name_in_owner = true
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 40.0
+offset_right = 200.0
+offset_bottom = 100.0
+pivot_offset = Vector2(200, 30)
+theme_override_colors/font_color = Color(1, 0.176, 0.176, 1)
+theme_override_font_sizes/font_size = 44
+text = "連擊 ×2"
+horizontal_alignment = 1
+
+[node name="HoldUpMenu" type="CenterContainer" parent="BattleUI"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Panel" type="PanelContainer" parent="BattleUI/HoldUpMenu"]
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="BattleUI/HoldUpMenu/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="BattleUI/HoldUpMenu/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="HoldUpTitle" type="Label" parent="BattleUI/HoldUpMenu/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.843, 0, 1)
+theme_override_font_sizes/font_size = 30
+text = "Hold Up！要求什麼？"
+horizontal_alignment = 1
+
+[node name="HoldUpGold" type="Button" parent="BattleUI/HoldUpMenu/Panel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 52)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "「香油錢拿來」（金幣）"
+
+[node name="HoldUpInfo" type="Button" parent="BattleUI/HoldUpMenu/Panel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 52)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "「老實交代」（弱點情報）"
+
+[node name="HoldUpItem" type="Button" parent="BattleUI/HoldUpMenu/Panel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 52)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "「身上有什麼好東西」（道具）"
+
+[node name="AllOutOverlay" type="ColorRect" parent="BattleUI"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.78, 0.05, 0.05, 0.92)
+
+[node name="AllOutLabel" type="Label" parent="BattleUI/AllOutOverlay"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 120
+text = "超　渡　大　陣"
+horizontal_alignment = 1
+vertical_alignment = 1

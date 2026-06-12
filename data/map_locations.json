@@ -1,0 +1,38 @@
+{
+  "ximen_mrt": {
+    "name": "捷運西門站 6 號出口", "district": "ximen",
+    "position_3d": {"x": 12.0, "y": 0.0, "z": -8.0}, "trigger_radius": 2.5,
+    "actions": ["beggar_minigame", "random_encounter", "quest_ah_ming", "quest_rei"],
+    "available_periods": [1, 2, 3], "bgm": "ximen_night",
+    "scene_file": "res://assets/3d/environments/ximen_mrt.glb"
+  },
+  "wannian_mall": {
+    "name": "萬年商業大樓", "district": "ximen",
+    "position_3d": {"x": 8.0, "y": 0.0, "z": -5.0}, "trigger_radius": 3.0,
+    "actions": ["shop", "greed_break_trigger", "quest_zheng_ma", "quest_jie"],
+    "available_periods": [0, 1, 2], "bgm": "ximen_day",
+    "scene_file": "res://assets/3d/environments/wannian_mall.glb"
+  },
+  "zen_bbq": {
+    "name": "禪味燒肉", "district": "wanhua_old",
+    "position_3d": {"x": -15.0, "y": 0.0, "z": 10.0}, "trigger_radius": 2.0,
+    "actions": ["food_break_trigger", "rest", "quest_ah_zhong", "quest_david"],
+    "available_periods": [2, 3], "bgm": "wanhua_night",
+    "scene_file": "res://assets/3d/environments/zen_bbq.glb"
+  },
+  "zuijin_club": {
+    "name": "紫醉金迷公關俱樂部", "district": "linsen",
+    "position_3d": {"x": 25.0, "y": 0.0, "z": -18.0}, "trigger_radius": 2.5,
+    "actions": ["cherry_dialogue", "lust_break_trigger", "quest_cherry_debt", "quest_cai_ma"],
+    "available_periods": [3], "unlock_flag": "linsen_unlocked",
+    "bgm": "linsen_night",
+    "scene_file": "res://assets/3d/environments/zuijin_club.glb"
+  },
+  "old_temple": {
+    "name": "破舊古廟", "district": "wanhua_old",
+    "position_3d": {"x": -18.0, "y": 0.0, "z": 8.0}, "trigger_radius": 3.0,
+    "actions": ["save", "job_switch", "rest", "skill_learn", "quest_grandma", "quest_lao_wang"],
+    "available_periods": [0, 1, 2, 3], "bgm": "temple_ambient",
+    "scene_file": "res://assets/3d/environments/old_temple.glb"
+  }
+}

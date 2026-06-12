@@ -1,0 +1,37 @@
+{
+  "ares": {
+    "name": "阿瑞斯", "subtitle": "台北戰神",
+    "max_hp": 2000, "attack": 80, "defense": 40, "level": 20,
+    "weaknesses": [], "resistances": ["karma", "merit", "physical"],
+    "is_boss": true,
+    "portrait": "boss_ares.png",
+    "battle_bg": "bg_battle_boss.png", "bgm": "boss_theme",
+    "phases": [
+      {
+        "phase": 1, "hp_threshold": 1.0,
+        "ai_pattern": "boss_phase1",
+        "skills": ["war_strike", "intimidate", "rage_charge"],
+        "skill_defs": {
+          "war_strike":  {"name": "戰神怒斬", "power": 90, "damage_type": "physical", "target": "single"},
+          "intimidate":  {"name": "威壓", "damage_type": "support", "special": "weaken", "duration": 2, "target": "player"},
+          "rage_charge": {"name": "神怒蓄力", "damage_type": "support", "special": "charge_next", "warn_text": "戰神怒火蓄積……", "cycle": 3}
+        }
+      },
+      {
+        "phase": 2, "hp_threshold": 0.5,
+        "transition_cutscene": "ares_phase2",
+        "ai_pattern": "boss_phase2",
+        "skills": ["war_strike", "area_crush", "divine_judgment", "divine_rage"],
+        "skill_defs": {
+          "area_crush":      {"name": "天地壓制", "power": 120, "damage_type": "physical", "target": "all", "special": "slow", "duration": 1},
+          "divine_judgment": {"name": "神裁", "power": 200, "damage_type": "physical", "target": "single", "ignore_defense": true, "condition": "hp_below_30_per_turn"},
+          "divine_rage":     {"name": "戰神怒火", "power": 150, "damage_type": "physical", "target": "single", "guaranteed_down": true, "condition": "after_charge"}
+        }
+      }
+    ],
+    "gold_reward": 5000,
+    "defeat_cutscene": "ares_defeated",
+    "unlock_ending": "ending_true",
+    "description": "台北戰神降臨西門天橋。深夜大雨。"
+  }
+}

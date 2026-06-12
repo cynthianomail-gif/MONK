@@ -1,0 +1,8 @@
+{
+  "wujie_base": {
+    "prompt": "Taiwanese Buddhist monk male 30s shaved head worn grey kasaya robe calm T-pose full body rigging ready, low poly cartoon style clean topology quad mesh",
+    "art_style": "cartoon", "topology": "quad",
+    "output": "assets/3d/characters/wujie_base.glb",
+    "next_step": "mixamo"
+  }
+}

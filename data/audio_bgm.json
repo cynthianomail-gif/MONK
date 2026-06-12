@@ -1,0 +1,14 @@
+{
+  "title_theme":    "res://assets/audio/bgm/title_theme.ogg",
+  "ximen_day":      "res://assets/audio/bgm/ximen_day.ogg",
+  "ximen_night":    "res://assets/audio/bgm/ximen_night.ogg",
+  "wanhua_night":   "res://assets/audio/bgm/wanhua_night.ogg",
+  "linsen_night":   "res://assets/audio/bgm/linsen_night.ogg",
+  "temple_ambient": "res://assets/audio/bgm/temple_ambient.ogg",
+  "battle_theme":   "res://assets/audio/bgm/battle_theme.ogg",
+  "all_out_theme":  "res://assets/audio/bgm/all_out_theme.ogg",
+  "boss_theme":     "res://assets/audio/bgm/boss_theme.ogg",
+  "cherry_theme":   "res://assets/audio/bgm/cherry_theme.ogg",
+  "victory_jingle": "res://assets/audio/bgm/victory_jingle.ogg",
+  "defeat_sting":   "res://assets/audio/bgm/defeat_sting.ogg"
+}

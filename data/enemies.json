@@ -1,0 +1,79 @@
+{
+  "street_punk": {
+    "name": "西門混混", "district": "ximen",
+    "max_hp": 150, "attack": 25, "defense": 10, "level": 2,
+    "weaknesses": ["merit"], "resistances": ["physical"],
+    "ai_pattern": "aggressive",
+    "skills": ["punk_punch", "provoke", "call_backup"],
+    "skill_defs": {
+      "punk_punch": {"name": "街頭亂拳", "power": 30, "damage_type": "physical", "target": "single"},
+      "provoke":    {"name": "尋釁滋事", "damage_type": "support", "special": "taunt_self_def", "def_bonus": 0.3, "duration": 1, "condition": "hp_below_50"},
+      "call_backup": {"name": "叫兄弟來", "damage_type": "support", "special": "summon", "summon_id": "street_punk", "max_once": true, "condition": "hp_below_30"}
+    },
+    "gold_reward": 80, "portrait": "enemy_punk.png",
+    "description": "西門晃蕩的小混混。"
+  },
+
+  "corrupt_vendor": {
+    "name": "黑心攤販", "district": "ximen",
+    "max_hp": 200, "attack": 20, "defense": 25, "level": 3,
+    "weaknesses": ["karma"], "resistances": ["merit"],
+    "ai_pattern": "defensive",
+    "skills": ["overcharge", "smoke_screen", "fake_goods"],
+    "skill_defs": {
+      "overcharge":  {"name": "坑殺定價", "power": 20, "damage_type": "physical", "target": "single", "special": "steal_gold", "steal": 100},
+      "smoke_screen": {"name": "煙霧彈", "damage_type": "support", "special": "self_evade", "evade": 0.6, "duration": 1},
+      "fake_goods":  {"name": "假貨進攻", "power": 35, "damage_type": "physical", "target": "single", "special": "poison", "duration": 3, "condition": "hp_below_50"}
+    },
+    "gold_reward": 150, "portrait": "enemy_vendor.png",
+    "description": "賣假貨的攤販。"
+  },
+
+  "night_ghost": {
+    "name": "深夜孤魂", "district": "wanhua_old",
+    "max_hp": 120, "attack": 40, "defense": 0, "level": 4,
+    "weaknesses": ["merit"], "resistances": ["physical"],
+    "ai_pattern": "random",
+    "skills": ["haunt", "spirit_claw", "drain_merit"],
+    "skill_defs": {
+      "haunt":      {"name": "陰魂附體", "damage_type": "support", "special": "fear", "duration": 2, "side_effect": {"self_atk": 20}},
+      "spirit_claw": {"name": "奪命抓", "power": 50, "damage_type": "karma", "target": "single", "ignore_defense": true},
+      "drain_merit": {"name": "吸取功德", "damage_type": "support", "special": "drain_merit", "drain": 20, "heal_self": 30}
+    },
+    "gold_reward": 100, "portrait": "enemy_ghost.png",
+    "description": "萬華古廟附近的亡魂。深夜限定。",
+    "time_restriction": [3]
+  },
+
+  "drunk_guard": {
+    "name": "醉漢保鑣", "district": "linsen",
+    "max_hp": 180, "attack": 35, "defense": 15, "level": 5,
+    "weaknesses": ["karma"], "resistances": [],
+    "ai_pattern": "aggressive",
+    "skills": ["bottle_smash", "double_hit", "bodyguard"],
+    "skill_defs": {
+      "bottle_smash": {"name": "酒瓶砸頭", "power": 45, "damage_type": "physical", "target": "single", "special": "stun", "stun_chance": 0.2},
+      "double_hit":  {"name": "雙人夾擊", "power": 30, "damage_type": "physical", "target": "single", "hits": 2, "condition": "partner_alive"},
+      "bodyguard":   {"name": "護主", "damage_type": "support", "special": "cover_ally", "cover_ratio": 0.5, "condition": "ally_hp_lowest"}
+    },
+    "spawn_pair": true,
+    "gold_reward": 200, "portrait": "enemy_guard.png",
+    "description": "林森北路的保鑣，成對出現。"
+  },
+
+  "temple_ghost": {
+    "name": "廟宇惡鬼", "district": "wanhua_old",
+    "max_hp": 350, "attack": 30, "defense": 30, "level": 6,
+    "weaknesses": ["merit"], "resistances": ["karma", "physical"],
+    "ai_pattern": "defensive",
+    "skills": ["curse_seal", "ghost_fire", "dark_regen", "karma_burst"],
+    "skill_defs": {
+      "curse_seal": {"name": "詛咒封印", "damage_type": "support", "special": "seal", "duration": 2, "target": "player"},
+      "ghost_fire": {"name": "鬼火燃燒", "power": 60, "damage_type": "karma", "target": "single", "special": "burn", "duration": 3},
+      "dark_regen": {"name": "黑霧再生", "damage_type": "support", "special": "self_heal", "heal": 80, "condition": "hp_below_40", "per_turn": true},
+      "karma_burst": {"name": "業障爆發", "damage_type": "karma", "power_formula": "player_karma * 1.5", "target": "single", "condition": "player_karma_above_50"}
+    },
+    "gold_reward": 400, "portrait": "enemy_temple_ghost.png",
+    "description": "萬華古廟鎮守惡鬼，菁英敵人。"
+  }
+}

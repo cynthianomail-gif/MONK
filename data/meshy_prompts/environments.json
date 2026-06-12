@@ -1,0 +1,33 @@
+{
+  "ximen_mrt": {
+    "prompt": "Taipei MRT exit 6 Ximending at night, underground station entrance, metallic railings, neon signs Chinese characters, wet pavement reflecting colorful lights, convenience store nearby, low poly 3D game environment, stylized cartoon",
+    "art_style": "cartoon", "topology": "quad",
+    "godot_scale": 1.0,
+    "output": "assets/3d/environments/ximen_mrt.glb",
+    "toon_shader": true
+  },
+  "wannian_mall": {
+    "prompt": "5-story commercial building Ximending Taipei retro shopping mall exterior night, glowing shop signs electronics toy stores neon lights escalator glass, low poly 3D cartoon stylized game asset",
+    "art_style": "cartoon", "topology": "quad",
+    "godot_scale": 1.2,
+    "output": "assets/3d/environments/wannian_mall.glb"
+  },
+  "zen_bbq": {
+    "prompt": "small Japanese BBQ restaurant old Taipei district late night, hanging red lanterns smoke grill wooden sign narrow alley warm orange glow, low poly 3D cartoon",
+    "art_style": "cartoon", "topology": "quad",
+    "godot_scale": 0.9,
+    "output": "assets/3d/environments/zen_bbq.glb"
+  },
+  "zuijin_club": {
+    "prompt": "underground nightclub entrance Linsen North Road Taipei, neon purple pink signs velvet rope dark staircase bouncer silhouette seductive, low poly 3D cartoon stylized",
+    "art_style": "cartoon", "topology": "quad",
+    "godot_scale": 1.0,
+    "output": "assets/3d/environments/zuijin_club.glb"
+  },
+  "old_temple": {
+    "prompt": "small dilapidated Buddhist temple Wanhua Taipei, cracked stone walls incense smoke red lanterns worn wooden gate urban background, low poly 3D cartoon atmospheric",
+    "art_style": "cartoon", "topology": "quad",
+    "godot_scale": 1.0,
+    "output": "assets/3d/environments/old_temple.glb"
+  }
+}
