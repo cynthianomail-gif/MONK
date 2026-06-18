@@ -13,7 +13,10 @@ func _ready() -> void:
 	start_button.grab_focus()
 
 func _on_start_pressed() -> void:
-	SceneRouter.go_to_map()
+	# 新遊戲：重置狀態（出生點＝古廟），直接由主線引擎跑第一章。
+	# ch1 第一幕就是開場過場（神廟倒塌），故不需另外播，避免雙播。
+	GameManager.new_game()
+	MainQuestManager.continue_story()
 
 func _on_continue_pressed() -> void:
 	SaveManager.load_game()

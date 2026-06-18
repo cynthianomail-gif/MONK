@@ -8,7 +8,7 @@ const VOWS: Dictionary = {
 			  "desc": "Cherry 靠近時，你沒有起身離開。",
 			  "effect": "cherry_combat_ally", "cutscene": "break_lust", "flag": "broke_lust_vow"},
 	"greed": {"name": "貪戒", "gold_cost": 8000, "karma_gain": 40,
-			  "desc": "純金勞力士念珠戴上，你感覺自己是台北之王。",
+			  "desc": "純金勞力士念珠戴上，你感覺自己是新梵市之王。",
 			  "effect": "gold_multiplier", "cutscene": "break_greed", "flag": "broke_greed_vow"}
 }
 
@@ -45,6 +45,11 @@ func _execute(vow_type: String, vow: Dictionary) -> void:
 	EventBus.vow_broken.emit(vow_type)
 	_apply_effect(vow.effect)
 	SkillUnlockManager.check_unlocks()
+	# 破戒當下的內心戲獨白（vow_break_<type>），播完再進過場。
+	var monologue: String = "vow_break_%s" % vow_type
+	if ResourceLoader.exists("res://dialogue/%s.dtl" % monologue):
+		Dialogic.start(monologue)
+		await Dialogic.timeline_ended
 	SceneRouter.play_cutscene(vow.cutscene, "map")
 
 func _apply_effect(eff: String) -> void:

@@ -28,6 +28,8 @@ var is_downed: bool = false
 var summoned_backup: bool = false
 var chaos_target: Combatant = null
 var buffs: Dictionary = {}  # buff_name → {"value": float, "duration": int}
+var portrait_path: String = ""        # 已解析的立繪 res:// 路徑（空＝無立繪）
+var portrait_moods: Dictionary = {}   # mood_key → 已解析 res:// 路徑（Boss 動態表情）
 
 static func from_enemy(enemy_id: String, data: Dictionary, suffix: String = "") -> Combatant:
 	var c := Combatant.new()
@@ -46,6 +48,11 @@ static func from_enemy(enemy_id: String, data: Dictionary, suffix: String = "") 
 	c.ai_pattern = data.get("ai_pattern", "random")
 	c.gold_reward = data.get("gold_reward", 0)
 	c.is_boss = data.get("is_boss", false)
+	c.portrait_path = BattleArt.resolve_portrait_path(String(data.get("portrait", "")))
+	for k in data.get("portrait_moods", {}):
+		var rp: String = BattleArt.resolve_portrait_path(String(data["portrait_moods"][k]))
+		if rp != "":
+			c.portrait_moods[k] = rp
 	return c
 
 static func from_player() -> Combatant:

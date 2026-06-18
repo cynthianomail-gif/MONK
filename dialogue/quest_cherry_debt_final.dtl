@@ -1,0 +1,22 @@
+天將亮，林森北的霓虹一盞盞熄了。Cherry 與無戒站在巷口，空氣裡有雨後的潮味。
+join Cherry (neutral)
+if GameManager.get_flag("cherry_escape"):
+	Cherry (sorrow): 我們就這樣……跑出來了。蔡媽不會放過我們的，你知道吧。
+	Wujie (calm): 知道。但貧僧也不會放開這隻手了。前路再黑，兩個人走，總比一個人強。
+	Cherry (smile): 「兩個人」喔……你一個和尚，講這種話不怕佛祖罰你?
+	Wujie (happy): 罰便罰。這一條色戒，貧僧破得心甘情願。
+	Cherry (smile): ……傻和尚。那從今天起，你的業障，我陪你一起扛。
+elif GameManager.get_flag("cherry_debt_negotiated"):
+	Cherry (neutral): 你那天在辦公室的樣子，把我嚇到了。那根本不是和尚……比討債的還可怕。
+	Wujie (calm): 貧僧知道。為了鎮住蔡媽，動了不該動的氣。這業障，貧僧認。
+	Cherry (sorrow): 你為我背這個，我反而更不安。和尚，別為了我變成你討厭的東西。
+	Wujie (calm): 放心。佛在貧僧心裡，這點黑,蓋不過去。妳自由了，這就夠了。
+	Cherry (smile): ……謝謝你。真的。
+else:
+	Cherry (smile): 五萬欸……你眉頭都沒皺一下就掏了。我這輩子沒見過這麼會花錢的和尚。
+	Wujie (calm): 錢沒了可以再化緣，妳這條命錯過了就沒了。孰輕孰重，貧僧分得清。
+	Cherry (neutral): 我會還你的。一塊一塊還，就算要還一輩子。
+	Wujie (happy): 不必還錢。妳若願意,往後少蹲一次冰冷的巷口，這債就還清了。
+	Cherry (smile): ……好。一言為定，怪和尚。
+Cherry (neutral): 天亮了。回去吧，你那破廟，搞不好還等著你掃地呢。
+Wujie (calm): 阿彌陀佛。後會有期，Cherry。

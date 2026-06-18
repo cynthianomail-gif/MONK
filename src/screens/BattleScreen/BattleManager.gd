@@ -20,6 +20,10 @@ var player_combatant: Combatant
 var enemy_combatants: Array = []
 var _hits: int = 0
 var _enemies_data: Dictionary = {}
+var _boss: Combatant = null      # 有階段的 Boss 參照（無則為 null）
+var _boss_phases: Array = []     # boss.json 的 phases 陣列
+var _boss_phase_idx: int = -1    # 目前階段索引（-1 = 非階段型 Boss）
+var _boss_hp_seen: int = 0        # 上次見到的 Boss HP（判斷掉血→受擊表情）
 
 func _ready() -> void:
 	add_to_group("battle_manager")
@@ -37,8 +41,13 @@ func setup(enemy_id: String) -> void:
 	enemy_combatants = [Combatant.from_enemy(enemy_id, data)]
 	if data.get("spawn_pair", false):
 		enemy_combatants.append(Combatant.from_enemy(enemy_id, data, "_2"))
+	_init_boss_phases(data)
 	status.reset()
 	ui.build(player_combatant, enemy_combatants)
+	ui.set_battle_bg(BattleArt.resolve_battle_bg(data))
+	if _boss != null and not String(_boss.portrait_moods.get("hurt", "")).is_empty():
+		_boss_hp_seen = _boss.current_hp
+		_boss.hp_changed.connect(_on_boss_hp_changed)
 	battle_log.emit("遭遇 %s！" % data.get("name", enemy_id))
 	EventBus.battle_started.emit(data)
 	if data.get("is_boss", false):
@@ -104,7 +113,11 @@ func player_use_skill(skill_id: String, target_idx: int) -> void:
 	if sk.get("is_heat_action", false):
 		EventBus.heat_action_triggered.emit(GameManager.player.job)
 		_track_heat_achievement()
+		var cut: String = sk.get("cutscene", "")
+		if cut != "":
+			await SceneRouter.play_battle_cutscene(cut)
 	await ui.play_skill_effect(sk.get("name", skill_id), result.hit_weakness, result.is_crit)
+	await _maybe_trigger_boss_phase2()
 	_process_result(result)
 
 func _valid_target(idx: int) -> Combatant:
@@ -152,6 +165,8 @@ func _enemy_turn() -> void:
 		var act: Dictionary = executor.execute_enemy_action(e, player_combatant, enemy_combatants)
 		if not act.is_empty():
 			battle_log.emit("%s 使出「%s」" % [e.display_name, act.get("name", "?")])
+			if e == _boss:
+				ui.flash_enemy_mood(_boss, _boss_fig(String(_boss.portrait_moods.get("act", ""))), 0.8)
 		if act.has("summon") and enemy_combatants.size() < MAX_ENEMIES:
 			_summon(act.summon)
 		await get_tree().create_timer(0.5).timeout
@@ -269,9 +284,96 @@ func _defeat() -> void:
 func _track_heat_achievement() -> void:
 	GameManager.set_flag("heat_used_" + GameManager.player.job, true)
 
+# ─── Boss 階段切換 ──────────────────────────────────────
+
+func _init_boss_phases(data: Dictionary) -> void:
+	_boss = null
+	_boss_phases = []
+	_boss_phase_idx = -1
+	if not data.get("is_boss", false):
+		return
+	var phases: Array = data.get("phases", [])
+	if phases.is_empty() or enemy_combatants.is_empty():
+		return
+	_boss = enemy_combatants[0]
+	_boss_phases = phases
+	_boss_phase_idx = 0
+	_apply_boss_phase(0)  # boss.json 的技能定義在各 phase 內，需主動套用
+
+func _apply_boss_phase(i: int) -> void:
+	if _boss == null or i < 0 or i >= _boss_phases.size():
+		return
+	var phase: Dictionary = _boss_phases[i]
+	_boss.skills = phase.get("skills", _boss.skills)
+	_boss.skill_defs = phase.get("skill_defs", _boss.skill_defs)
+	_boss.ai_pattern = phase.get("ai_pattern", _boss.ai_pattern)
+
+## 玩家技能結算後呼叫：Boss 首次掉到下一階段門檻 → 播轉場過場、切換階段技能/AI。
+func _maybe_trigger_boss_phase2() -> void:
+	if _boss == null or _boss_phase_idx < 0:
+		return
+	var next_idx: int = _boss_phase_idx + 1
+	if next_idx >= _boss_phases.size():
+		return
+	if not _boss.is_alive():
+		return
+	var threshold: float = _boss_phases[next_idx].get("hp_threshold", 0.5)
+	if float(_boss.current_hp) / float(_boss.max_hp) > threshold:
+		return
+	_boss_phase_idx = next_idx
+	var cut: String = _boss_phases[next_idx].get("transition_cutscene", "")
+	if cut != "":
+		await SceneRouter.play_battle_cutscene(cut)
+	_apply_boss_phase(next_idx)
+	ui.set_enemy_base(_boss, _boss_fig(String(_boss.portrait_moods.get("phase2", ""))))
+	battle_log.emit("%s 進入第二階段！" % _boss.display_name)
+
+## Boss 掉血 → 暫態受擊表情（pained）。回血/不變不觸發。
+func _on_boss_hp_changed(current: int, _mx: int) -> void:
+	if _boss != null and current < _boss_hp_seen and current > 0:
+		ui.flash_enemy_mood(_boss, _boss_fig(String(_boss.portrait_moods.get("hurt", ""))), 0.6)
+	_boss_hp_seen = current
+
+## Boss 表情/階段路徑 → 優先用 boss/cut/ 去背站姿（缺則退回原框圖）。
+func _boss_fig(filename_path: String) -> String:
+	return BattleArt.resolve_figure_path(BattleArt.BOSS_DIR, filename_path.get_file())
+
 func _set_state(s: State) -> void:
 	state = s
 	state_changed.emit(s)
+
+# ─── 道具（戰鬥中使用）─────────────────────────────────
+## 玩家回合使用消耗道具：自我施放、消耗一回合、不選敵、不觸發 One More。
+func player_use_item(item_id: String) -> void:
+	if state != State.PLAYER_TURN:
+		return
+	var items: Dictionary = JsonLoader.load_json("res://data/items.json")
+	var data: Dictionary = items.get(item_id, {})
+	if data.is_empty():
+		return
+	if not GameManager.consume_item(item_id):
+		return
+	_apply_item_effect(data.get("effect", {}))
+	battle_log.emit("使用「%s」" % data.get("name", item_id))
+	_hits = 0
+	EventBus.combo_count_changed.emit(0)
+	_check_end()
+	if state != State.END:
+		_enemy_turn()  # 道具消耗一回合 → 進敵方回合
+
+## 依 effect.kind 套用——複用既有戰鬥效果機制（不經 SkillExecutor）。
+func _apply_item_effect(effect: Dictionary) -> void:
+	match effect.get("kind", ""):
+		"heal":
+			player_combatant.heal(int(effect.get("value", 0)))
+		"karma":
+			GameManager.add_karma(int(effect.get("value", 0)))
+		"merit":
+			GameManager.add_merit(int(effect.get("value", 0)))
+		"shield":
+			player_combatant.add_buff("golden_body", float(effect.get("value", 0)), int(effect.get("duration", 3)))
+		"cleanse":
+			status.clear_negative(player_combatant)
 
 ## 測試用：直接擊倒全部敵人
 func force_victory() -> void:

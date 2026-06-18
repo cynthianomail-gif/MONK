@@ -1,0 +1,25 @@
+{
+"@path": "res://addons/dialogic/Resources/character.gd",
+"@subpath": NodePath(""),
+&"_translation_id": "",
+&"color": Color(0.8, 0.45, 0.55, 1),
+&"custom_info": {},
+&"default_portrait": "default",
+&"description": "醉金閣的老鴇媽媽桑，手腕老練、立場難測。",
+&"display_name": "蔡媽",
+&"mirror": false,
+&"nicknames": [],
+&"offset": Vector2(0, 0),
+&"portraits": {
+"default": {
+"export_overrides": {
+"image": "\"res://assets/2d/portraits/npcs/bust/npc_cai_ma.png\""
+},
+"mirror": false,
+"offset": Vector2(0, 0),
+"scale": 1.0,
+"scene": ""
+}
+},
+&"scale": 1.0
+}

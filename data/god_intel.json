@@ -1,0 +1,95 @@
+{
+  "_schema": "神祇情報圖鑑：萬神殿總覽＋12 神。每筆 {order, god, domain, pieces[]}。pieces=情報碎片，蒐集進度＝已解碎片/總碎片；piece.flag 支援一般旗標(intel_*)或 'quest:<id>'(完成該支線)。開場了塵簡介只給每神第 1 塊(intel_<id>)，進度條不滿；其餘碎片透過其他人/支線/各章補齊。GodIntel 系統純推導。阿瑞斯 4 塊(開場+阿忠/老王/鄭媽支線)ch1 可滿；其餘神第 2 塊待各自章節(intel_<god>_2)。",
+  "pantheon": {
+    "order": 0, "god": "萬神殿集團 Pantheon Corp.", "domain": "掌控新梵市的跨國巨頭",
+    "pieces": [
+      {"flag": "intel_pantheon", "text": "高層真面目是降臨現代的希臘神祇，把神力煉成資本，拿人類的慾望與信仰當企業能源。十二主神各據一條城市命脈。"}
+    ]
+  },
+  "ares": {
+    "order": 1, "god": "阿瑞斯 Ares", "domain": "武力·保全·軍火",
+    "pieces": [
+      {"flag": "intel_ares", "text": "集團的拳頭。掌保全、傭兵與軍火庫，連都更強拆都由他的人馬執行。崇尚力量、輕蔑談判——奪走舍利塔的，正是他。"},
+      {"flag": "quest:ah_zhong", "text": "阿忠師傅說，你師父生前就察覺廟產被盯上。經手強拆的建設公司登記負責人查無此人，幕後全是阿瑞斯的保全集團在運作。"},
+      {"flag": "quest:lao_wang", "text": "老王當年的公司，被同一批『顧問』用暴力與恐嚇逼到破產。阿瑞斯一向先亮拳頭，再談價錢。"},
+      {"flag": "quest:zheng_ma", "text": "逼鄭媽還債的討債人，臂上都有同一枚紅色戰矛刺青——阿瑞斯私人武裝的記號。順著他們，能摸到城西軍火庫的後門。"}
+    ]
+  },
+  "hermes": {
+    "order": 2, "god": "荷米斯 Hermes", "domain": "物流·快遞·地下情報",
+    "pieces": [
+      {"flag": "intel_hermes", "text": "城市每一筆流動都被他抽成。"},
+      {"flag": "intel_hermes_2", "text": "他的物流網表面送貨，暗地替全城黑錢過水。每個包裹都是一筆能查的帳——只要你進得了他的轉運中心。"}
+    ]
+  },
+  "poseidon": {
+    "order": 3, "god": "波賽頓 Poseidon", "domain": "海運·港口·走私",
+    "pieces": [
+      {"flag": "intel_poseidon", "text": "潮水下的貨，沒有他點頭進不了港。"},
+      {"flag": "intel_poseidon_2", "text": "港口的貨櫃十櫃有三櫃不報關。他以場地水柱與海妖歌聲，讓闖入者連站都站不穩。"}
+    ]
+  },
+  "demeter": {
+    "order": 4, "god": "狄蜜特 Demeter", "domain": "食品·農業·糧食壟斷",
+    "pieces": [
+      {"flag": "intel_demeter", "text": "餐桌上的豐收，握在她一個人手裡。"},
+      {"flag": "intel_demeter_2", "text": "她以糧價掐住民生，囤積與傾銷一念之間。迷宮是她那座四季不分的巨型農場。"}
+    ]
+  },
+  "hephaestus": {
+    "order": 5, "god": "赫菲斯托斯 Hephaestus", "domain": "建設·重工·軍火（拆廟母公司）",
+    "pieces": [
+      {"flag": "intel_hephaestus", "text": "拆掉破廟的怪手，出自他的工坊。"},
+      {"flag": "intel_hephaestus_2", "text": "拆廟的怪手、阿瑞斯的軍火，都從他的重工廠出。砲塔與機械雜兵是他的家臣。"}
+    ]
+  },
+  "aphrodite": {
+    "order": 6, "god": "阿芙蘿黛蒂 Aphrodite", "domain": "娛樂·夜生活·偶像",
+    "pieces": [
+      {"flag": "intel_aphrodite", "text": "霓虹與掌聲都是她養的能源。"},
+      {"flag": "intel_aphrodite_2", "text": "她豢養偶像與狂粉，把崇拜煉成能源。狂熱的粉絲牆，比保鏢更難穿過。"}
+    ]
+  },
+  "apollo": {
+    "order": 7, "god": "阿波羅 Apollo", "domain": "媒體·音樂·輿論",
+    "pieces": [
+      {"flag": "intel_apollo", "text": "全城聽見的聲音，由他校準。"},
+      {"flag": "intel_apollo_2", "text": "他壟斷媒體與輿論，能讓真相沉默。遠程音波與『預言』使他總快你一步。"}
+    ]
+  },
+  "dionysus": {
+    "order": 8, "god": "戴歐尼修斯 Dionysus", "domain": "酒業·夜店·成癮經濟",
+    "pieces": [
+      {"flag": "intel_dionysus", "text": "讓人停不下來，就是他的生意。"},
+      {"flag": "intel_dionysus_2", "text": "他的酒與夜店讓人成癮，醉意能奪走你的自主。混亂，是他的主場。"}
+    ]
+  },
+  "artemis": {
+    "order": 9, "god": "阿緹蜜絲 Artemis", "domain": "私人軍事·狩獵·賞金",
+    "pieces": [
+      {"flag": "intel_artemis", "text": "獵物的賞金單，她從不落空。"},
+      {"flag": "intel_artemis_2", "text": "她的私軍以賞金狩獵逃犯與異己。陷阱、狙擊與獵犬，等著踏進她獵場的人。"}
+    ]
+  },
+  "athena": {
+    "order": 10, "god": "雅典娜 Athena", "domain": "科技·數據·監控·AI",
+    "pieces": [
+      {"flag": "intel_athena", "text": "這座城的眼睛，都向她回報。"},
+      {"flag": "intel_athena_2", "text": "她的監控與 AI 預判你的每一步。和她對陣，等於和讀過你底牌的人對弈。"}
+    ]
+  },
+  "hera": {
+    "order": 11, "god": "赫拉 Hera", "domain": "政商聯姻·權勢核心（二把手）",
+    "pieces": [
+      {"flag": "intel_hera", "text": "權勢之網的織者，宙斯之后。"},
+      {"flag": "intel_hera_2", "text": "她以政商聯姻織網，替宙斯守最後一道門。宴會廳裡每個權貴都是她的棋。"}
+    ]
+  },
+  "zeus": {
+    "order": 12, "god": "宙斯 Zeus", "domain": "電網·能源·權力（CEO）",
+    "pieces": [
+      {"flag": "intel_zeus", "text": "奧林帕斯大廈頂樓的那位——眾神之王，掌全城電網，是這一切的源頭。"},
+      {"flag": "intel_zeus_2", "text": "奧林帕斯大廈頂樓的停機坪，是他降下漫天狂雷的神域。城市的電網即他的血脈。"}
+    ]
+  }
+}

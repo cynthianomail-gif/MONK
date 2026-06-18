@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cowgn7b4m3upj"]
+
+[ext_resource type="Script" uid="uid://bwp0a7yjg22e7" path="res://src/screens/Minigames/BeggarChallenge.gd" id="1"]
+
+[node name="BeggarChallenge" type="Node2D"]
+script = ExtResource("1")

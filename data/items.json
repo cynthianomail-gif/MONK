@@ -1,0 +1,20 @@
+{
+	"heal_salve": {
+		"name": "金瘡藥",
+		"price": 150,
+		"effect": { "kind": "heal", "value": 200 },
+		"desc": "外傷藥膏，戰鬥中回復 HP 200。"
+	},
+	"karma_crystal": {
+		"name": "業障結晶",
+		"price": 250,
+		"effect": { "kind": "karma", "value": 40 },
+		"desc": "凝結的怨念，立即補業障 40，催動羅漢拳等業障技。"
+	},
+	"amulet": {
+		"name": "護身符",
+		"price": 350,
+		"effect": { "kind": "shield", "value": 250, "duration": 3 },
+		"desc": "鄭媽開光的符，金身護盾吸收下次傷害（上限 250）。"
+	}
+}

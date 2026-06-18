@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3 uid="uid://cq8wmonkbustlyr"]
+
+[ext_resource type="Script" path="res://src/ui/dialogue_style/speaker_bust_layer.gd" id="1_bust"]
+[ext_resource type="Script" uid="uid://d0ptqnbudhkyj" path="res://addons/dialogic/Modules/Character/node_portrait_container.gd" id="2_pcon"]
+
+[node name="SpeakerBustLayer" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_bust")
+
+[node name="SpeakerPortrait" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_top = 0.38
+anchor_right = 0.42
+anchor_bottom = 1.0
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_pcon")
+mode = 1
+size_mode = 3
+origin_anchor = 6
+origin_offset = Vector2(320, -20)
+debug_character_portrait = "speaker"

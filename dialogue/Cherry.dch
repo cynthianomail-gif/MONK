@@ -1,0 +1,52 @@
+{
+"@path": "res://addons/dialogic/Resources/character.gd",
+"@subpath": NodePath(""),
+&"_translation_id": "",
+&"color": Color(0.85, 0.32, 0.46, 1),
+&"custom_info": {},
+&"default_portrait": "neutral",
+&"description": "林森北路的酒店女公關，近三十，眼底有倦也有故事。",
+&"display_name": "Cherry",
+&"mirror": false,
+&"nicknames": [],
+&"offset": Vector2(0, 0),
+&"portraits": {
+"angry": {
+"export_overrides": {
+"image": "\"res://assets/2d/portraits/cherry/bust/cherry_angry.png\""
+},
+"mirror": false,
+"offset": Vector2(0, 0),
+"scale": 1.0,
+"scene": ""
+},
+"neutral": {
+"export_overrides": {
+"image": "\"res://assets/2d/portraits/cherry/bust/cherry_neutral.png\""
+},
+"mirror": false,
+"offset": Vector2(0, 0),
+"scale": 1.0,
+"scene": ""
+},
+"smile": {
+"export_overrides": {
+"image": "\"res://assets/2d/portraits/cherry/bust/cherry_smile.png\""
+},
+"mirror": false,
+"offset": Vector2(0, 0),
+"scale": 1.0,
+"scene": ""
+},
+"sorrow": {
+"export_overrides": {
+"image": "\"res://assets/2d/portraits/cherry/bust/cherry_sorrow.png\""
+},
+"mirror": false,
+"offset": Vector2(0, 0),
+"scale": 1.0,
+"scene": ""
+}
+},
+&"scale": 1.0
+}

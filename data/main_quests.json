@@ -1,0 +1,166 @@
+{
+  "_demo": {"last_chapter": "ch01_ares", "note": "DEMO 版只做第一章；打完 ch01_ares(ares_purified) 即視為 demo 結束，不跑 ch2+。完整版再移除或改 last_chapter。"},
+  "_schema": "主線任務資料：12 章，一章一神（希臘十二主神），線性推進。每章 entry：chapter/order 章序；require_flag=前一章 complete_flag（ch1 無）；boss=該章 Boss；location=劇情迷宮（沿用 3D 探索場景＋劇情觸發，非獨立關卡）；achievement=通章解鎖的十二因緣成就 id。stages[]：id/desc 必填，可選 dialogue/cutscene/location/boss/battle/set_flag。complete_flag=該章完成旗標（＝下一章 require_flag，也＝解鎖 achievement）。舍利塔貫穿：relic_stolen(序)→relic_recovered(ch12)。⚠ 所有 boss(除 ares 已存在)/location/cutscene/dialogue/敵兵 皆 NEW，見 main-story spec 缺口表。",
+
+  "ch01_ares": {
+    "chapter": 1, "order": 1, "god": "阿瑞斯 Ares",
+    "title": "神廟的倒塌與諸神現身", "domain": "武力·保全·軍火",
+    "summary": "破廟遭萬神殿建設與保全強拆、舍利塔被奪。無戒赴保全總部討要，發現負責人是戰神阿瑞斯，正式宣戰並當場超渡之。",
+    "boss": "ares", "location": "pantheon_security_hq", "achievement": "ignorance",
+    "stages": [
+      {"id": "c1_demolition", "desc": "破廟遭強拆、舍利塔被奪走。", "cutscene": "opening_temple_falls", "hold": true, "set_flag": "relic_stolen"},
+      {"id": "c1_aftermath", "desc": "落魄進城，雨夜茶攤遇斷臂修練者了塵；他道破萬神殿，並一一引介十二主神。", "cutscene": "ch1_aftermath_wake", "hold": true, "dialogue": "main_ch1_aftermath"},
+      {"id": "c1_intel", "desc": "了塵聚焦阿瑞斯，指點幾位知情或需援手的人，傳無戒一招羅漢拳。", "dialogue": "main_ch1_intel"},
+      {"id": "c1_armory_gate", "desc": "了塵要先確認無戒的修為，夠了才肯帶他殺進阿瑞斯的軍火庫。", "gate": {"type": "skills", "min": 5, "pass_dialogue": "main_ch1_gate_ready", "fail_dialogue": "main_ch1_not_ready"}},
+      {"id": "c1_confront", "desc": "了塵領路，無戒直闖萬神殿保全總部討回聖物。", "location": "pantheon_security_hq", "dialogue": "main_ares_lead"},
+      {"id": "c1_armory_breach", "desc": "循情報突入阿瑞斯的軍火庫，撞上第一波重武裝安保。", "dialogue": "main_ch1_armory_breach", "battle": "pantheon_guard"},
+      {"id": "c1_armory_deep", "desc": "越深入守備越森嚴，殺穿第二波雜兵。", "battle": "pantheon_guard", "set_flag": "ares_encountered"},
+      {"id": "c1_ares_intro", "desc": "軍火庫深處，負責人現出真身——戰神阿瑞斯。", "cutscene": "ares_intro"},
+      {"id": "c1_ares", "desc": "無戒宣戰，當場超渡戰神阿瑞斯。", "boss": "ares"}
+    ],
+    "complete_flag": "ares_purified", "rewards": {"gold": 1000, "merit": 10}
+  },
+
+  "ch02_hermes": {
+    "chapter": 2, "order": 2, "require_flag": "ares_purified", "god": "荷米斯 Hermes",
+    "title": "毛細血管的盜神", "domain": "物流·快遞·地下情報",
+    "summary": "掌控全城物流與地下情報的商業之神荷米斯，把城市的每一筆流動都抽成。迷宮是日夜不息的物流轉運中心。",
+    "boss": "hermes", "location": "hermes_logistics", "achievement": "formation",
+    "stages": [
+      {"id": "c2_lead", "desc": "循情報網的金流逆查到物流樞紐。", "dialogue": "main_hermes_lead"},
+      {"id": "c2_hub", "desc": "潛入晝夜運轉的物流轉運中心，突破無人機與輸送帶。", "location": "hermes_logistics"},
+      {"id": "c2_boss", "desc": "於分揀大廳超渡盜神荷米斯。", "cutscene": "hermes_intro", "boss": "hermes"}
+    ],
+    "complete_flag": "hermes_purified", "rewards": {"gold": 1500, "merit": 12}
+  },
+
+  "ch03_poseidon": {
+    "chapter": 3, "order": 3, "require_flag": "hermes_purified", "god": "波賽頓 Poseidon",
+    "title": "潮水下的走私", "domain": "海運·港口·走私",
+    "summary": "海運霸主波賽頓掌控港口與地下走私。迷宮是一艘豪華郵輪，他以場地水柱與海妖歌聲干擾戰局。",
+    "boss": "poseidon", "location": "poseidon_cruise", "achievement": "consciousness",
+    "stages": [
+      {"id": "c3_lead", "desc": "走私線索指向港口的豪華郵輪。", "dialogue": "main_poseidon_lead"},
+      {"id": "c3_cruise", "desc": "潛入郵輪迷宮，突破水柱與海妖歌聲。", "location": "poseidon_cruise"},
+      {"id": "c3_boss", "desc": "於甲板超渡海運霸主波賽頓。", "cutscene": "poseidon_intro", "boss": "poseidon"}
+    ],
+    "complete_flag": "poseidon_purified", "rewards": {"gold": 2000, "merit": 15}
+  },
+
+  "ch04_demeter": {
+    "chapter": 4, "order": 4, "require_flag": "poseidon_purified", "god": "狄蜜特 Demeter",
+    "title": "豐收的枷鎖", "domain": "食品·農業·糧食壟斷",
+    "summary": "豐收女神狄蜜特壟斷全城糧食，以飢餓馴服信眾。迷宮是高聳的垂直農場與食品廠。",
+    "boss": "demeter", "location": "demeter_farm", "achievement": "name_form",
+    "stages": [
+      {"id": "c4_lead", "desc": "糧價暴漲、配給成癮，線索指向垂直農場。", "dialogue": "main_demeter_lead"},
+      {"id": "c4_farm", "desc": "深入垂直農場，穿過藤蔓與毒孢子的封鎖。", "location": "demeter_farm"},
+      {"id": "c4_boss", "desc": "於中央溫室超渡豐收女神狄蜜特。", "cutscene": "demeter_intro", "boss": "demeter"}
+    ],
+    "complete_flag": "demeter_purified", "rewards": {"gold": 2200, "merit": 16}
+  },
+
+  "ch05_hephaestus": {
+    "chapter": 5, "order": 5, "require_flag": "demeter_purified", "god": "赫菲斯托斯 Hephaestus",
+    "title": "拆廟者的熔爐", "domain": "建設·重工·軍火製造（拆廟母公司）",
+    "summary": "匠神赫菲斯托斯掌建設與軍火重工——拆毀無戒破廟的，正是他的建設公司。迷宮是巨型建案工地與地下兵工廠。",
+    "boss": "hephaestus", "location": "hephaestus_site", "achievement": "six_bases",
+    "stages": [
+      {"id": "c5_lead", "desc": "拆廟令的源頭，指向匠神的建設母公司。", "dialogue": "main_hephaestus_lead"},
+      {"id": "c5_site", "desc": "闖入建案工地，閃避重機具與自動砲塔。", "location": "hephaestus_site"},
+      {"id": "c5_boss", "desc": "於地下兵工廠超渡匠神赫菲斯托斯，討回拆廟之債。", "cutscene": "hephaestus_intro", "boss": "hephaestus"}
+    ],
+    "complete_flag": "hephaestus_purified", "rewards": {"gold": 2500, "merit": 18}
+  },
+
+  "ch06_aphrodite": {
+    "chapter": 6, "order": 6, "require_flag": "hephaestus_purified", "god": "阿芙蘿黛蒂 Aphrodite",
+    "title": "霓虹的女王", "domain": "娛樂·夜生活·偶像",
+    "summary": "夜生活女王阿芙蘿黛蒂掌俱樂部與地下偶像界，把粉絲的愛慾抽作能源。迷宮是巨型演唱會現場。",
+    "boss": "aphrodite", "location": "aphrodite_arena", "achievement": "contact",
+    "stages": [
+      {"id": "c6_lead", "desc": "霓虹區的偶像狂潮，愛慾被抽成企業能源。", "dialogue": "main_aphrodite_lead"},
+      {"id": "c6_arena", "desc": "闖入演唱會現場，穿越狂熱粉絲的人海。", "location": "aphrodite_arena"},
+      {"id": "c6_boss", "desc": "於舞台中央點化夜生活女王阿芙蘿黛蒂。", "cutscene": "aphrodite_intro", "boss": "aphrodite"}
+    ],
+    "complete_flag": "aphrodite_purified", "rewards": {"gold": 2800, "merit": 18}
+  },
+
+  "ch07_apollo": {
+    "chapter": 7, "order": 7, "require_flag": "aphrodite_purified", "god": "阿波羅 Apollo",
+    "title": "輿論的太陽", "domain": "媒體·音樂·輿論",
+    "summary": "光明之神阿波羅掌媒體與輿論，以預言般的演算法操弄人心。迷宮是直播塔與電視台。",
+    "boss": "apollo", "location": "apollo_broadcast", "achievement": "sensation",
+    "stages": [
+      {"id": "c7_lead", "desc": "全城的話語權被一座直播塔壟斷。", "dialogue": "main_apollo_lead"},
+      {"id": "c7_tower", "desc": "攀上直播塔，避開音波與輿論審判。", "location": "apollo_broadcast"},
+      {"id": "c7_boss", "desc": "於頂層攝影棚超渡光明之神阿波羅。", "cutscene": "apollo_intro", "boss": "apollo"}
+    ],
+    "complete_flag": "apollo_purified", "rewards": {"gold": 3000, "merit": 20}
+  },
+
+  "ch08_dionysus": {
+    "chapter": 8, "order": 8, "require_flag": "apollo_purified", "god": "戴歐尼修斯 Dionysus",
+    "title": "永夜的狂歡", "domain": "酒業·夜店·成癮經濟",
+    "summary": "酒神戴歐尼修斯掌酒業與成癮經濟，以永不散場的狂歡囚禁靈魂。迷宮是不見天日的地下夜店。",
+    "boss": "dionysus", "location": "dionysus_club", "achievement": "craving",
+    "stages": [
+      {"id": "c8_lead", "desc": "一場散不了的派對，吞掉了整條街的人。", "dialogue": "main_dionysus_lead"},
+      {"id": "c8_club", "desc": "潛入地下夜店，抵抗醉狂與成癮的迷亂。", "location": "dionysus_club"},
+      {"id": "c8_boss", "desc": "於 VIP 包廂超渡酒神戴歐尼修斯。", "cutscene": "dionysus_intro", "boss": "dionysus"}
+    ],
+    "complete_flag": "dionysus_purified", "rewards": {"gold": 3200, "merit": 20}
+  },
+
+  "ch09_artemis": {
+    "chapter": 9, "order": 9, "require_flag": "dionysus_purified", "god": "阿緹蜜絲 Artemis",
+    "title": "狩獵的賞金", "domain": "私人軍事·狩獵·賞金",
+    "summary": "狩獵女神阿緹蜜絲掌私人軍事與賞金獵殺，城市成了她的獵場。迷宮是會員制狩獵會所與靶場。",
+    "boss": "artemis", "location": "artemis_lodge", "achievement": "clinging",
+    "stages": [
+      {"id": "c9_lead", "desc": "無戒成了賞金榜首，獵人從四面而來。", "dialogue": "main_artemis_lead"},
+      {"id": "c9_lodge", "desc": "反入狩獵會所，破解陷阱與獵犬群。", "location": "artemis_lodge"},
+      {"id": "c9_boss", "desc": "於靶場超渡狩獵女神阿緹蜜絲。", "cutscene": "artemis_intro", "boss": "artemis"}
+    ],
+    "complete_flag": "artemis_purified", "rewards": {"gold": 3500, "merit": 22}
+  },
+
+  "ch10_athena": {
+    "chapter": 10, "order": 10, "require_flag": "artemis_purified", "god": "雅典娜 Athena",
+    "title": "全知的演算法", "domain": "科技·數據·監控·AI",
+    "summary": "智慧女神雅典娜掌科技與數據，掌資訊即掌信仰，以全城監控預判一切。迷宮是無所不見的演算法中心。",
+    "boss": "athena", "location": "athena_datacenter", "achievement": "becoming",
+    "stages": [
+      {"id": "c10_lead", "desc": "全城的眼睛都連向一座演算法中心。", "dialogue": "main_athena_lead"},
+      {"id": "c10_core", "desc": "潛入演算法中心，騙過會預判行動的監控網。", "location": "athena_datacenter"},
+      {"id": "c10_boss", "desc": "於核心機房超渡智慧女神雅典娜。", "cutscene": "athena_intro", "boss": "athena"}
+    ],
+    "complete_flag": "athena_purified", "rewards": {"gold": 3800, "merit": 24}
+  },
+
+  "ch11_hera": {
+    "chapter": 11, "order": 11, "require_flag": "athena_purified", "god": "赫拉 Hera",
+    "title": "王座之后", "domain": "政商聯姻·權勢核心（宙斯之后·二把手）",
+    "summary": "天后赫拉是萬神殿的二把手，以政商聯姻編織全城權勢之網，替宙斯守住最後一道門。迷宮是戒備森嚴的集團宴會廳。",
+    "boss": "hera", "location": "hera_banquet", "achievement": "birth",
+    "stages": [
+      {"id": "c11_lead", "desc": "通往宙斯的唯一路，被天后的權勢之網攔下。", "dialogue": "main_hera_lead"},
+      {"id": "c11_banquet", "desc": "強闖集團宴會廳，穿過權貴與保鏢的重圍。", "location": "hera_banquet"},
+      {"id": "c11_boss", "desc": "於主桌超渡天后赫拉，撬開通往頂樓的門。", "cutscene": "hera_intro", "boss": "hera"}
+    ],
+    "complete_flag": "hera_purified", "rewards": {"gold": 4200, "merit": 26}
+  },
+
+  "ch12_zeus": {
+    "chapter": 12, "order": 12, "require_flag": "hera_purified", "god": "宙斯 Zeus",
+    "title": "直搗黃龍的雷霆決戰", "domain": "電網·能源·權力（眾神之王 CEO）",
+    "summary": "無戒攻上奧林帕斯大廈頂樓停機坪，面對化身現代 CEO、掌控城市電網的眾神之王宙斯，以凡軀佛法迎戰漫天狂雷，奪回舍利塔。",
+    "boss": "zeus", "location": "olympus_tower", "achievement": "aging_death",
+    "stages": [
+      {"id": "c12_ascend", "desc": "攻入奧林帕斯大廈，一路向頂樓推進。", "location": "olympus_tower"},
+      {"id": "c12_zeus", "desc": "停機坪上，眾神之王宙斯降下漫天狂雷。", "cutscene": "zeus_intro", "boss": "zeus", "set_flag": "zeus_defeated"},
+      {"id": "c12_relic", "desc": "雷霆落定，奪回舍利塔。新梵市的信仰，重歸眾生。", "cutscene": "ending_true", "set_flag": "relic_recovered"}
+    ],
+    "complete_flag": "ending_true", "rewards": {"gold": 5000, "merit": 30}
+  }
+}

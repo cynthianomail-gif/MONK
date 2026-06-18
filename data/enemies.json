@@ -75,5 +75,21 @@
     },
     "gold_reward": 400, "portrait": "enemy_temple_ghost.png",
     "description": "萬華古廟鎮守惡鬼，菁英敵人。"
+  },
+
+  "pantheon_guard": {
+    "name": "萬神殿重裝保全", "district": "pantheon",
+    "max_hp": 220, "attack": 38, "defense": 22, "level": 7,
+    "weaknesses": ["merit"], "resistances": ["physical"],
+    "ai_pattern": "aggressive",
+    "skills": ["baton_strike", "riot_shield", "call_reinforcement"],
+    "skill_defs": {
+      "baton_strike": {"name": "電擊棍", "power": 42, "damage_type": "physical", "target": "single", "special": "stun", "stun_chance": 0.2},
+      "riot_shield": {"name": "鎮暴盾陣", "damage_type": "support", "special": "taunt_self_def", "def_bonus": 0.4, "duration": 1, "condition": "hp_below_50"},
+      "call_reinforcement": {"name": "呼叫支援", "damage_type": "support", "special": "summon", "summon_id": "pantheon_guard", "max_once": true, "condition": "hp_below_30"}
+    },
+    "spawn_pair": true,
+    "gold_reward": 250, "portrait": "enemy_guard.png",
+    "description": "萬神殿保全集團的重裝打手，第一章開場驅趕無戒，成對出現。"
   }
 }

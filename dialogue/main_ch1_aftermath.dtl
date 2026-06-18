@@ -1,0 +1,53 @@
+雨沒有要停的意思。無戒沿著新梵市的霓虹走了一夜——廟沒了，舍利沒了，連個落腳處都沒有。舊城區的巷子深處，一盞昏黃的燈下，支著一座沒有招牌的茶攤。
+攤後坐著一個獨臂的老者，空蕩的左袖在風裡晃。他替無戒斟了一碗熱茶，像是早就等著他來。
+Liaochen (default): 坐。淋成這樣，是從萬華一路走來的吧——那座被怪手推平的破廟。
+Wujie (calm): 老施主認得貧僧？
+Liaochen (default): 認得那座廟。也認得，是誰拆的。
+他抬眼，渾濁的眼底卻有光。
+Liaochen (default): 萬神殿集團。這座城的水電、物流、媒體、夜生活，沒有一條命脈不在他們手裡。世人只當是間富可敵國的跨國巨頭。
+Wujie (calm): 老施主說的，聽來不只是『巨頭』這麼簡單。
+Liaochen (default): 他們的高層，不是人。是降臨在這時代的神——古希臘的諸神。把神力煉成了資本，拿世人的慾望與信仰，當企業的能源。
+[signal arg="flag:intel_pantheon"]
+Wujie (angry): ……荒唐。神佛若在世間斂財，那與妖魔何異。
+Liaochen (default): 你既要與他們為敵，總得先認得他們的臉。十二位主神，各據一條命脈。我一個一個，說給你聽。
+[background arg="res://assets/2d/gods/ares.jpg" fade="0.4"]
+Liaochen (default): 拆你廟、奪你塔的，是集團的拳頭——戰神，阿瑞斯。保全、傭兵、軍火，全握在他手裡。崇尚力量，瞧不起談判。
+[signal arg="flag:intel_ares"]
+[background arg="res://assets/2d/gods/hermes.jpg" fade="0.4"]
+Liaochen (default): 替貨抽成的盜神，荷米斯。這城裡每一筆流動，他都要分一杯——連地下情報，也是他的買賣。
+[signal arg="flag:intel_hermes"]
+[background arg="res://assets/2d/gods/poseidon.jpg" fade="0.4"]
+Liaochen (default): 海運的霸主，波賽頓。潮水下的貨，沒有他點頭，進不了港。
+[signal arg="flag:intel_poseidon"]
+[background arg="res://assets/2d/gods/demeter.jpg" fade="0.4"]
+Liaochen (default): 豐收女神，狄蜜特。你餐桌上的每一粒米，都握在她一人手裡。
+[signal arg="flag:intel_demeter"]
+[background arg="res://assets/2d/gods/hephaestus.jpg" fade="0.4"]
+Liaochen (default): 匠神，赫菲斯托斯。拆你廟的那台怪手，正是出自他的工坊。建設、重工、軍火，他什麼都造。
+[signal arg="flag:intel_hephaestus"]
+[background arg="res://assets/2d/gods/aphrodite.jpg" fade="0.4"]
+Liaochen (default): 夜生活的女王，阿芙蘿黛蒂。霓虹與掌聲，都是她豢養的能源。
+[signal arg="flag:intel_aphrodite"]
+[background arg="res://assets/2d/gods/apollo.jpg" fade="0.4"]
+Liaochen (default): 光明之神，阿波羅。全城聽見的聲音由他校準——你該信什麼，是他說了算。
+[signal arg="flag:intel_apollo"]
+[background arg="res://assets/2d/gods/dionysus.jpg" fade="0.4"]
+Liaochen (default): 酒神，戴歐尼修斯。讓人沉淪、停不下來，就是他的生意。
+[signal arg="flag:intel_dionysus"]
+[background arg="res://assets/2d/gods/artemis.jpg" fade="0.4"]
+Liaochen (default): 狩獵女神，阿緹蜜絲。掛上她賞金單的獵物，從沒逃掉過。她養著一支私人軍隊。
+[signal arg="flag:intel_artemis"]
+[background arg="res://assets/2d/gods/athena.jpg" fade="0.4"]
+Liaochen (default): 智慧女神，雅典娜。這座城的每一隻眼睛——監視器、數據、那些會學習的機器——都向她回報。
+[signal arg="flag:intel_athena"]
+[background arg="res://assets/2d/gods/hera.jpg" fade="0.4"]
+Liaochen (default): 天后，赫拉。權勢之網的織者，宙斯之后，集團的二把手。
+[signal arg="flag:intel_hera"]
+[background arg="res://assets/2d/gods/zeus.jpg" fade="0.4"]
+Liaochen (default): 而坐在奧林帕斯大廈頂樓的那位——眾神之王，宙斯。掌著全城電網，是這一切的源頭。
+[signal arg="flag:intel_zeus"]
+[background arg="" fade="0.5"]
+雨聲重新漫了回來。十二張臉，像十二盞不滅的燈，烙在無戒心裡。
+Liaochen (default): 記住這些臉。你要走的路，會一一遇上他們。而眼下，先過得了第一關——阿瑞斯。
+Wujie (calm): 貧僧不懂這許多神。貧僧只知道，那座塔鎮著百年香火，也鎮著一些不該醒來的東西。它被搬出來，是把禍事一起搬出來了。
+Liaochen (default): 所以我才等你。一個敢用凡軀去碰神的人。

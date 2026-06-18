@@ -1,0 +1,20 @@
+{
+  "_note": "小遊戲正式美術草稿 prompt。風格依 project_art_direction：半寫實厚塗、暗金×黑 UI。背景與人物立繪沿用現有戰鬥背景/Wujie/Jie，先不重生。生成後把成品路徑填回各 .gd 的 export 變數即可抽換。",
+  "_style_suffix": "semi-realistic painterly thick-paint illustration, Taiwanese urban setting, cinematic lighting, dark gold and black palette accents, game asset",
+  "beggar_challenge": {
+    "office_worker": "full-body side-view of a Taiwanese office worker walking, white shirt and slacks, briefcase, tired commuter expression, transparent background, walk-cycle friendly",
+    "tourist": "full-body side-view of a foreign tourist walking, casual clothes, camera and small backpack, curious expression, transparent background",
+    "rich_lady": "full-body side-view of an elegant wealthy Taiwanese lady walking, designer dress and handbag, aloof expression, transparent background",
+    "drunk_man": "full-body side-view of a tipsy middle-aged man stumbling, loosened collar, flushed face, transparent background",
+    "coin_fx": "small burst of golden coins and merit sparkle, painterly, transparent background, particle sheet"
+  },
+  "soup_carry": {
+    "soup_bowl": "a monk's alms bowl filled to the brim with hot soup, 45-degree side-top view, steam rising, painterly, transparent background, rotatable prop",
+    "tower_climb_bg": "interior of an old Taiwanese pagoda staircase seen from below, vertical scroll-friendly tall canvas, atmospheric, candle and incense glow"
+  },
+  "wooden_fish_rhythm": {
+    "wooden_fish_knock": "a carved wooden fish (muyu) percussion instrument, top view, two frames knock and rest, warm wood tone, transparent background",
+    "note_token": "a glowing dark-gold rhythm note token shaped like a small wooden fish, transparent background",
+    "judge_neon_fx": "neon ink-splash hit effect for a rhythm judgement line, dark gold and red, transparent background, sprite sheet"
+  }
+}

@@ -8,6 +8,7 @@ func _ready() -> void:
 
 func _run_test() -> void:
 	await get_tree().process_frame
+	get_tree().current_scene = null  # 脫離 current_scene，換場時才不會釋放本測試
 	# ─── Step 1：地圖載入與觸發器 ───
 	print("TEST: 切換至 MapScreen")
 	SceneRouter.go_to_map()
@@ -16,9 +17,9 @@ func _run_test() -> void:
 		_fail("MapScreen 未載入")
 		return
 	var triggers := get_tree().get_nodes_in_group("location_trigger")
-	print("TEST: 地點觸發器數量 = %d" % triggers.size())
-	if triggers.size() < 4:
-		_fail("觸發器數量不足")
+	print("TEST: 西門區觸發器數量 = %d" % triggers.size())
+	if triggers.size() < 2:
+		_fail("西門區觸發器數量不足（應為 ximen_mrt+wannian_mall）")
 		return
 
 	# ─── Step 3：完整戰鬥（弱點 → 總攻擊 → 勝利）───

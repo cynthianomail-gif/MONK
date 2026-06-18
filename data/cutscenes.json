@@ -1,0 +1,56 @@
+{
+  "_schema": "劇情過場（StoryCutscene 用，分鏡＋字幕軌）。shots[] 依序播放：image=靜幀路徑 / frames_dir=動畫幀資料夾(內 frame_%04d.png, fps 預設12) / black=true 純黑；duration 秒(frames_dir 則由幀數/fps 算)；motion=none/zoom_in/pan_left/shake；sfx=該幀起播音效；fade_in/fade_out。captions[]：start/end 秒、speaker、text，依全片時間顯示於底部對話框。可跳過(confirm/cancel)。缺幀/缺圖安全略過(顯示黑底)，故先接線測通、美術之後填。",
+
+  "opening_temple_falls": {
+    "bgm": "rain_street", "bgm_db": -9,
+    "shots": [
+      {"image": "res://assets/cutscenes/opening_temple_falls/01_pov_temple.png", "duration": 4.5, "motion": "none"},
+      {"image": "res://assets/cutscenes/opening_temple_falls/01_pov_temple.png", "duration": 5.0, "motion": "none"},
+      {"image": "res://assets/cutscenes/opening_temple_falls/02_ares_cup.png", "duration": 4.5, "motion": "none", "blink": true},
+      {"image": "res://assets/cutscenes/opening_temple_falls/02b_ares_laugh.png", "duration": 6.5, "motion": "none", "blink": true},
+      {"image": "res://assets/cutscenes/opening_temple_falls/02c_ares_collar.png", "duration": 2.2, "motion": "none", "blink": true},
+      {"frames_dir": "res://assets/cutscenes/opening_temple_falls/punch_anim", "fps": 24, "duration": 5.04, "voice": "ares_taunt", "bgm_db": -18, "bgm_fade": 0.5,
+        "cues": [
+          {"t": 3.1, "sfx": "impact_heavy", "voice": "monk_grunt", "flash": true, "flash_strength": 1.0, "flash_time": 0.55, "knockout": true}
+        ]},
+      {"image": "res://assets/cutscenes/opening_temple_falls/05_lineup.jpg", "duration": 10.4, "motion": "none", "eye_open": true, "groggy": true, "bgm_db": -9, "bgm_fade": 1.2},
+      {"black": true, "duration": 5.5, "bgm_db": -45, "bgm_fade": 1.6}
+    ],
+    "captions": [
+      {"start": 0.8,  "end": 4.2,  "speaker": "",     "text": "……百年古剎，一夜成墟。"},
+      {"start": 5.0,  "end": 8.4,  "speaker": "無戒",   "text": "……不行。那群孽障，我追定了。"},
+      {"start": 9.9,  "end": 13.7, "speaker": "阿瑞斯", "text": "就這點能耐，也配當一座廟的主人？", "voice": "ares_scoff"},
+      {"start": 14.4, "end": 17.6, "speaker": "阿瑞斯", "text": "醒醒吧，和尚。神，回來了——這城裡每一份信仰，", "voice": "ares_laugh"},
+      {"start": 17.7, "end": 20.2, "speaker": "阿瑞斯", "text": "從今天起，全是萬神殿的資產。"},
+      {"start": 20.8, "end": 22.7, "speaker": "阿瑞斯", "text": "連舍利塔都守不住，還談什麼戒律。", "voice": "ares_hey"},
+      {"start": 28.3, "end": 30.7, "speaker": "無戒",   "text": "戒律……是用來律己的。"},
+      {"start": 30.9, "end": 32.9, "speaker": "無戒",   "text": "不是任你們踐踏的。"},
+      {"start": 33.1, "end": 34.6, "speaker": "無戒",   "text": "我會把你們……全部，"},
+      {"start": 34.7, "end": 37.6, "speaker": "無戒",   "text": "驅.逐.出.去.", "cps": 3.0, "trigger_faint": true, "faint_sfx": "body_collapse"}
+    ]
+  },
+
+  "ares_intro": {
+    "bgm": "boss_theme",
+    "shots": [
+      {"black": true, "duration": 0.6, "fade_in": true},
+      {"image": "res://assets/cutscenes/ch1_ares/ares_reveal.jpg", "duration": 9.6, "motion": "zoom_in", "sfx": "encounter_sting"}
+    ],
+    "captions": [
+      {"start": 0.8, "end": 3.4, "speaker": "保全主管", "text": "聖物？這裡沒有什麼廟產，只有萬神殿的資產。"},
+      {"start": 3.6, "end": 6.6, "speaker": "阿瑞斯",   "text": "……也罷。讓你死個明白——我是阿瑞斯，戰爭之神。"},
+      {"start": 6.8, "end": 9.6, "speaker": "無戒",     "text": "神？在貧僧眼裡，你不過是個還沒被超渡的執念。"}
+    ]
+  },
+
+  "ch1_aftermath_wake": {
+    "bgm": "rain_street", "bgm_db": -9, "bgm_fade": 1.4,
+    "shots": [
+      {"black": true, "duration": 0.6, "fade_in": true},
+      {"image": "res://assets/cutscenes/ch1_aftermath_wake/tea_stall.jpg", "duration": 4.5, "motion": "none", "eye_open": true, "groggy": true}
+    ],
+    "captions": [
+      {"start": 0.9, "end": 4.2, "speaker": "", "text": "雨，沒有要停的意思。"}
+    ]
+  }
+}

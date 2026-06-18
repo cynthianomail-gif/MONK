@@ -14,5 +14,12 @@
   "heat_buildup":    "res://assets/audio/sfx/heat_buildup.wav",
   "status_apply":    "res://assets/audio/sfx/status_apply.wav",
   "combo_up":        "res://assets/audio/sfx/combo_up.wav",
-  "wooden_fish_tap": "res://assets/audio/sfx/wooden_fish_tap.wav"
+  "wooden_fish_tap": "res://assets/audio/sfx/wooden_fish_tap.wav",
+  "monk_grunt":      "res://assets/audio/sfx/monk_grunt.mp3",
+  "text_blip":       "res://assets/audio/sfx/text_blip.mp3",
+  "body_collapse":   "res://assets/audio/sfx/body_collapse.mp3",
+  "ares_scoff":      "res://assets/audio/voice/ares_scoff.mp3",
+  "ares_hey":        "res://assets/audio/voice/ares_hey.mp3",
+  "ares_laugh":      "res://assets/audio/voice/ares_laugh.mp3",
+  "ares_taunt":      "res://assets/audio/voice/ares_taunt.mp3"
 }

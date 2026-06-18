@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="Script" path="res://src/screens/MapScreen/DistrictScene.gd" id="1"]
+[ext_resource type="Script" path="res://src/screens/MapScreen/Wujie.gd" id="2"]
+[node name="DistrictScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+script = ExtResource("1")
+[node name="World" type="Node2D" parent="."]
+[node name="Background" type="Sprite2D" parent="World"]
+centered = false
+[node name="Portals" type="Node2D" parent="World"]
+[node name="Wujie" type="AnimatedSprite2D" parent="World"]
+script = ExtResource("2")
+[node name="Camera2D" type="Camera2D" parent="World"]
+[node name="TimeTint" type="CanvasModulate" parent="."]
+[node name="MapBtn" type="Button" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -120.0
+offset_top = 80.0
+offset_right = -24.0
+offset_bottom = 120.0
+grow_horizontal = 0
+text = "地圖"

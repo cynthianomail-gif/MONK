@@ -8,3 +8,5 @@ script = ExtResource("1")
 [node name="BGMPlayer" type="AudioStreamPlayer" parent="."]
 
 [node name="SFXPlayer" type="AudioStreamPlayer" parent="."]
+
+[node name="VoicePlayer" type="AudioStreamPlayer" parent="."]

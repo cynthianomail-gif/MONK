@@ -1,0 +1,52 @@
+{
+"@path": "res://addons/dialogic/Resources/character.gd",
+"@subpath": NodePath(""),
+&"_translation_id": "",
+&"color": Color(0.83, 0.8, 0.74, 1),
+&"custom_info": {},
+&"default_portrait": "calm",
+&"description": "萬華破廟的和尚，本作主角。",
+&"display_name": "無戒",
+&"mirror": false,
+&"nicknames": [],
+&"offset": Vector2(0, 0),
+&"portraits": {
+"angry": {
+"export_overrides": {
+"image": "\"res://assets/2d/portraits/wujie/bust/wujie_ascetic_angry.png\""
+},
+"mirror": false,
+"offset": Vector2(0, 0),
+"scale": 1.0,
+"scene": ""
+},
+"calm": {
+"export_overrides": {
+"image": "\"res://assets/2d/portraits/wujie/bust/wujie_ascetic_calm.png\""
+},
+"mirror": false,
+"offset": Vector2(0, 0),
+"scale": 1.0,
+"scene": ""
+},
+"happy": {
+"export_overrides": {
+"image": "\"res://assets/2d/portraits/wujie/bust/wujie_ascetic_happy.png\""
+},
+"mirror": false,
+"offset": Vector2(0, 0),
+"scale": 1.0,
+"scene": ""
+},
+"surprised": {
+"export_overrides": {
+"image": "\"res://assets/2d/portraits/wujie/bust/wujie_ascetic_surprised.png\""
+},
+"mirror": false,
+"offset": Vector2(0, 0),
+"scale": 1.0,
+"scene": ""
+}
+},
+&"scale": 1.0
+}

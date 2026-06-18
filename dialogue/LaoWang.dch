@@ -1,0 +1,25 @@
+{
+"@path": "res://addons/dialogic/Resources/character.gd",
+"@subpath": NodePath(""),
+&"_translation_id": "",
+&"color": Color(0.55, 0.52, 0.48, 1),
+&"custom_info": {},
+&"default_portrait": "default",
+&"description": "廟前流浪漢，自稱被合夥人背叛的前董事長。",
+&"display_name": "老王",
+&"mirror": false,
+&"nicknames": [],
+&"offset": Vector2(0, 0),
+&"portraits": {
+"default": {
+"export_overrides": {
+"image": "\"res://assets/2d/portraits/npcs/bust/npc_lao_wang.png\""
+},
+"mirror": false,
+"offset": Vector2(0, 0),
+"scale": 1.0,
+"scene": ""
+}
+},
+&"scale": 1.0
+}

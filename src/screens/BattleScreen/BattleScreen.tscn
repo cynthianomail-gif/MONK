@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://src/screens/BattleScreen/BattleManager.gd" id="1"]
 [ext_resource type="Script" path="res://src/screens/BattleScreen/SkillExecutor.gd" id="2"]
 [ext_resource type="Script" path="res://src/screens/BattleScreen/StatusEffects.gd" id="3"]
 [ext_resource type="Script" path="res://src/screens/BattleScreen/BattleUI.gd" id="4"]
+[ext_resource type="Script" path="res://src/screens/BattleScreen/breathing_figure.gd" id="5"]
 
 [node name="BattleScreen" type="Control" groups=["battle_manager"]]
 layout_mode = 3
@@ -27,17 +28,38 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(0.055, 0.024, 0.035, 1)
 
+[node name="BattleBg" type="TextureRect" parent="BattleUI"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+expand_mode = 1
+stretch_mode = 6
+
 [node name="EnemyArea" type="HBoxContainer" parent="BattleUI"]
 unique_name_in_owner = true
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -600.0
-offset_top = 120.0
-offset_right = 600.0
-offset_bottom = 420.0
-theme_override_constants/separation = 40
+offset_left = -700.0
+offset_top = 100.0
+offset_right = 700.0
+offset_bottom = 945.0
+theme_override_constants/separation = 110
 alignment = 1
+
+[node name="PlayerFigure" type="TextureRect" parent="BattleUI"]
+unique_name_in_owner = true
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -620.0
+offset_right = 480.0
+offset_bottom = -20.0
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("5")
 
 [node name="PlayerPanel" type="PanelContainer" parent="BattleUI"]
 anchors_preset = 2
@@ -55,18 +77,23 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 16
 
-[node name="VBox" type="VBoxContainer" parent="BattleUI/PlayerPanel/Margin"]
+[node name="HBox" type="HBoxContainer" parent="BattleUI/PlayerPanel/Margin"]
 layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="VBox" type="VBoxContainer" parent="BattleUI/PlayerPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="PlayerName" type="Label" parent="BattleUI/PlayerPanel/Margin/VBox"]
+[node name="PlayerName" type="Label" parent="BattleUI/PlayerPanel/Margin/HBox/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.961, 0.961, 0.941, 1)
 theme_override_font_sizes/font_size = 30
 text = "無戒"
 
-[node name="PlayerHPBar" type="ProgressBar" parent="BattleUI/PlayerPanel/Margin/VBox"]
+[node name="PlayerHPBar" type="ProgressBar" parent="BattleUI/PlayerPanel/Margin/HBox/VBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 18)
 layout_mode = 2
@@ -74,13 +101,13 @@ max_value = 500.0
 value = 500.0
 show_percentage = false
 
-[node name="PlayerHPText" type="Label" parent="BattleUI/PlayerPanel/Margin/VBox"]
+[node name="PlayerHPText" type="Label" parent="BattleUI/PlayerPanel/Margin/HBox/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "500 / 500"
 
-[node name="ResourceLabel" type="Label" parent="BattleUI/PlayerPanel/Margin/VBox"]
+[node name="ResourceLabel" type="Label" parent="BattleUI/PlayerPanel/Margin/HBox/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.843, 0, 1)

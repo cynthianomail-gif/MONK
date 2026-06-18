@@ -9,7 +9,6 @@ const ACTION_LABELS: Dictionary = {
 	"rest":                "休息",
 	"save":                "存檔",
 	"job_switch":          "職業切換",
-	"skill_learn":         "參悟技能",
 	"cherry_dialogue":     "與 Cherry 說話",
 	"food_break_trigger":  "和牛的香氣……（破飲食戒）",
 	"greed_break_trigger": "金色的誘惑……（破貪戒）",
@@ -47,6 +46,7 @@ func _ready() -> void:
 	GameManager.stat_changed.connect(func(_k, _v): update_stats())
 	GameManager.job_changed.connect(func(_j): update_stats())
 	EventBus.skill_unlocked.connect(func(n): show_toast("新技能解鎖：%s" % n))
+	EventBus.skill_learnable.connect(func(n): show_toast("可學新招：%s（去經書習得）" % n))
 	update_stats()
 
 func set_time(day: int, period_name: String) -> void:

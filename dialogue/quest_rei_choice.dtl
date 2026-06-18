@@ -1,0 +1,31 @@
+西門六號出口外，一個拖著大背包的女生對著捷運路線圖皺眉，手機螢幕亮著翻譯軟體。
+join Rei (default)
+Rei (default): あの……龍山寺、龍山寺？我、搭錯、出口。地圖、ぜんぶ漢字、わからない……
+Wujie (calm): 施主迷路了？龍山寺。貧僧正巧也往那個方向。
+Rei (default): わかる！お坊さん、漢字わかる！太好了……你、可以、帶我去嗎？
+無戒看著她無助的眼神，心裡轉過幾個念頭。
+- 親自帶她去龍山寺
+	Wujie (calm): 同是異鄉過客。走吧，貧僧帶你穿過剝皮寮，那條路比捷運近。
+	Rei (default): ほんとう？ありがとう、ありがとうございます！
+	一路上她用破碎的中文問東問西，到了龍山寺，硬塞給無戒一些零錢與一塊日本帶來的護身符。
+	Rei (default): これ、お礼。和尚、いい人。我、會記得台灣。
+	[signal arg="merit:+25"]
+	[signal arg="gold:+150"]
+	[signal arg="flag:rei_guided"]
+- 合十念佛，向她化緣
+	Wujie (calm): 阿彌陀佛。指路是緣，施主若有餘力，添些香油，貧僧為你誦經祈平安。
+	Rei (default): お、お賽銭？呃……はい、わかった。
+	她半懂不懂地掏出一疊鈔票，多給了不少，無戒照著地圖比劃方向給她。
+	Rei (default): 方向、わかった。和尚……商売上手ね。
+	[signal arg="karma:+10"]
+	[signal arg="gold:+300"]
+	[signal arg="flag:rei_begged"]
+- 「龍山寺沒什麼好玩，我帶你去個更熱鬧的地方」
+	Wujie (angry): 龍山寺老人多。施主難得來，該去見識新梵市的夜。林森北路，霓虹、酒、不夜城。
+	Rei (default): 林森北路？聞いたことある……夜遊び？面白そう！
+	無戒嘴角揚起一抹不像和尚的笑，替她叫了車。這一念，已偏了正道。
+	[signal arg="karma:+20"]
+	[signal arg="flag:rei_linsen"]
+	[signal arg="flag:linsen_unlocked"]
+Wujie (calm): 去吧。願你在這座城裡，找到想找的東西。
+Rei (default): うん。和尚も、元気でね。

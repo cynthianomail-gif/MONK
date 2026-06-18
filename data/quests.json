@@ -7,15 +7,14 @@
     "stages": [
       {
         "dialogue": "quest_ah_ming_s1",
-        "desc": "阿明被警衛驅趕，請你幫他吸引人群",
-        "trigger_minigame": "busking_crowd",
+        "desc": "阿明被警衛驅趕，請你幫他打節奏吸引人群",
+        "trigger_minigame": "wooden_fish_rhythm",
         "merit": 15
       },
       {
         "dialogue": "quest_ah_ming_s2",
         "desc": "阿明逃過一劫，感謝無戒",
         "merit": 10,
-        "unlock_skill": "brahma_resonance",
         "flag": "ah_ming_saved"
       }
     ],
@@ -76,7 +75,7 @@
         "dialogue": "quest_jie_challenge",
         "desc": "小傑挑戰木魚節奏戰，賭 500 金幣",
         "trigger_minigame": "wooden_fish_rhythm",
-        "win":  {"gold": 500, "unlock_skill": "wooden_fish_fury", "flag": "jie_defeated"},
+        "win":  {"gold": 500, "flag": "jie_defeated"},
         "lose": {"gold": -500}
       }
     ],

@@ -1,14 +1,15 @@
 {
-  "ignorance":    {"name": "無明", "desc": "完成第一場戰鬥"},
-  "formation":    {"name": "行", "desc": "弱點連擊累積 10 次"},
-  "consciousness": {"name": "識", "desc": "Cherry 好感度達 100"},
-  "name_form":    {"name": "名色", "desc": "三大破戒全數完成"},
-  "six_bases":    {"name": "六入", "desc": "探索全部台北地點"},
-  "contact":      {"name": "觸", "desc": "使用三職業熱血處決各一次"},
-  "sensation":    {"name": "受", "desc": "單場戰鬥金幣收入破 2000"},
-  "craving":      {"name": "愛", "desc": "化緣小遊戲單次超過 5000 元"},
-  "clinging":     {"name": "取", "desc": "業障與功德同時滿值"},
-  "becoming":     {"name": "有", "desc": "擊倒 50 名敵人"},
-  "birth":        {"name": "生", "desc": "通關主線第二幕"},
-  "aging_death":  {"name": "老死", "desc": "達成所有結局"}
+  "_schema": "十二因緣成就，錨定主線 12 章：通過第 N 章（超渡對應神祇）即解鎖第 N 個因緣。unlock_flag=該章 complete_flag（見 main_quests.json）；chapter=章序。AchievementSystem（待實作）監看 flag 設定即解鎖。",
+  "ignorance":    {"name": "無明", "chapter": 1,  "unlock_flag": "ares_purified",       "desc": "通關第一章 · 超渡戰神阿瑞斯"},
+  "formation":    {"name": "行",   "chapter": 2,  "unlock_flag": "hermes_purified",     "desc": "通關第二章 · 超渡盜神荷米斯"},
+  "consciousness":{"name": "識",   "chapter": 3,  "unlock_flag": "poseidon_purified",   "desc": "通關第三章 · 超渡海神波賽頓"},
+  "name_form":    {"name": "名色", "chapter": 4,  "unlock_flag": "demeter_purified",    "desc": "通關第四章 · 超渡豐收女神狄蜜特"},
+  "six_bases":    {"name": "六入", "chapter": 5,  "unlock_flag": "hephaestus_purified", "desc": "通關第五章 · 超渡匠神赫菲斯托斯"},
+  "contact":      {"name": "觸",   "chapter": 6,  "unlock_flag": "aphrodite_purified",  "desc": "通關第六章 · 超渡夜生活女王阿芙蘿黛蒂"},
+  "sensation":    {"name": "受",   "chapter": 7,  "unlock_flag": "apollo_purified",     "desc": "通關第七章 · 超渡光明之神阿波羅"},
+  "craving":      {"name": "愛",   "chapter": 8,  "unlock_flag": "dionysus_purified",   "desc": "通關第八章 · 超渡酒神戴歐尼修斯"},
+  "clinging":     {"name": "取",   "chapter": 9,  "unlock_flag": "artemis_purified",    "desc": "通關第九章 · 超渡狩獵女神阿緹蜜絲"},
+  "becoming":     {"name": "有",   "chapter": 10, "unlock_flag": "athena_purified",     "desc": "通關第十章 · 超渡智慧女神雅典娜"},
+  "birth":        {"name": "生",   "chapter": 11, "unlock_flag": "hera_purified",       "desc": "通關第十一章 · 超渡天后赫拉"},
+  "aging_death":  {"name": "老死", "chapter": 12, "unlock_flag": "ending_true",         "desc": "通關第十二章 · 超渡眾神之王宙斯，奪回舍利塔"}
 }

@@ -9,7 +9,7 @@
     "name": "羅漢伏虎", "job": "ascetic",
     "cost": {"karma": 20}, "damage_type": "karma", "power": 180, "target": "single",
     "special": "knockdown",
-    "unlock_condition": "初始解鎖",
+    "unlock_condition": "了塵親授（第一章劇情）",
     "description": "業障凝聚成鐵拳。命中弱點觸發 Down，可繼續行動。",
     "animation": "anim_arhat"
   },
@@ -66,7 +66,7 @@
     "name": "梵音氣功", "job": "chanter",
     "cost": {"merit": 15}, "damage_type": "merit", "power": 120, "target": "all",
     "special": "knockdown",
-    "unlock_condition": "初始解鎖",
+    "unlock_condition": "完成支線「師傅阿忠的最後一鍋」",
     "description": "命中功德弱點觸發 Down。", "animation": "anim_soundwave"
   },
   "great_compassion_shield": {
@@ -114,21 +114,21 @@
     "name": "破碗乞討", "job": "beggar",
     "cost": {}, "damage_type": "physical", "power": 40, "target": "single",
     "special": "steal_gold", "steal_min": 50, "steal_max": 100,
-    "unlock_condition": "初始解鎖",
+    "unlock_condition": "累計擊倒 6 名敵人",
     "description": "攻擊同時奪取 50~100 金幣。", "animation": "anim_beg"
   },
   "lions_roar": {
     "name": "獅子吼", "job": "beggar",
     "cost": {"karma": 25}, "damage_type": "karma", "power": 90, "target": "all",
     "special": "chaos", "duration": 2,
-    "unlock_condition": "初始解鎖",
+    "unlock_condition": "完成支線「流浪漢老王的過去」",
     "description": "全體傷害，附加混亂 2 回合。", "animation": "anim_roar"
   },
   "self_harm": {
     "name": "苦肉計", "job": "beggar",
     "cost": {"hp": 0.2}, "damage_type": "support", "target": "self",
     "special": "gain_karma", "karma_gain": 35,
-    "unlock_condition": "初始解鎖",
+    "unlock_condition": "弱點連擊累積 5 次",
     "description": "自傷換業障 +35。", "animation": "anim_selfharm"
   },
   "underdog": {

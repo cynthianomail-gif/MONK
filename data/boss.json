@@ -1,11 +1,12 @@
 {
   "ares": {
-    "name": "阿瑞斯", "subtitle": "台北戰神",
+    "name": "阿瑞斯", "subtitle": "新梵戰神",
     "max_hp": 2000, "attack": 80, "defense": 40, "level": 20,
     "weaknesses": [], "resistances": ["karma", "merit", "physical"],
     "is_boss": true,
-    "portrait": "boss_ares.png",
-    "battle_bg": "bg_battle_boss.png", "bgm": "boss_theme",
+    "portrait": "ares_base.jpg",
+    "portrait_moods": { "hurt": "ares_pained.jpg", "act": "ares_mocking_laugh.jpg", "phase2": "ares_phase2.jpg" },
+    "battle_bg": "bg_battle_ares_forge.png", "bgm": "boss_theme",
     "phases": [
       {
         "phase": 1, "hp_threshold": 1.0,
@@ -31,7 +32,6 @@
     ],
     "gold_reward": 5000,
     "defeat_cutscene": "ares_defeated",
-    "unlock_ending": "ending_true",
-    "description": "台北戰神降臨西門天橋。深夜大雨。"
+    "description": "萬神殿保全總部。第一章 Boss——戰神阿瑞斯。"
   }
 }

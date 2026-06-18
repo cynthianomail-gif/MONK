@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://btpo8jrft6qcp"]
+
+[ext_resource type="Script" uid="uid://bi3g6mbj7hud8" path="res://src/screens/Minigames/SoupCarry.gd" id="1"]
+
+[node name="SoupCarry" type="Node2D"]
+script = ExtResource("1")

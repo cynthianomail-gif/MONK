@@ -24,10 +24,32 @@ func trigger_action(action: String, _location: String) -> void:
 		push_warning("QuestManager: 對話 %s 尚未製作（Step 7）" % dialogue)
 		return
 	Dialogic.start(dialogue)
-	Dialogic.timeline_ended.connect(
-		func(): _advance_quest(quest_id, stage, q),
+	# 該 stage 若帶 trigger_minigame：對話結束後先玩小遊戲，
+	# 由 SceneRouter 依結果套用 win/lose，再推進 stage。
+	if q.stages[stage].has("trigger_minigame"):
+		Dialogic.timeline_ended.connect(
+			func(): _start_stage_minigame(quest_id, stage, q),
+			CONNECT_ONE_SHOT
+		)
+	else:
+		Dialogic.timeline_ended.connect(
+			func(): _advance_quest(quest_id, stage, q),
+			CONNECT_ONE_SHOT
+		)
+
+func _start_stage_minigame(id: String, stage: int, q: Dictionary) -> void:
+	var s: Dictionary = q.stages[stage]
+	var ctx: Dictionary = {}
+	if s.has("win"):
+		ctx["quest_win"] = s.win
+	if s.has("lose"):
+		ctx["quest_lose"] = s.lose
+	# 小遊戲結束（獎勵已由 SceneRouter 套用）後推進支線。
+	SceneRouter.minigame_finished.connect(
+		func(_mid: String, _res: Dictionary): _advance_quest(id, stage, q),
 		CONNECT_ONE_SHOT
 	)
+	SceneRouter.go_to_minigame(s.trigger_minigame, ctx)
 
 func _advance_quest(id: String, stage: int, q: Dictionary) -> void:
 	var s: Dictionary = q.stages[stage]
@@ -43,7 +65,7 @@ func _advance_quest(id: String, stage: int, q: Dictionary) -> void:
 	if s.has("hp_max_up"):
 		GameManager.player.max_hp += s.hp_max_up
 	if s.has("unlock_skill"):
-		GameManager.player.skills_unlocked.append(s.unlock_skill)
+		SkillUnlockManager.grant_skill(s.unlock_skill)
 	# 推進階段
 	var next_stage: int = stage + 1
 	if next_stage >= q.stages.size():

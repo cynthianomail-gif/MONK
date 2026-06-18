@@ -3,6 +3,7 @@
   "ximen_day":      "res://assets/audio/bgm/ximen_day.ogg",
   "ximen_night":    "res://assets/audio/bgm/ximen_night.ogg",
   "wanhua_night":   "res://assets/audio/bgm/wanhua_night.ogg",
+  "rain_street":    "res://assets/audio/bgm/rain_street.mp3",
   "linsen_night":   "res://assets/audio/bgm/linsen_night.ogg",
   "temple_ambient": "res://assets/audio/bgm/temple_ambient.ogg",
   "battle_theme":   "res://assets/audio/bgm/battle_theme.ogg",

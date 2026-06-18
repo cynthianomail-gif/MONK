@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dccpix13n62cd"]
+
+[ext_resource type="Script" uid="uid://vyu0ud3rl8lj" path="res://src/screens/Minigames/WoodenFishRhythm.gd" id="1"]
+
+[node name="WoodenFishRhythm" type="Node2D"]
+script = ExtResource("1")

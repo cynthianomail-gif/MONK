@@ -21,13 +21,19 @@ const STATUS_NAMES: Dictionary = {
 @onready var hold_up_menu: CenterContainer = %HoldUpMenu
 @onready var all_out_overlay: ColorRect = %AllOutOverlay
 @onready var all_out_label: Label = %AllOutLabel
+@onready var battle_bg: TextureRect = %BattleBg
+@onready var player_figure: BreathingFigure = %PlayerFigure
 
 signal hold_up_choice(choice: String)
 
 var _panels: Array = []
 var _pending_skill: String = ""
+var _items: Dictionary = {}
+var _player_job: String = "ascetic"
+var _player_low: bool = false
 
 func _ready() -> void:
+	_items = JsonLoader.load_json("res://data/items.json")
 	skill_menu.visible = false
 	hold_up_menu.visible = false
 	all_out_overlay.visible = false
@@ -53,9 +59,16 @@ func build(player: Combatant, enemies: Array) -> void:
 		add_enemy_panel(enemies[i])
 	player_name.text = player.display_name
 	player_hp_bar.max_value = player.max_hp
+	_player_job = GameManager.player.job
+	_player_low = false
+	_set_player_portrait("normal")
 	player.hp_changed.connect(func(cur, mx):
 		player_hp_bar.value = cur
-		player_hp_text.text = "%d / %d" % [cur, mx])
+		player_hp_text.text = "%d / %d" % [cur, mx]
+		var low: bool = cur < mx * 0.3
+		if low != _player_low:
+			_player_low = low
+			_set_player_portrait("hurt" if low else "normal"))
 	player_hp_bar.value = player.current_hp
 	player_hp_text.text = "%d / %d" % [player.current_hp, player.max_hp]
 	_update_resources()
@@ -66,11 +79,49 @@ func add_enemy_panel(c: Combatant) -> void:
 	enemy_area.add_child(panel)
 	_panels.append(panel)
 
+func set_battle_bg(path: String) -> void:
+	if path != "" and ResourceLoader.exists(path):
+		battle_bg.texture = load(path)
+
+## 玩家站立背面圖：state ∈ {normal, hurt}（HP<30% 換受傷姿），套呼吸。
+func _set_player_portrait(state: String) -> void:
+	var p: String = BattleArt.player_figure_path(_player_job, state)
+	if ResourceLoader.exists(p):
+		player_figure.texture = load(p)
+		player_figure.visible = true
+		player_figure.reset_base()
+	else:
+		player_figure.visible = false
+
+func _panel_for(c: Combatant) -> EnemyPanel:
+	for p in _panels:
+		if p.combatant == c:
+			return p
+	return null
+
+## Boss 暫態表情（act/hurt）。
+func flash_enemy_mood(c: Combatant, path: String, secs: float) -> void:
+	var p := _panel_for(c)
+	if p != null:
+		p.flash_mood(path, secs)
+
+## Boss 持久換底圖（phase2）。
+func set_enemy_base(c: Combatant, path: String) -> void:
+	var p := _panel_for(c)
+	if p != null:
+		p.set_base_portrait(path)
+
 # ─── 技能選單 ──────────────────────────────────────────
 
 func show_skill_menu(skill_ids: Array) -> void:
 	for c in skill_buttons.get_children():
 		c.queue_free()
+	var item_btn := Button.new()
+	item_btn.text = "🎒 道具"
+	item_btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	item_btn.disabled = not _has_usable_items()
+	item_btn.pressed.connect(_show_item_menu)
+	skill_buttons.add_child(item_btn)
 	for id in skill_ids:
 		var sk: Dictionary = manager.executor.get_skill(id)
 		var btn := Button.new()
@@ -126,6 +177,38 @@ func _first_alive_index() -> int:
 		if manager.enemy_combatants[i].is_alive():
 			return i
 	return 0
+
+# ─── 道具子選單 ────────────────────────────────────────
+func _has_usable_items() -> bool:
+	for id in GameManager.player.get("inventory", {}):
+		if GameManager.item_count(id) > 0 and _items.has(id):
+			return true
+	return false
+
+func _show_item_menu() -> void:
+	for c in skill_buttons.get_children():
+		c.queue_free()
+	for id in GameManager.player.get("inventory", {}):
+		var count: int = GameManager.item_count(id)
+		if count <= 0 or not _items.has(id):
+			continue
+		var data: Dictionary = _items[id]
+		var btn := Button.new()
+		btn.text = "%s ×%d" % [data.get("name", id), count]
+		btn.tooltip_text = data.get("desc", "")
+		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		btn.pressed.connect(_on_item_pressed.bind(id))
+		skill_buttons.add_child(btn)
+	var back := Button.new()
+	back.text = "← 返回"
+	back.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	back.pressed.connect(func() -> void: show_skill_menu(manager.available_skills()))
+	skill_buttons.add_child(back)
+	skill_menu.visible = true
+
+func _on_item_pressed(item_id: String) -> void:
+	skill_menu.visible = false
+	manager.player_use_item(item_id)
 
 # ─── 演出 ──────────────────────────────────────────────
 

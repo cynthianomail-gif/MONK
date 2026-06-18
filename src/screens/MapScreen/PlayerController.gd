@@ -8,6 +8,10 @@ const GRAVITY: float = -20.0
 
 var _cam_basis: Basis = Basis.IDENTITY
 
+func _ready() -> void:
+	# 預設背對相機（第三人稱慣例）；移動時 atan2 會接管朝向。
+	model.rotation.y = PI
+
 func _physics_process(delta: float) -> void:
 	_refresh_cam_basis()
 	if not is_on_floor():

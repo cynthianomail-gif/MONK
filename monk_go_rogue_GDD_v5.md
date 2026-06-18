@@ -10,7 +10,7 @@
 1. **引擎：** Godot 4.3+，GDScript，Forward+ 渲染器
 2. **命名：** 節點 PascalCase，變數 snake_case，常數 SCREAMING_SNAKE
 3. **模組化：** 超過 150 行必須拆 Component，用 signal 通訊
-4. **核心原則：** 探索=3D 沉浸，戰鬥/對話=2D 演出，兩者場景完全隔離
+4. **核心原則：** 探索=3D 沉浸，戰鬥=獨立 2D 場景；對話=2D 立繪演出但**疊在 3D 探索場景上**（P5 風，3D 活在背景，非獨立場景）。探索↔戰鬥場景完全隔離。
 
 ---
 
@@ -1373,6 +1373,38 @@ func _on_combo(count: int) -> void:
 
 ---
 
+### 8.1.1 美術定案 — 2D 立繪風格與 UI 色系（2026-06-13 鎖定）
+
+> 本節為**最終定案**，凌駕 8.1 表格中較早的籠統描述。所有 2D 立繪、UI、key art 一律依此標準。
+
+**主角無戒定裝基準：** `assets/2d/portraits/wujie/_LOCKED_base_reference.png`（= 苦行僧·平靜 `wujie_ascetic_calm.png`）。
+此圖為**臉型／風格的唯一基準**，往後所有表情版、職業版、其他角色都以它對齊（臉部維持此基準，不可漂移）。
+
+**2D 立繪風格公式（Higgsfield `soul_2`，2:3）：**
+
+- 半寫實風格化遊戲立繪、**強烈立體感與體積**、厚塗 painterly 光影、有深度（**不要純平塗 cel、不要粗黑邊**）。
+- 臉：硬派成熟、有氣場、自然暖膚色；抬頭紋／皺紋保留(角色本來的滄桑感是特色)。
+- 服裝：洗舊的**灰色袈裟**＋米白內襟，自然色，**人物本身不上紅光**。
+- 構圖：上半身、抱臂、P5 風格俐落氣場。
+- 背景：**乾淨的暗 charcoal 近黑**，柔和漸層即可，**不放紅色心魔剪影、不放紅墨噴**（已於 2026-06-13 取消紅心魔母題）。背景保持單純，凸顯人物。
+- canonical 反向約束：character not tinted red、background clean no red figure、dimensional not flat。
+
+**UI 主色系：暗金 × 黑 + 業障動態變色。**
+
+| 狀態 | UI 主色 | 語意 |
+|------|---------|------|
+| 基準（平時） | **暗金／琉璃金**（gold-on-near-black） | 佛教識別色；對應功德＝金光、金錢＝金 |
+| 功德高 | 偏明亮**金光**、神聖感增強 | 正向修行 |
+| 業障高 | 漸變到**墮落色（暗紅／毒紫）** | 魔性侵蝕（UI 層面，立繪背景不放紅心魔） |
+
+- 金配近黑 = 取得與 P5「紅配黑」同級的高對比衝擊，但不撞 P5、更貼佛教調性。
+- 紅色僅作 **accent / 業障側**，不作 UI 基準主色；人物身上不鋪紅。
+- 水墨噴濺、霓虹斜切等 P5 風 UI 質感保留，主色改套暗金。
+
+**一致性產線備註：** 為維持「同一張臉」，後續表情／職業版**應以基準圖作為參考圖**（img2img／角色參考）生成，而非純文字重抽；必要時可考慮訓練專屬 Soul。
+
+---
+
 ### 8.2 3D 場景美術規格（Meshy AI）
 
 **生成設定標準：**
@@ -1920,6 +1952,8 @@ func play_sfx(id: String) -> void:
 ## 八・五、技能解鎖系統（SkillUnlockManager）
 
 技能完全不依賴天數，全部綁定**玩家行為旗標**。EventBus 每次有重要事件發生時呼叫 `check_unlocks()`。
+
+> **⚠ 已過時（2026-06-17）：** 下方 lambda 版 `UNLOCK_CONDITIONS`/`check_unlocks` 已被 `SkillUnlockManager.UNLOCK_TABLE` 資料驅動取代，且解鎖改為「了塵為師」習得制——條件達成只變「可學」，玩家須進經書·技能頁點「習得」才真正入招池（例外：initial/story 羅漢拳/heat）。`check_unlocks()` 只自動學 initial。詳見 spec `docs/superpowers/specs/2026-06-17-skill-learning-system-design.md`。
 
 ```gdscript
 extends Node

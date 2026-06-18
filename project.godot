@@ -24,18 +24,111 @@ SceneRouter="*res://src/autoloads/SceneRouter.gd"
 QuestManager="*res://src/systems/QuestManager.gd"
 BreakVowSystem="*res://src/systems/BreakVowSystem.gd"
 SkillUnlockManager="*res://src/systems/SkillUnlockManager.gd"
+MainQuestManager="*res://src/systems/MainQuestManager.gd"
+AchievementSystem="*res://src/systems/AchievementSystem.gd"
+GodIntel="*res://src/systems/GodIntel.gd"
 Dialogic="*res://addons/dialogic/Core/DialogicGameHandler.gd"
+SettingsManager="*res://src/autoloads/SettingsManager.gd"
 
 [dialogic]
 
-directories/dch_directory={}
-directories/dtl_directory={}
-layout/style_directory={}
+directories/dch_directory={
+"AhMing": "res://dialogue/AhMing.dch",
+"AhZhong": "res://dialogue/AhZhong.dch",
+"CaiMa": "res://dialogue/CaiMa.dch",
+"Cherry": "res://dialogue/Cherry.dch",
+"David": "res://dialogue/David.dch",
+"Grandma": "res://dialogue/Grandma.dch",
+"Jie": "res://dialogue/Jie.dch",
+"LaoWang": "res://dialogue/LaoWang.dch",
+"Liaochen": "res://dialogue/Liaochen.dch",
+"Rei": "res://dialogue/Rei.dch",
+"Wujie": "res://dialogue/Wujie.dch",
+"ZhengMa": "res://dialogue/ZhengMa.dch"
+}
+directories/dtl_directory={
+"cherry_first_meeting": "res://dialogue/cherry_first_meeting.dtl",
+"demo_end": "res://dialogue/demo_end.dtl",
+"main_ares_lead": "res://dialogue/main_ares_lead.dtl",
+"main_ch1_aftermath": "res://dialogue/main_ch1_aftermath.dtl",
+"main_ch1_armory_breach": "res://dialogue/main_ch1_armory_breach.dtl",
+"main_ch1_gate_ready": "res://dialogue/main_ch1_gate_ready.dtl",
+"main_ch1_intel": "res://dialogue/main_ch1_intel.dtl",
+"main_ch1_not_ready": "res://dialogue/main_ch1_not_ready.dtl",
+"quest_ah_ming_s1": "res://dialogue/quest_ah_ming_s1.dtl",
+"quest_ah_ming_s2": "res://dialogue/quest_ah_ming_s2.dtl",
+"quest_ah_zhong_final": "res://dialogue/quest_ah_zhong_final.dtl",
+"quest_ah_zhong_s1": "res://dialogue/quest_ah_zhong_s1.dtl",
+"quest_ah_zhong_s2": "res://dialogue/quest_ah_zhong_s2.dtl",
+"quest_ah_zhong_s3": "res://dialogue/quest_ah_zhong_s3.dtl",
+"quest_cai_ma_choice": "res://dialogue/quest_cai_ma_choice.dtl",
+"quest_cai_ma_s1": "res://dialogue/quest_cai_ma_s1.dtl",
+"quest_cherry_debt_choice": "res://dialogue/quest_cherry_debt_choice.dtl",
+"quest_cherry_debt_final": "res://dialogue/quest_cherry_debt_final.dtl",
+"quest_cherry_debt_s1": "res://dialogue/quest_cherry_debt_s1.dtl",
+"quest_david_choice": "res://dialogue/quest_david_choice.dtl",
+"quest_grandma_final": "res://dialogue/quest_grandma_final.dtl",
+"quest_grandma_s1": "res://dialogue/quest_grandma_s1.dtl",
+"quest_grandma_s2": "res://dialogue/quest_grandma_s2.dtl",
+"quest_jie_challenge": "res://dialogue/quest_jie_challenge.dtl",
+"quest_lao_wang_choice": "res://dialogue/quest_lao_wang_choice.dtl",
+"quest_lao_wang_s1": "res://dialogue/quest_lao_wang_s1.dtl",
+"quest_lao_wang_s2": "res://dialogue/quest_lao_wang_s2.dtl",
+"quest_rei_choice": "res://dialogue/quest_rei_choice.dtl",
+"quest_zheng_ma_s1": "res://dialogue/quest_zheng_ma_s1.dtl",
+"quest_zheng_ma_s2": "res://dialogue/quest_zheng_ma_s2.dtl",
+"vow_break_food": "res://dialogue/vow_break_food.dtl",
+"vow_break_greed": "res://dialogue/vow_break_greed.dtl",
+"vow_break_lust": "res://dialogue/vow_break_lust.dtl"
+}
+layout/style_directory={
+"": "res://src/ui/dialogue_style/monk_dialogue_style.tres",
+"和尚逆天 對話樣式": "res://src/ui/dialogue_style/monk_dialogue_style.tres"
+}
+glossary/default_case_sensitive=true
+layout/style_list=["res://src/ui/dialogue_style/monk_dialogue_style.tres"]
+layout/default_style="res://src/ui/dialogue_style/monk_dialogue_style.tres"
+variables={}
+extensions_folder="res://addons/dialogic_additions"
+text/letter_speed=0.01
+text/initial_text_reveal_skippable=true
+text/text_reveal_skip_delay=0.1
+text/advance_delay=0.1
+text/autoadvance_per_character_delay=0.1
+text/autoadvance_ignored_characters_enabled=true
+animations/join_default_length=0.5
+animations/join_default_wait=true
+animations/leave_default_length=0.5
+animations/leave_default_wait=true
+animations/cross_fade_default_length=0.5
+choices/autofocus_first=true
+choices/delay=0.2
+choices/reveal_delay=0
+choices/reveal_by_input=false
+save/autosave_delay=60.0
+save/encryption_on_exports_only=true
+text/autopauses={}
+audio/channel_defaults={
+"": {
+"audio_bus": "",
+"fade_length": 0.0,
+"loop": false,
+"volume": 0.0
+},
+"music": {
+"audio_bus": "",
+"fade_length": 0.0,
+"loop": true,
+"volume": 0.0
+}
+}
 
 [display]
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
+window/size/window_width_override=1280
+window/size/window_height_override=720
 window/stretch/mode="canvas_items"
 
 [editor_plugins]
@@ -93,5 +186,18 @@ skill_4={
 skill_5={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":53,"key_label":0,"unicode":53,"location":0,"echo":false,"script":null)
+]
+}
+dialogic_default_action={
+"deadzone": 0.2,
+"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":1,"canceled":false,"pressed":false,"double_click":false,"script":null)
+, Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":32,"key_label":0,"unicode":32,"location":0,"echo":false,"script":null)
+, Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194309,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+open_menu={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":77,"key_label":0,"unicode":109,"location":0,"echo":false,"script":null)
+, Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"button_index":6,"pressure":0.0,"pressed":false,"script":null)
 ]
 }
