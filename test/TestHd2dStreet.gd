@@ -24,7 +24,16 @@ func _ready() -> void:
 	if not we.environment.glow_enabled:
 		return _fail("glow 未開")
 
-	print("TEST PASS: Hd2dStreet 環境＋地面＋glow OK")
+	var buildings := street.get_node_or_null("Buildings")
+	if buildings == null:
+		return _fail("無 Buildings 節點")
+	if buildings.get_child_count() < 4:
+		return _fail("Buildings 立板不足：%d" % buildings.get_child_count())
+	for c in buildings.get_children():
+		if not (c is MeshInstance3D):
+			return _fail("Buildings 子節點非 MeshInstance3D：%s" % c)
+
+	print("TEST PASS: Hd2dStreet 環境＋地面＋建築立板(%d)＋glow OK" % buildings.get_child_count())
 	get_tree().quit(0)
 
 func _find_we(n: Node) -> WorldEnvironment:

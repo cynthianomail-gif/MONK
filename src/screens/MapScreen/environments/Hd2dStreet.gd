@@ -24,7 +24,9 @@ func _ready() -> void:
 	_ground_tex = _load(TEX_DIR + "ground_wet.png")
 	_build_environment()
 	_build_ground()
-	# 建築/背板＝Task 2；後製＝Task 5；氛圍＝Task 6
+	_build_buildings()
+	_build_backdrop()
+	# 後製＝Task 5；氛圍＝Task 6
 
 func _load(path: String) -> Texture2D:
 	return load(path) as Texture2D if ResourceLoader.exists(path) else null
@@ -86,3 +88,67 @@ func _build_ground() -> void:
 	col.position = Vector3(0, -0.5, 0)
 	body.add_child(col)
 	add_child(body)
+
+# ── 建築景深層：近排（街兩側）＋遠排（壓暗）＝箱庭縱深。──
+# 立板＝直立 QuadMesh，法線朝 +Z（面向相機），UNSHADED 保厚塗畫風，
+# 整張矩形（原型先不去背）。高度隨機、寬度依貼圖比例避免拉伸。
+func _build_buildings() -> void:
+	if _bldgs.is_empty():
+		return
+	var parent := Node3D.new()
+	parent.name = "Buildings"
+	add_child(parent)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20260618
+
+	# 遠排：橫跨 X 的一道燈海樓牆，壓暗讀成遠景
+	var far_x := -STREET_W * 0.5
+	while far_x <= STREET_W * 0.5:
+		var h := rng.randf_range(13.0, 18.0)
+		_add_plate(parent, _bldgs[rng.randi() % _bldgs.size()],
+			Vector3(far_x, h * 0.5, FAR_ROW_Z), h, 0.6)
+		far_x += rng.randf_range(6.0, 8.0)
+
+	# 近排：左右各擺幾棟，中央留街給主角走（|x| < ~4 不放）
+	for side in [-1.0, 1.0]:
+		var n := rng.randi_range(2, 3)
+		for i in n:
+			var h2 := rng.randf_range(9.0, 15.0)
+			var z := NEAR_ROW_Z + rng.randf_range(-5.0, 5.0)
+			var x: float = side * (NEAR_SIDE_X + rng.randf_range(-0.6, 1.6))
+			_add_plate(parent, _bldgs[rng.randi() % _bldgs.size()],
+				Vector3(x, h2 * 0.5, z), h2, 1.0)
+
+# 單張立板：直立 QuadMesh、面向 +Z、UNSHADED；dim<1 壓暗（遠景）。
+func _add_plate(parent: Node3D, tex: Texture2D, pos: Vector3, height: float, dim: float) -> void:
+	var aspect := float(tex.get_width()) / float(tex.get_height())   # 768/1376≈0.558
+	var q := QuadMesh.new()
+	q.size = Vector2(height * aspect, height)                        # QuadMesh 預設立在 XY 平面、法線 +Z
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.albedo_texture = tex
+	m.albedo_color = Color(dim, dim, dim)
+	m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	q.material = m
+	var mi := MeshInstance3D.new()
+	mi.mesh = q
+	mi.position = pos
+	parent.add_child(mi)
+
+# ── 遠景背板：街盡頭一片壓暗燈海，填掉黑洞、讓街像繼續延伸。──
+func _build_backdrop() -> void:
+	if _bldgs.is_empty():
+		return
+	var q := QuadMesh.new()
+	q.size = Vector2(STREET_W * 2.5, 26.0)
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.albedo_texture = _bldgs[_bldgs.size() - 1]
+	m.albedo_color = Color(0.4, 0.4, 0.5)            # 壓暗＝遠景
+	m.uv1_scale = Vector3(4, 2, 1)
+	q.material = m
+	var mi := MeshInstance3D.new()
+	mi.name = "Backdrop"
+	mi.mesh = q
+	mi.position = Vector3(0, 11.0, FAR_ROW_Z - 8.0)
+	add_child(mi)
