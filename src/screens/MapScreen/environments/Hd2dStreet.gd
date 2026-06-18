@@ -101,21 +101,21 @@ func _build_buildings() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 20260618
 
-	# 遠排：橫跨 X 的一道燈海樓牆，壓暗讀成遠景
-	var far_x := -STREET_W * 0.5
-	while far_x <= STREET_W * 0.5:
+	# 遠排：橫跨 X 的一道燈海樓牆，壓暗讀成遠景（固定 3 棟，避免 while 依賴 RNG 終止）
+	var far_count := 3
+	for i in far_count:
 		var h := rng.randf_range(13.0, 18.0)
+		var fx := -STREET_W * 0.5 + (STREET_W / float(far_count - 1)) * i
 		_add_plate(parent, _bldgs[rng.randi() % _bldgs.size()],
-			Vector3(far_x, h * 0.5, FAR_ROW_Z), h, 0.6)
-		far_x += rng.randf_range(6.0, 8.0)
+			Vector3(fx, h * 0.5, FAR_ROW_Z), h, 0.6)
 
 	# 近排：左右各擺幾棟，中央留街給主角走（|x| < ~4 不放）
-	for side in [-1.0, 1.0]:
+	for side: float in [-1.0, 1.0]:
 		var n := rng.randi_range(2, 3)
 		for i in n:
 			var h2 := rng.randf_range(9.0, 15.0)
 			var z := NEAR_ROW_Z + rng.randf_range(-5.0, 5.0)
-			var x: float = side * (NEAR_SIDE_X + rng.randf_range(-0.6, 1.6))
+			var x := side * (NEAR_SIDE_X + rng.randf_range(-0.6, 1.6))
 			_add_plate(parent, _bldgs[rng.randi() % _bldgs.size()],
 				Vector3(x, h2 * 0.5, z), h2, 1.0)
 
@@ -138,6 +138,7 @@ func _add_plate(parent: Node3D, tex: Texture2D, pos: Vector3, height: float, dim
 # ── 遠景背板：街盡頭一片壓暗燈海，填掉黑洞、讓街像繼續延伸。──
 func _build_backdrop() -> void:
 	if _bldgs.is_empty():
+		push_warning("Hd2dStreet: _build_backdrop skipped — no _bldgs loaded")
 		return
 	var q := QuadMesh.new()
 	q.size = Vector2(STREET_W * 2.5, 26.0)
