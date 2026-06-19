@@ -1,82 +1,48 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="PackedScene" path="res://src/screens/MapScreen/Player.tscn" id="1"]
 [ext_resource type="Script" path="res://src/screens/MapScreen/CameraRig.gd" id="2"]
-[ext_resource type="PackedScene" path="res://assets/3d/environments/ximen/prototypes/ximen_storefront_facade_01.glb" id="3"]
-[ext_resource type="PackedScene" path="res://assets/3d/environments/ximen/prototypes/ximen_mrt_exit_01.glb" id="4"]
-[ext_resource type="PackedScene" path="res://assets/3d/environments/ximen/prototypes/ximen_neon_sign_cluster_01.glb" id="5"]
-[ext_resource type="PackedScene" path="res://assets/3d/environments/ximen/prototypes/ximen_food_stall_01.glb" id="6"]
-[ext_resource type="PackedScene" path="res://assets/3d/environments/ximen/prototypes/ximen_convenience_entrance_01.glb" id="7"]
-[ext_resource type="PackedScene" path="res://assets/3d/environments/ximen/prototypes/ximen_utility_pole_light_01.glb" id="8"]
-[ext_resource type="PackedScene" path="res://assets/3d/environments/ximen/prototypes/ximen_street_clutter_01.glb" id="9"]
-[ext_resource type="Script" path="res://test/Ximen3DHubPrototype.gd" id="10"]
+[ext_resource type="Script" path="res://test/Ximen3DHubPrototype.gd" id="3"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 1
 background_color = Color(0.025, 0.028, 0.052, 1)
 ambient_light_source = 1
-ambient_light_color = Color(0.36, 0.38, 0.58, 1)
-ambient_light_energy = 0.72
+ambient_light_color = Color(0.34, 0.36, 0.56, 1)
+ambient_light_energy = 0.6
 tonemap_mode = 2
-tonemap_exposure = 1.1
+tonemap_exposure = 1.08
 glow_enabled = true
-glow_intensity = 0.8
+glow_intensity = 0.55
+glow_strength = 0.9
 glow_bloom = 0.1
-glow_hdr_threshold = 1.0
+glow_blend_mode = 1
+glow_hdr_threshold = 1.25
 fog_enabled = true
-fog_light_color = Color(0.13, 0.15, 0.28, 1)
-fog_density = 0.012
+fog_light_color = Color(0.14, 0.17, 0.32, 1)
+fog_density = 0.02
 
-[sub_resource type="StandardMaterial3D" id="GroundMaterial_1"]
-albedo_color = Color(0.055, 0.056, 0.07, 1)
-roughness = 0.22
-metallic_specular = 0.7
-
-[sub_resource type="PlaneMesh" id="GroundMesh_1"]
-material = SubResource("GroundMaterial_1")
-size = Vector2(9, 30)
-
-[sub_resource type="BoxShape3D" id="GroundShape_1"]
-size = Vector3(9, 1, 30)
-
-[sub_resource type="BoxShape3D" id="WallShape_1"]
-size = Vector3(1, 4, 30)
+[sub_resource type="CameraAttributesPractical" id="CamAttr_1"]
+dof_blur_far_enabled = true
+dof_blur_far_distance = 24.0
+dof_blur_far_transition = 10.0
+dof_blur_amount = 0.08
 
 [node name="TestXimen3DHub" type="Node3D"]
-script = ExtResource("10")
+script = ExtResource("3")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_1")
-
-[node name="Ground" type="MeshInstance3D" parent="."]
-mesh = SubResource("GroundMesh_1")
-
-[node name="GroundBody" type="StaticBody3D" parent="."]
-
-[node name="GroundCollision" type="CollisionShape3D" parent="GroundBody"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-shape = SubResource("GroundShape_1")
-
-[node name="LeftWall" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.8, 1.8, 0)
-
-[node name="LeftWallCollision" type="CollisionShape3D" parent="LeftWall"]
-shape = SubResource("WallShape_1")
-
-[node name="RightWall" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.8, 1.8, 0)
-
-[node name="RightWallCollision" type="CollisionShape3D" parent="RightWall"]
-shape = SubResource("WallShape_1")
+camera_attributes = SubResource("CamAttr_1")
 
 [node name="Player" parent="." instance=ExtResource("1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, 8.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, 11.5)
 
 [node name="CameraRig" type="Node3D" parent="." node_paths=PackedStringArray("target_path")]
 script = ExtResource("2")
 target_path = NodePath("../Player")
-camera_offset = Vector3(0, 4.2, 7.0)
-camera_pitch_deg = -14.0
+camera_offset = Vector3(0, 6.2, 9.2)
+camera_pitch_deg = -23.0
 follow_speed = 0.1
 
 [node name="Camera3D" type="Camera3D" parent="CameraRig"]
@@ -84,89 +50,6 @@ current = true
 fov = 58.0
 
 [node name="StreetKit" type="Node3D" parent="."]
-
-[node name="StorefrontLeftA" parent="StreetKit" instance=ExtResource("3")]
-transform = Transform3D(0.78, 0, 0, 0, 0.78, 0, 0, 0, 0.78, -3.1, 0, 3.8)
-
-[node name="StorefrontLeftB" parent="StreetKit" instance=ExtResource("3")]
-transform = Transform3D(0.72, 0, 0, 0, 0.72, 0, 0, 0, 0.72, -3.15, 0, -5.0)
-
-[node name="ConvenienceRight" parent="StreetKit" instance=ExtResource("7")]
-transform = Transform3D(0.78, 0, 0, 0, 0.78, 0, 0, 0, 0.78, 3.05, 0, 0.6)
-
-[node name="MrtExitRight" parent="StreetKit" instance=ExtResource("4")]
-transform = Transform3D(0.74, 0, 0, 0, 0.74, 0, 0, 0, 0.74, 3.0, 0, -7.8)
-
-[node name="NeonSignsLeftA" parent="StreetKit" instance=ExtResource("5")]
-transform = Transform3D(0.88, 0, 0, 0, 0.88, 0, 0, 0, 0.88, -3.2, 1.8, 4.0)
-
-[node name="NeonSignsLeftB" parent="StreetKit" instance=ExtResource("5")]
-transform = Transform3D(0.72, 0, 0, 0, 0.72, 0, 0, 0, 0.72, -3.25, 1.6, -5.3)
-
-[node name="FoodStallNear" parent="StreetKit" instance=ExtResource("6")]
-transform = Transform3D(0.66, 0, 0, 0, 0.66, 0, 0, 0, 0.66, 1.65, 0, 5.6)
-
-[node name="UtilityPoleLeft" parent="StreetKit" instance=ExtResource("8")]
-transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, -3.55, 0, 7.0)
-
-[node name="UtilityPoleFar" parent="StreetKit" instance=ExtResource("8")]
-transform = Transform3D(0.64, 0, 0, 0, 0.64, 0, 0, 0, 0.64, 3.5, 0, -9.5)
-
-[node name="StreetClutterNear" parent="StreetKit" instance=ExtResource("9")]
-transform = Transform3D(0.72, 0, 0, 0, 0.72, 0, 0, 0, 0.72, -1.35, 0, 5.2)
-
-[node name="StreetClutterFar" parent="StreetKit" instance=ExtResource("9")]
-transform = Transform3D(0.58, 0, 0, 0, 0.58, 0, 0, 0, 0.58, 1.4, 0, -6.2)
-
-[node name="StorefrontRightFar" parent="StreetKit" instance=ExtResource("3")]
-transform = Transform3D(0.66, 0, 0, 0, 0.66, 0, 0, 0, 0.66, 3.2, 0, -3.6)
-
-[node name="ConvenienceLeftBack" parent="StreetKit" instance=ExtResource("7")]
-transform = Transform3D(0.62, 0, 0, 0, 0.62, 0, 0, 0, 0.62, -3.05, 0, -1.0)
-
-[node name="FoodStallFar" parent="StreetKit" instance=ExtResource("6")]
-transform = Transform3D(0.56, 0, 0, 0, 0.56, 0, 0, 0, 0.56, -1.55, 0, -8.8)
-
-[node name="NeonSignsRightFar" parent="StreetKit" instance=ExtResource("5")]
-transform = Transform3D(0.66, 0, 0, 0, 0.66, 0, 0, 0, 0.66, 3.25, 1.7, 6.0)
-
-[node name="StreetClutterMid" parent="StreetKit" instance=ExtResource("9")]
-transform = Transform3D(0.54, 0, 0, 0, 0.54, 0, 0, 0, 0.54, 1.1, 0, 1.8)
-
-[node name="KeyLight" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.866025, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, -0.433013, 0.75, 0, 5, 4)
-light_color = Color(0.72, 0.76, 1, 1)
-light_energy = 0.55
-
-[node name="BlueNeonA" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.2, 2.8, 2.5)
-light_color = Color(0.2, 0.75, 1, 1)
-light_energy = 3.2
-omni_range = 8.0
-
-[node name="PinkNeonA" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 2.6, -1.5)
-light_color = Color(1, 0.18, 0.55, 1)
-light_energy = 3.5
-omni_range = 8.0
-
-[node name="GoldNeonFar" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -8.5)
-light_color = Color(1, 0.62, 0.22, 1)
-light_energy = 2.5
-omni_range = 7.0
-
-[node name="CyanNeonNear" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 2.2, 5.8)
-light_color = Color(0.18, 0.95, 0.82, 1)
-light_energy = 2.2
-omni_range = 6.0
-
-[node name="RedAlleyLight" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 1.8, -8.2)
-light_color = Color(1, 0.08, 0.16, 1)
-light_energy = 2.6
-omni_range = 5.4
 
 [node name="HUD" type="CanvasLayer" parent="."]
 
