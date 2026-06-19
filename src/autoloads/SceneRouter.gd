@@ -24,6 +24,10 @@ func go_to_title() -> void:
 func go_to_map() -> void:
 	await _change_scene(MAP_SCENE, Transition.INK_SPLASH)
 
+## 通用換場：返回任意指定場景（戰後回原 3D 探索場景等用）。
+func go_to_scene(path: String) -> void:
+	await _change_scene(path, Transition.INK_SPLASH)
+
 func go_to_battle(enemy_id: String) -> void:
 	_store_player_position()
 	await _change_scene(BATTLE_SCENE, Transition.SLASH_RED)

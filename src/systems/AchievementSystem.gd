@@ -59,7 +59,9 @@ func get_all() -> Array:
 	return out
 
 func _on_flag_changed(key: String, value: Variant) -> void:
-	if not bool(value):
+	# 成就只對「被設為 true 的 bool 旗標」解鎖；非 bool 旗標（如戰後回場用的
+	# battle_return_scene 字串）直接略過——Godot 4 無 bool(String) 建構式會炸。
+	if typeof(value) != TYPE_BOOL or not value:
 		return
 	for it in _list:
 		if it.unlock_flag == key:

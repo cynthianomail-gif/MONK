@@ -267,9 +267,10 @@ func _victory() -> void:
 	GameManager.set_flag("kill_count", GameManager.get_flag("kill_count", 0) + kills)
 	GameManager.player.current_hp = player_combatant.current_hp
 	SkillUnlockManager.check_unlocks()
+	_apply_battle_victory_hooks()
 	EventBus.battle_ended.emit("win")
 	await get_tree().create_timer(1.0).timeout
-	SceneRouter.go_to_map()
+	_return_from_battle()
 
 func _defeat() -> void:
 	await ui.play_defeat()
@@ -278,8 +279,37 @@ func _defeat() -> void:
 	GameManager.player.gold = int(GameManager.player.gold / 2.0)
 	GameManager.player.current_hp = int(GameManager.player.max_hp / 2.0)
 	GameManager.player.last_position = {"x": -18.0, "y": 0.0, "z": 4.0}
+	_clear_battle_return_flags()  # 戰敗回古廟而非原場景，清掉暫存避免外洩到下一場
 	await get_tree().create_timer(1.0).timeout
 	SceneRouter.go_to_map()
+
+# ─── 戰後回場機制（通用：3D 探索場景觸發戰鬥後回原場景）──────────────
+# 觸發端在進戰前設旗標（位置由 SceneRouter.go_to_battle() 的 _store_player_position 存好）：
+#   battle_return_scene                 = 回去的場景路徑（空＝回城市地圖）
+#   battle_clear_flag_on_win            = 打贏要設 true 的清場旗標（空＝無）
+#   battle_return_restore_last_position = 回場後是否還原位置（由目標場景自行讀取）
+
+## 勝利時把「打贏要設的清場旗標」設起來，並清掉暫存欄位。
+func _apply_battle_victory_hooks() -> void:
+	var clear_flag: String = String(GameManager.get_flag("battle_clear_flag_on_win", ""))
+	if clear_flag != "":
+		GameManager.set_flag(clear_flag, true)
+		GameManager.set_flag("battle_clear_flag_on_win", "")
+
+## 戰後通用返回：有指定 battle_return_scene 就回那裡（並清掉暫存），否則回城市地圖。
+func _return_from_battle() -> void:
+	var return_scene: String = String(GameManager.get_flag("battle_return_scene", ""))
+	if return_scene != "" and ResourceLoader.exists(return_scene):
+		GameManager.set_flag("battle_return_scene", "")
+		SceneRouter.go_to_scene(return_scene)
+	else:
+		SceneRouter.go_to_map()
+
+## 戰敗時不回原 3D 場景，清掉回場暫存避免外洩到下一場戰鬥。
+func _clear_battle_return_flags() -> void:
+	GameManager.set_flag("battle_return_scene", "")
+	GameManager.set_flag("battle_clear_flag_on_win", "")
+	GameManager.set_flag("battle_return_restore_last_position", false)
 
 func _track_heat_achievement() -> void:
 	GameManager.set_flag("heat_used_" + GameManager.player.job, true)
