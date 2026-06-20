@@ -5,6 +5,8 @@
 
 ---
 
+> **🔄 2026-06-19/20 大轉向（最新，凌駕本文件下方所有舊向描述）：** 全遊戲改 **《大神 Ōkami》日式水墨風（去霓虹／去 cyberpunk）**，舞台**反皮日本**（地名/視覺改日本神社城；**希臘四神財閥主線、系統、數值全不變，只反皮不重寫劇情**）。**探索＝3D 但改「幾何盒體＋水墨 shader」**（非 Meshy 寫實貼圖、非 2D 楓谷）。美術產線＝**角色立繪→Codex**、**背景→Magnific（Freepik MCP / nano_banana）**；higgsfield 額度已乾。細節見 `PROJECT_STATUS.md` 頂部與 `docs/superpowers/specs/2026-06-20-3d-shrine-street-scene-design.md`。下方「台北/西門/霓虹/Meshy 寫實」等＝轉向前歷史。
+
 ## 🤖 給 Claude Code 的總體指示
 
 1. **引擎：** Godot 4.3+，GDScript，Forward+ 渲染器
@@ -1362,20 +1364,24 @@ func _on_combo(count: int) -> void:
 
 ### 8.1 整體美術方向
 
+> 🔄 **2026-06-19 改《大神》日式水墨**（去霓虹），下表已更新；產線見頂部 banner。
+
 | 層次 | 技術 | 風格 |
 |------|------|------|
-| 3D 探索場景 | Meshy AI → Godot Forward+ | 卡通渲染（Toon Shader），台北霓虹夜市 |
-| 3D 角色 | Meshy + Mixamo + Blender | 低多邊形，同套 Toon Shader |
-| 2D 戰鬥/對話立繪 | Higgsfield AI | 視覺小說風，手繪感，乾淨 Lineart |
-| 2D 戰鬥背景 | Higgsfield AI | 動漫背景風，大景深 |
-| UI/選單 | Godot CanvasLayer + Shader | 霓虹斜切，水墨噴濺，P5 風 |
-| 過場演出 | Higgsfield 影片 → ffmpeg 拆幀 | PNG 幀序列，每秒 12 幀 |
+| 3D 探索場景 | 幾何盒體＋水墨 shader（不貼 AI 圖） | 日式 sumi-e 水墨：toon＋墨染斑駁＋Laplacian 描邊＋和紙顆粒；神社街 |
+| 3D 角色 | 既有 GLB 套水墨 toon shader | 與場景同水墨畫風 |
+| 2D 戰鬥/對話立繪 | **Codex 生圖** | 日式水墨厚塗、破袍僧人、game-ready 去背 |
+| 2D 戰鬥背景 | **Magnific（Freepik MCP / nano_banana）** | 水墨神社/市集，留中景站位 |
+| UI/選單 | Godot CanvasLayer + Shader | 暗金×黑＋水墨噴濺（P5 質感保留、去霓虹） |
+| 過場演出 | Magnific/Seedance 影片 → ffmpeg 拆幀 | PNG 幀序列，每秒 12 幀 |
 
 ---
 
 ### 8.1.1 美術定案 — 2D 立繪風格與 UI 色系（2026-06-13 鎖定）
 
-> 本節為**最終定案**，凌駕 8.1 表格中較早的籠統描述。所有 2D 立繪、UI、key art 一律依此標準。
+> ⚠ **2026-06-19 大轉向：本節的「半寫實厚塗」立繪定案已被《大神》日式水墨風取代**（角色改由 Codex 生水墨厚塗、game-ready 去背）。下方「半寫實/厚塗/不要粗黑邊」＝舊向，保留供對照。**UI 暗金×黑色系續用、只去霓虹。** 新角色基準＝Codex 生的無戒正面水墨立繪（臉測過關後當全卡司錨點）。
+>
+> （原註）本節為最終定案，凌駕 8.1 表格中較早的籠統描述。所有 2D 立繪、UI、key art 一律依此標準。
 
 **主角無戒定裝基準：** `assets/2d/portraits/wujie/_LOCKED_base_reference.png`（= 苦行僧·平靜 `wujie_ascetic_calm.png`）。
 此圖為**臉型／風格的唯一基準**，往後所有表情版、職業版、其他角色都以它對齊（臉部維持此基準，不可漂移）。
