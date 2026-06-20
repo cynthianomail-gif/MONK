@@ -27,6 +27,10 @@ func _attach_outline_deferred() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	_attach_outline_to_camera()
+	var player := get_tree().get_first_node_in_group("player")
+	if player != null:
+		_apply_ink(player)
+		print("SHRINE_INK_PLAYER ok")
 
 func _attach_outline_to_camera() -> void:
 	var cam := get_viewport().get_camera_3d()
