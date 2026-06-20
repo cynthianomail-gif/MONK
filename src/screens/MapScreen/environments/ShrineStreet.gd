@@ -3,7 +3,7 @@ extends Node3D
 ## 在 _ready 動態建：env/光、石板地面（含碰撞）、兩排店家（屋頂/三件套/木格/掛看板）、
 ## 石燈籠、鳥居、遠景杉林、幟＋道具、和紙層。RNG 固定種子＝可重現。
 ## 描邊後處理 quad 執行期掛到當前相機；_apply_ink() 把玩家 mesh 套水墨 toon。
-## 正式化自 test/OkamiShaderTest.gd（shader 抽成 assets/shaders/okami/*.gdshader）。
+## shader 來源＝assets/shaders/okami/*.gdshader（由水墨 look-dev 原型正式化而來）。
 
 const TOON_SHADER := preload("res://assets/shaders/okami/ink_toon.gdshader")
 const GROUND_SHADER := preload("res://assets/shaders/okami/ink_ground.gdshader")
