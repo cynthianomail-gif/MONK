@@ -3,6 +3,8 @@ extends CanvasLayer
 ## 3D 探索地圖 HUD（Step 1 佔位版，Step 4 換成霓虹風格元件）
 
 const ACTION_LABELS: Dictionary = {
+	"main_quest":          "繼續修行（主線）",
+	"armory_npc":          "與鐵叔搭話",
 	"random_encounter":    "尋找麻煩（遭遇戰）",
 	"beggar_minigame":     "化緣挑戰",
 	"shop":                "購物",

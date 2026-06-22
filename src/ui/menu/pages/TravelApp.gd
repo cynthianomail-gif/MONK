@@ -66,7 +66,7 @@ func _pay_taxi(loc_id: String) -> bool:
 		return false
 	var loc: Dictionary = _loc(loc_id)
 	var sp: Dictionary = loc.get("scene_pos", {"x": 0.5})
-	GameManager.pending_arrival = {"area": String(loc.get("district", "")), "x": float(sp.get("x", 0.5))}
+	GameManager.pending_arrival = {"area": String(loc.get("district", "")), "x": float(sp.get("x", 0.5)), "loc": loc_id}
 	return true
 
 # === helpers ===
