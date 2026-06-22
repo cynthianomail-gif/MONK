@@ -21,7 +21,7 @@ var player: Dictionary = {
 	"completed_quests": [],
 	"active_quests": {},
 	"last_position": {"x": 0.0, "y": 0.0, "z": 0.0},
-	"current_area": "ximen",
+	"current_area": "shrine",
 	"inventory": {}
 }
 
@@ -168,6 +168,6 @@ func new_game() -> void:
 		"completed_quests": [],
 		"active_quests": {},
 		"last_position": {"x": 0.0, "y": 1.2, "z": 6.0},
-		"current_area": "ximen",
+		"current_area": "shrine",
 		"inventory": {}
 	}

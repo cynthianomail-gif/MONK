@@ -1,33 +1,15 @@
 {
-  "ximen": {
-    "name": "西門町",
-    "scene_2d": "res://assets/2d/map/scenes/ximen_street.png",
-    "scene_spawn": {"x": 0.12, "y": 0.82},
-    "map_pos": {"x": 0.24, "y": 0.42},
-    "edge_portals": [{"to": "wanhua_old", "x": 0.97}],
-    "bgm": "ximen_night",
-    "environment": "res://src/screens/MapScreen/environments/XimenStreet.tscn",
+  "shrine": {
+    "name": "神社區",
+    "bgm": "temple_ambient",
+    "environment": "res://src/screens/MapScreen/environments/ShrineStreet.tscn",
     "default_spawn": {"x": 0.0, "y": 1.2, "z": 6.0}
   },
-  "wanhua_old": {
-    "name": "萬華舊區",
-    "scene_2d": "res://assets/2d/map/scenes/wanhua_street.png",
-    "scene_spawn": {"x": 0.10, "y": 0.82},
-    "map_pos": {"x": 0.52, "y": 0.60},
-    "edge_portals": [{"to": "ximen", "x": 0.03}, {"to": "linsen", "x": 0.97}],
-    "bgm": "temple_ambient",
-    "environment": "res://src/screens/MapScreen/environments/PlaceholderArea.tscn",
-    "default_spawn": {"x": 0.0, "y": 1.2, "z": 0.0}
-  },
-  "linsen": {
-    "name": "林森商圈",
-    "scene_2d": "res://assets/2d/map/scenes/linsen_street.png",
-    "scene_spawn": {"x": 0.10, "y": 0.82},
-    "map_pos": {"x": 0.78, "y": 0.34},
-    "edge_portals": [{"to": "wanhua_old", "x": 0.03}],
-    "bgm": "linsen_night",
-    "unlock_flag": "linsen_unlocked",
-    "environment": "res://src/screens/MapScreen/environments/PlaceholderArea.tscn",
-    "default_spawn": {"x": 0.0, "y": 1.2, "z": 0.0}
+  "armory": {
+    "name": "軍火庫區",
+    "bgm": "ximen_night",
+    "unlock_flag": "armory_unlocked",
+    "environment": "res://src/screens/MapScreen/environments/ArmoryDistrict.tscn",
+    "default_spawn": {"x": 0.0, "y": 1.2, "z": 6.0}
   }
 }
