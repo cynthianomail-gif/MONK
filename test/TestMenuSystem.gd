@@ -280,7 +280,7 @@ func _test_travel_app() -> void:
 	# 捷運扣款＋耗時（_pay_mrt 只處理付費/推時，不換場）
 	GameManager.player.gold = 100
 	var p0: int = GameManager.player.period
-	var ok_mrt: bool = app._pay_mrt("wanhua_old")
+	var ok_mrt: bool = app._pay_mrt("shrine")
 	_check(ok_mrt and GameManager.player.gold == 95, "MRT charges 5 gold (got %d)" % GameManager.player.gold)
 	_check(GameManager.player.period == (p0 + 1) % 4, "MRT advances 1 period")
 	# 計程車扣款＋設 pending_arrival、不耗時
@@ -290,7 +290,7 @@ func _test_travel_app() -> void:
 	var ok_taxi: bool = app._pay_taxi("old_temple")
 	_check(ok_taxi and GameManager.player.gold == 70, "taxi charges 30 gold (got %d)" % GameManager.player.gold)
 	_check(GameManager.player.period == p1, "taxi no time cost")
-	_check(String(GameManager.pending_arrival.get("area", "")) == "wanhua_old", "taxi sets pending area")
+	_check(String(GameManager.pending_arrival.get("area", "")) == "shrine", "taxi sets pending area")
 	# 錢不夠：不扣款、不動作
 	GameManager.player.gold = 2
 	GameManager.pending_arrival = {}
