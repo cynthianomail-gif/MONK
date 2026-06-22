@@ -1,7 +1,7 @@
 # 《和尚逆天》專案狀態總表
 
 > **🎯 範圍：DEMO 版＝只做第一章（阿瑞斯）（2026-06-15 定案）。** ch2–12 暫不實作；所有規劃以「ch1 完整可玩 demo」為目標。
-> 常駐進度文件 — 切帳號/換 session 先讀這份。最後更新 **2026-06-20**。
+> 常駐進度文件 — 切帳號/換 session 先讀這份。最後更新 **2026-06-22**。
 > 企畫書＝[`monk_go_rogue_GDD_v5.md`](monk_go_rogue_GDD_v5.md)；主線設計＝[`docs/superpowers/specs/2026-06-14-main-story-design.md`](docs/superpowers/specs/2026-06-14-main-story-design.md)。
 
 > **🔄 2026-06-19/20 大轉向（最新，覆蓋下方舊向）：** 全遊戲改 **《大神 Ōkami》日式水墨風（去霓虹）**、舞台**反皮日本**（地名/視覺；**希臘四神財閥主線不變、不重寫劇情**）。**探索確認用回 3D（水墨 shader 版，非 2D 楓谷）**。美術分工＝**角色立繪→Codex**、**背景→Magnific（Freepik MCP / nano_banana，~33k credits）**；higgsfield 額度已乾。水墨 shader＋3D 神社街 look-dev 已驗證，正式化 spec/plan＝`docs/superpowers/{specs,plans}/2026-06-20-3d-shrine-street-scene*`。**下方所有 2D 楓谷／cyberpunk／霓虹／西門 等敘述＝轉向前歷史，系統程式不變、只反皮。**
@@ -13,8 +13,8 @@
 - **系統/程式**：核心幾乎全做完（autoload／2D 戰鬥／地圖程式／過場播放／轉場讀取／存檔／對話橋接／選單地基＋經書）。
 - **支線內容**：9 條支線＋Cherry 初遇＋3 段破戒獨白＝26 個對話檔，全做完並驗證。
 - **2D 美術**：英雄/敵人/NPC 立繪、5 戰鬥背景、12 神設定集 splash（今日完成）、28 音檔、7+1 段過場幀。
-- **探索地圖**：⚠**2026-06-19 再轉向＝確認用回 3D（《大神》水墨 shader 版）**；2D 楓谷退役。**探索地點 3→2**＝①神社區 hub（`ShrineStreet`）②軍火庫區（阿瑞斯地盤，`ArmoryDistrict`，黑道軍火倉＋街尾熔爐 Boss 巢）。兩個都做成可走 3D 水墨場景＋截圖驗證（玩家上墨/第三人稱/走動），shader 抽成 `assets/shaders/okami/*.gdshader`，**但還沒接回 MapScreen（2D→3D 宿主＝下一波）**。水墨阿瑞斯戰鬥背景已換 `bg_battle_ares_forge.png`。spec/plan＝`2026-06-20-3d-shrine-street-scene*`；詳見記憶 `project-3d-environment`。
-- **三大缺口**：① **3D 水墨探索**：look-dev 已過，待正式化成可玩場景＋接回遊戲（MapScreen 現為 2D 宿主，需改回 3D）② **主線 12 神戰役只有資料骨架、內容 0 實作**（但 DEMO 只做 ch1，已擴成完整切片）③ **GDD 文件過時＋需反皮日本/水墨**（沒主線章、舊向用詞）。
+- **探索地圖**：⚠**2026-06-19 再轉向＝確認用回 3D（《大神》水墨 shader 版）**；2D 楓谷退役。**探索地點 3→2**＝①神社區 hub（`ShrineStreet`）②軍火庫區（阿瑞斯地盤，`ArmoryDistrict`，黑道軍火倉＋街尾熔爐 Boss 巢）。兩個都做成可走 3D 水墨場景＋截圖驗證（玩家上墨/第三人稱/走動），shader 抽成 `assets/shaders/okami/*.gdshader`，**✅2026-06-22 已接回 MapScreen（改 3D 宿主，2 區資料驅動 LocationTrigger＋手機移動往返＋軍火庫鎖鐵叔）**。水墨阿瑞斯戰鬥背景已換 `bg_battle_ares_forge.png`。spec/plan＝`2026-06-20-3d-shrine-street-scene*`；詳見記憶 `project-3d-environment`。
+- **三大缺口**：① ✅**3D 水墨探索（2026-06-22 完成）**：神社/軍火庫 2 區已接回 MapScreen（3D 宿主＋資料驅動觸發＋手機移動往返＋軍火庫鎖鐵叔），接線測試＋5 回歸 ALL PASS、windowed 截圖驗證；仍待全卡司水墨立繪（含鐵叔 2 態＝Codex）＋GPU 手感微調 ② **主線 12 神戰役只有資料骨架、內容 0 實作**（但 DEMO 只做 ch1，已擴成完整切片）③ **GDD 文件過時＋需反皮日本/水墨**（沒主線章、舊向用詞）。
 
 ---
 
