@@ -43,10 +43,13 @@ directories/dch_directory={
 "LaoWang": "res://dialogue/LaoWang.dch",
 "Liaochen": "res://dialogue/Liaochen.dch",
 "Rei": "res://dialogue/Rei.dch",
+"TieShu": "res://dialogue/TieShu.dch",
 "Wujie": "res://dialogue/Wujie.dch",
 "ZhengMa": "res://dialogue/ZhengMa.dch"
 }
 directories/dtl_directory={
+"armory_worker_freed": "res://dialogue/armory_worker_freed.dtl",
+"armory_worker_locked": "res://dialogue/armory_worker_locked.dtl",
 "cherry_first_meeting": "res://dialogue/cherry_first_meeting.dtl",
 "demo_end": "res://dialogue/demo_end.dtl",
 "main_ares_lead": "res://dialogue/main_ares_lead.dtl",
