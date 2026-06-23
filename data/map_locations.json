@@ -5,7 +5,7 @@
     "actions": ["beggar_minigame", "random_encounter", "quest_ah_ming", "quest_rei"],
     "available_periods": [1, 2, 3], "bgm": "ximen_night",
     "position_3d": {"x": 5.0, "y": 0.0, "z": -4.0}, "trigger_radius": 2.5,
-    "scene_file": "res://assets/3d/environments/ximen_mrt.glb"
+    "scene_file": "res://assets/3d/environments/ximen_mrt.glb", "npc_model": "ah_ming"
   },
   "wannian_mall": {
     "name": "萬年大樓", "district": "shrine",
@@ -13,7 +13,7 @@
     "actions": ["shop", "greed_break_trigger", "quest_zheng_ma", "quest_jie"],
     "available_periods": [0, 1, 2], "bgm": "ximen_day",
     "position_3d": {"x": -5.0, "y": 0.0, "z": -8.0}, "trigger_radius": 3.0,
-    "scene_file": "res://assets/3d/environments/wannian_mall.glb"
+    "scene_file": "res://assets/3d/environments/wannian_mall.glb", "npc_model": "zheng_ma"
   },
   "zen_bbq": {
     "name": "禪味燒肉", "district": "shrine",
@@ -21,7 +21,7 @@
     "actions": ["food_break_trigger", "rest", "quest_ah_zhong", "quest_david"],
     "available_periods": [2, 3], "bgm": "wanhua_night",
     "position_3d": {"x": -5.0, "y": 0.0, "z": -18.0}, "trigger_radius": 2.0,
-    "scene_file": "res://assets/3d/environments/zen_bbq.glb"
+    "scene_file": "res://assets/3d/environments/zen_bbq.glb", "npc_model": "ah_zhong"
   },
   "zuijin_club": {
     "name": "紫醉金迷俱樂部", "district": "shrine",
@@ -29,7 +29,7 @@
     "actions": ["cherry_dialogue", "lust_break_trigger", "quest_cherry_debt", "quest_cai_ma"],
     "available_periods": [3], "bgm": "linsen_night",
     "position_3d": {"x": 5.0, "y": 0.0, "z": -16.0}, "trigger_radius": 2.5,
-    "scene_file": "res://assets/3d/environments/zuijin_club.glb"
+    "scene_file": "res://assets/3d/environments/zuijin_club.glb", "npc_model": "cherry"
   },
   "old_temple": {
     "name": "荒廢神社", "district": "shrine",
@@ -37,12 +37,12 @@
     "actions": ["main_quest", "save", "job_switch", "rest", "quest_grandma", "quest_lao_wang"],
     "available_periods": [0, 1, 2, 3], "bgm": "temple_ambient",
     "position_3d": {"x": 0.0, "y": 0.0, "z": -26.0}, "trigger_radius": 3.0,
-    "scene_file": "res://assets/3d/environments/old_temple.glb"
+    "scene_file": "res://assets/3d/environments/old_temple.glb", "npc_model": "liaochen"
   },
   "armory_worker": {
     "name": "鐵叔", "district": "armory",
     "actions": ["armory_npc"], "unlock_flag": "armory_unlocked",
     "available_periods": [0, 1, 2, 3], "bgm": "ximen_night",
-    "position_3d": {"x": -4.0, "y": 0.0, "z": -16.0}, "trigger_radius": 2.5
+    "position_3d": {"x": -4.0, "y": 0.0, "z": -16.0}, "trigger_radius": 2.5, "npc_model": "tie_shu"
   }
 }

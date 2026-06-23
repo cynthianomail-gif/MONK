@@ -13,7 +13,7 @@
 - **系統/程式**：核心幾乎全做完（autoload／2D 戰鬥／地圖程式／過場播放／轉場讀取／存檔／對話橋接／選單地基＋經書）。
 - **支線內容**：9 條支線＋Cherry 初遇＋3 段破戒獨白＝26 個對話檔，全做完並驗證。
 - **2D 美術**：✅**2026-06-24 全卡司已換大神 okami 水墨並接進遊戲**（VN 胸像18／戰鬥站姿 無戒3職背面+受傷/敵人5／戰鬥背景7張 okami／阿瑞斯 boss+`ares_vfx.gd` FX／鐵叔2態；`tools/crop_bust.py` 同路徑覆蓋零改碼）。28 音檔。**過場幀仍舊圖**（video 等級，另議）。
-- **探索地圖**：⚠**2026-06-19 再轉向＝確認用回 3D（《大神》水墨 shader 版）**；2D 楓谷退役。**探索地點 3→2**＝①神社區 hub（`ShrineStreet`）②軍火庫區（阿瑞斯地盤，`ArmoryDistrict`，黑道軍火倉＋街尾熔爐 Boss 巢）。兩個都做成可走 3D 水墨場景＋截圖驗證（玩家上墨/第三人稱/走動），shader 抽成 `assets/shaders/okami/*.gdshader`，**✅2026-06-22 已接回 MapScreen（改 3D 宿主，2 區資料驅動 LocationTrigger＋手機移動往返＋軍火庫鎖鐵叔）**。水墨阿瑞斯戰鬥背景已換 `bg_battle_ares_forge.png`。spec/plan＝`2026-06-20-3d-shrine-street-scene*`；詳見記憶 `project-3d-environment`。
+- **探索地圖**：⚠**2026-06-19 再轉向＝確認用回 3D（《大神》水墨 shader 版）**；2D 楓谷退役。**探索地點 3→2**＝①神社區 hub（`ShrineStreet`）②軍火庫區（阿瑞斯地盤，`ArmoryDistrict`，黑道軍火倉＋街尾熔爐 Boss 巢）。兩個都做成可走 3D 水墨場景＋截圖驗證（玩家上墨/第三人稱/走動），shader 抽成 `assets/shaders/okami/*.gdshader`，**✅2026-06-22 已接回 MapScreen（改 3D 宿主，2 區資料驅動 LocationTrigger＋手機移動往返＋軍火庫鎖鐵叔）；✅2026-06-24 探索世界放 6 個可見 3D NPC（NpcFigure＋Meshy image-to-3d←okami 立繪、保貼圖＋程式呼吸搖擺）**。水墨阿瑞斯戰鬥背景已換 `bg_battle_ares_forge.png`。spec/plan＝`2026-06-20-3d-shrine-street-scene*`；詳見記憶 `project-3d-environment`。
 - **三大缺口**：① ✅**ch1 視覺全面 okami 完成（2026-06-24）**：3D 探索（神社/軍火庫 2 區接回 MapScreen）＋全卡司 2D 立繪（VN/戰鬥/敵人/boss）＋戰鬥背景7＋阿瑞斯 boss VFX＋鐵叔，全換新水墨並接進遊戲、9 回歸 ALL PASS；仍待＝過場 cutscene okami（video 另議）＋GPU 手感微調 ② **主線 12 神戰役只有資料骨架、內容 0 實作**（但 DEMO 只做 ch1，已擴成完整切片）③ **GDD 文件過時＋需反皮日本/水墨**（沒主線章、舊向用詞）。
 
 ---
