@@ -12,6 +12,8 @@ const GOLD := Color(0.788, 0.659, 0.38)
 
 const DISTRICT_BG := {
 	"ximen": "bg_battle_ximen.png",
+	"shrine": "bg_battle_ximen.png",        # 收區：神社區戰鬥用櫻木町水墨夜街
+	"armory": "bg_battle_ares_forge.png",   # 軍火庫戰鬥用阿瑞斯熔爐水墨場
 	"wanhua_old": "bg_battle_wanhua.png",
 	"linsen": "bg_battle_linsen.png",
 	"pantheon": "bg_battle_pantheon.png",
