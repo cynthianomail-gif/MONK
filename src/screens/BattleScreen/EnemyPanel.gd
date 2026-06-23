@@ -6,8 +6,11 @@ extends Control
 
 signal target_pressed(panel: EnemyPanel)
 
+const ARES_VFX := preload("res://src/screens/BattleScreen/ares_vfx.gd")
+
 var combatant: Combatant
 var index: int = 0
+var vfx: Control = null  # boss VFX 疊層(非 boss 為 null)
 
 var _figure: BreathingFigure
 var _hit_button: Button
@@ -103,6 +106,12 @@ func _init(c: Combatant, idx: int) -> void:
 	c.down_changed.connect(_on_down_changed)
 	_on_hp_changed(c.current_hp, c.max_hp)
 
+	# boss：掛 VFX 疊層(待機霧+火星常駐；受擊/攻擊/phase2/擊敗觸發)
+	if c.is_boss and ResourceLoader.exists("res://assets/2d/portraits/boss/fx/idle_mist.png"):
+		vfx = ARES_VFX.new()
+		add_child(vfx)
+		vfx.figure = _figure
+
 func _group_dir(c: Combatant) -> String:
 	return BattleArt.BOSS_DIR if c.is_boss else BattleArt.ENEMY_DIR
 
@@ -110,8 +119,14 @@ func _portrait_file(c: Combatant) -> String:
 	return c.portrait_path.get_file() if c.portrait_path != "" else ""
 
 func _on_hp_changed(current: int, max_hp: int) -> void:
+	var prev := int(_hp_bar.value)
 	_hp_bar.value = current
 	_hp_text.text = "%d / %d" % [current, max_hp]
+	if vfx != null:
+		if current <= 0:
+			vfx.play_defeat()
+		elif current < prev:
+			vfx.play_hit()
 	if current <= 0:
 		modulate = Color(0.4, 0.4, 0.4, 0.45)
 		if _figure != null:

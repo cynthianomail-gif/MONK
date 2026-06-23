@@ -29,8 +29,9 @@ func _enemies() -> Dictionary:
 func _test_bg_resolution() -> void:
 	var d := _enemies()
 	var cases := {
-		"street_punk": "bg_battle_ximen.png", "night_ghost": "bg_battle_wanhua.png",
-		"drunk_guard": "bg_battle_linsen.png", "pantheon_guard": "bg_battle_pantheon.png",
+		# 收區 shrine/armory：DISTRICT_BG 暫無對應 key → fallback bg_battle_ximen（待 Codex okami 戰鬥背景到位再加 key+改回）。ares 有 battle_bg override。
+		"street_punk": "bg_battle_ximen.png", "night_ghost": "bg_battle_ximen.png",
+		"drunk_guard": "bg_battle_ximen.png", "pantheon_guard": "bg_battle_ximen.png",
 		"ares": "bg_battle_ares_forge.png",
 	}
 	for id in cases:

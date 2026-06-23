@@ -111,6 +111,15 @@ func set_enemy_base(c: Combatant, path: String) -> void:
 	if p != null:
 		p.set_base_portrait(path)
 
+## Boss VFX（攻擊爆發 / 二階加強）；非 boss panel 無 vfx 則略過。
+func boss_vfx(c: Combatant, kind: String) -> void:
+	var p := _panel_for(c)
+	if p != null and p.vfx != null:
+		if kind == "attack":
+			p.vfx.play_attack()
+		elif kind == "phase2":
+			p.vfx.set_phase2()
+
 # ─── 技能選單 ──────────────────────────────────────────
 
 func show_skill_menu(skill_ids: Array) -> void:

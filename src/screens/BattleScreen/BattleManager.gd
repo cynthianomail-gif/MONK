@@ -167,6 +167,7 @@ func _enemy_turn() -> void:
 			battle_log.emit("%s 使出「%s」" % [e.display_name, act.get("name", "?")])
 			if e == _boss:
 				ui.flash_enemy_mood(_boss, _boss_fig(String(_boss.portrait_moods.get("act", ""))), 0.8)
+				ui.boss_vfx(_boss, "attack")
 		if act.has("summon") and enemy_combatants.size() < MAX_ENEMIES:
 			_summon(act.summon)
 		await get_tree().create_timer(0.5).timeout
@@ -356,6 +357,7 @@ func _maybe_trigger_boss_phase2() -> void:
 		await SceneRouter.play_battle_cutscene(cut)
 	_apply_boss_phase(next_idx)
 	ui.set_enemy_base(_boss, _boss_fig(String(_boss.portrait_moods.get("phase2", ""))))
+	ui.boss_vfx(_boss, "phase2")
 	battle_log.emit("%s 進入第二階段！" % _boss.display_name)
 
 ## Boss 掉血 → 暫態受擊表情（pained）。回血/不變不觸發。

@@ -1,6 +1,6 @@
 {
   "street_punk": {
-    "name": "西門混混", "district": "ximen",
+    "name": "櫻木町混混", "district": "shrine",
     "max_hp": 150, "attack": 25, "defense": 10, "level": 2,
     "weaknesses": ["merit"], "resistances": ["physical"],
     "ai_pattern": "aggressive",
@@ -11,11 +11,11 @@
       "call_backup": {"name": "叫兄弟來", "damage_type": "support", "special": "summon", "summon_id": "street_punk", "max_once": true, "condition": "hp_below_30"}
     },
     "gold_reward": 80, "portrait": "enemy_punk.png",
-    "description": "西門晃蕩的小混混。"
+    "description": "櫻木町晃蕩的小混混。"
   },
 
   "corrupt_vendor": {
-    "name": "黑心攤販", "district": "ximen",
+    "name": "黑心攤販", "district": "shrine",
     "max_hp": 200, "attack": 20, "defense": 25, "level": 3,
     "weaknesses": ["karma"], "resistances": ["merit"],
     "ai_pattern": "defensive",
@@ -30,7 +30,7 @@
   },
 
   "night_ghost": {
-    "name": "深夜孤魂", "district": "wanhua_old",
+    "name": "深夜孤魂", "district": "shrine",
     "max_hp": 120, "attack": 40, "defense": 0, "level": 4,
     "weaknesses": ["merit"], "resistances": ["physical"],
     "ai_pattern": "random",
@@ -41,12 +41,12 @@
       "drain_merit": {"name": "吸取功德", "damage_type": "support", "special": "drain_merit", "drain": 20, "heal_self": 30}
     },
     "gold_reward": 100, "portrait": "enemy_ghost.png",
-    "description": "萬華古廟附近的亡魂。深夜限定。",
+    "description": "門前町神社附近的亡魂。深夜限定。",
     "time_restriction": [3]
   },
 
   "drunk_guard": {
-    "name": "醉漢保鑣", "district": "linsen",
+    "name": "醉漢保鑣", "district": "shrine",
     "max_hp": 180, "attack": 35, "defense": 15, "level": 5,
     "weaknesses": ["karma"], "resistances": [],
     "ai_pattern": "aggressive",
@@ -58,11 +58,11 @@
     },
     "spawn_pair": true,
     "gold_reward": 200, "portrait": "enemy_guard.png",
-    "description": "林森北路的保鑣，成對出現。"
+    "description": "歌舞坂的保鑣，成對出現。"
   },
 
   "temple_ghost": {
-    "name": "廟宇惡鬼", "district": "wanhua_old",
+    "name": "神社宇惡鬼", "district": "shrine",
     "max_hp": 350, "attack": 30, "defense": 30, "level": 6,
     "weaknesses": ["merit"], "resistances": ["karma", "physical"],
     "ai_pattern": "defensive",
@@ -74,11 +74,11 @@
       "karma_burst": {"name": "業障爆發", "damage_type": "karma", "power_formula": "player_karma * 1.5", "target": "single", "condition": "player_karma_above_50"}
     },
     "gold_reward": 400, "portrait": "enemy_temple_ghost.png",
-    "description": "萬華古廟鎮守惡鬼，菁英敵人。"
+    "description": "門前町神社鎮守惡鬼，菁英敵人。"
   },
 
   "pantheon_guard": {
-    "name": "萬神殿重裝保全", "district": "pantheon",
+    "name": "萬神殿重裝保全", "district": "armory",
     "max_hp": 220, "attack": 38, "defense": 22, "level": 7,
     "weaknesses": ["merit"], "resistances": ["physical"],
     "ai_pattern": "aggressive",
