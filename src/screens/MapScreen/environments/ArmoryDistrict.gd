@@ -17,7 +17,7 @@ func _ready() -> void:
 	_build_lanterns(self)
 	_build_props(self)
 	_build_backdrop(self)
-	_build_paper_overlay()
+	# _build_paper_overlay()  # 拿掉和紙顆粒 overlay（與神社區一致、去灰）
 	_attach_outline_deferred()
 	print("ARMORY_DISTRICT ready")
 
@@ -154,9 +154,9 @@ func _build_env(root: Node3D) -> void:
 	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SCREEN
 	env.fog_enabled = true
 	env.fog_light_color = Color(0.22, 0.18, 0.17)            # 暖煙硝
-	env.fog_density = 0.011
+	env.fog_density = 0.004
 	env.adjustment_enabled = true
-	env.adjustment_saturation = 0.95
+	env.adjustment_saturation = 1.0
 	env.adjustment_contrast = 1.18
 	var we := WorldEnvironment.new()
 	we.environment = env

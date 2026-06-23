@@ -18,7 +18,7 @@ func _ready() -> void:
 	_build_stone_lanterns(self)
 	_build_backdrop(self)
 	_build_props(self)
-	_build_paper_overlay()
+	# _build_paper_overlay()  # 暫拿掉和紙顆粒 overlay（使用者覺得灰灰破壞品質）看效果
 	_attach_outline_deferred()
 	print("SHRINE_STREET ready")
 
@@ -117,9 +117,9 @@ func _build_env(root: Node3D) -> void:
 	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SCREEN
 	env.fog_enabled = true
 	env.fog_light_color = Color(0.90, 0.86, 0.77)
-	env.fog_density = 0.006
+	env.fog_density = 0.0015
 	env.adjustment_enabled = true
-	env.adjustment_saturation = 0.92
+	env.adjustment_saturation = 1.0
 	env.adjustment_contrast = 1.12
 	var we := WorldEnvironment.new()
 	we.environment = env
