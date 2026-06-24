@@ -51,7 +51,18 @@ func _apply_ink(node: Node) -> void:
 	for c in node.get_children():
 		_apply_ink(c)
 	if node is MeshInstance3D:
-		(node as MeshInstance3D).material_override = _toon_mat(Color(0.28, 0.25, 0.24))
+		var mi := node as MeshInstance3D
+		var sc: int = mi.mesh.get_surface_count() if mi.mesh != null else 0
+		for i in sc:
+			var m := mi.get_active_material(i)
+			if m is BaseMaterial3D:
+				var b := (m as BaseMaterial3D).duplicate() as BaseMaterial3D
+				b.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+				b.albedo_color.a = 1.0
+				b.roughness = 1.0
+				b.metallic = 0.0
+				b.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+				mi.set_surface_override_material(i, b)
 
 # ── 材質 helper ─────────────────────────────────────────
 func _toon_mat(color: Color) -> ShaderMaterial:

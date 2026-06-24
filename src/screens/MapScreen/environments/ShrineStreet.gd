@@ -48,13 +48,24 @@ func _attach_outline_to_camera() -> void:
 	cam.add_child(mi)
 	mi.position = Vector3(0, 0, -0.5)
 
-## 把玩家所有 mesh 換成水墨 toon。用 material_override 整個取代材質＝
-## 順帶繞過 Meshy GLB base-color alpha 透明 bug（toon mat 本身不透明）。
+## 玩家材質：保留 Meshy 貼圖(新 okami 立繪模型)+修透明消光，靠場景描邊給墨邊(同 NpcFigure)。
+## (舊版套平塗灰 toon；使用者要求改保貼圖讓主角品質透出。)
 func _apply_ink(node: Node) -> void:
 	for c in node.get_children():
 		_apply_ink(c)
 	if node is MeshInstance3D:
-		(node as MeshInstance3D).material_override = _toon_mat(Color(0.30, 0.27, 0.24))
+		var mi := node as MeshInstance3D
+		var sc: int = mi.mesh.get_surface_count() if mi.mesh != null else 0
+		for i in sc:
+			var m := mi.get_active_material(i)
+			if m is BaseMaterial3D:
+				var b := (m as BaseMaterial3D).duplicate() as BaseMaterial3D
+				b.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+				b.albedo_color.a = 1.0
+				b.roughness = 1.0
+				b.metallic = 0.0
+				b.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+				mi.set_surface_override_material(i, b)
 
 # ── 材質 helper ─────────────────────────────────────────
 func _toon_mat(color: Color) -> ShaderMaterial:
