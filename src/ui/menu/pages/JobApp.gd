@@ -6,7 +6,7 @@ const GOLD := Color(0.788, 0.659, 0.38)
 const DIM := Color(0.55, 0.52, 0.46)
 
 const JOBS := [
-	{"id": "soup_carry", "name": "端湯小弟", "desc": "把熱湯端上塔頂，別溢出來。"},
+	{"id": "soup_carry", "name": "端湯小弟", "desc": "限時把味增湯送上桌，灑越少賺越多。"},
 	{"id": "beggar_challenge", "name": "街頭托缽", "desc": "化緣修行，看人下菜。"},
 ]
 
