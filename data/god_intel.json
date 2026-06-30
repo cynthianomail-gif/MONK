@@ -1,7 +1,7 @@
 {
   "_schema": "神祇情報圖鑑：萬神殿總覽＋12 神。每筆 {order, god, domain, pieces[]}。pieces=情報碎片，蒐集進度＝已解碎片/總碎片；piece.flag 支援一般旗標(intel_*)或 'quest:<id>'(完成該支線)。開場了塵簡介只給每神第 1 塊(intel_<id>)，進度條不滿；其餘碎片透過其他人/支線/各章補齊。GodIntel 系統純推導。阿瑞斯 4 塊(開場+大村/源造/水野支線)ch1 可滿；其餘神第 2 塊待各自章節(intel_<god>_2)。",
   "pantheon": {
-    "order": 0, "god": "萬神殿集團 Pantheon Corp.", "domain": "掌控新梵市的跨國巨頭",
+    "order": 0, "god": "萬神殿集團 Pantheon Corp.", "domain": "掌控新梵京的跨國巨頭",
     "pieces": [
       {"flag": "intel_pantheon", "text": "高層真面目是降臨現代的希臘神祇，把神力煉成資本，拿人類的慾望與信仰當企業能源。十二主神各據一條城市命脈。"}
     ]
@@ -46,7 +46,7 @@
   "aphrodite": {
     "order": 6, "god": "阿芙蘿黛蒂 Aphrodite", "domain": "娛樂·夜生活·偶像",
     "pieces": [
-      {"flag": "intel_aphrodite", "text": "霓虹與掌聲都是她養的能源。"},
+      {"flag": "intel_aphrodite", "text": "燈火與掌聲都是她養的能源。"},
       {"flag": "intel_aphrodite_2", "text": "她豢養偶像與狂粉，把崇拜煉成能源。狂熱的粉絲牆，比保鏢更難穿過。"}
     ]
   },

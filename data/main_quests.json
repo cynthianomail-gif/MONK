@@ -75,11 +75,11 @@
 
   "ch06_aphrodite": {
     "chapter": 6, "order": 6, "require_flag": "hephaestus_purified", "god": "阿芙蘿黛蒂 Aphrodite",
-    "title": "霓虹的女王", "domain": "娛樂·夜生活·偶像",
+    "title": "燈火的女王", "domain": "娛樂·夜生活·偶像",
     "summary": "夜生活女王阿芙蘿黛蒂掌俱樂部與地下偶像界，把粉絲的愛慾抽作能源。迷宮是巨型演唱會現場。",
     "boss": "aphrodite", "location": "aphrodite_arena", "achievement": "contact",
     "stages": [
-      {"id": "c6_lead", "desc": "霓虹區的偶像狂潮，愛慾被抽成企業能源。", "dialogue": "main_aphrodite_lead"},
+      {"id": "c6_lead", "desc": "花街的偶像狂潮，愛慾被抽成企業能源。", "dialogue": "main_aphrodite_lead"},
       {"id": "c6_arena", "desc": "闖入演唱會現場，穿越狂熱粉絲的人海。", "location": "aphrodite_arena"},
       {"id": "c6_boss", "desc": "於舞台中央點化夜生活女王阿芙蘿黛蒂。", "cutscene": "aphrodite_intro", "boss": "aphrodite"}
     ],
@@ -159,7 +159,7 @@
     "stages": [
       {"id": "c12_ascend", "desc": "攻入奧林帕斯大廈，一路向頂樓推進。", "location": "olympus_tower"},
       {"id": "c12_zeus", "desc": "停機坪上，眾神之王宙斯降下漫天狂雷。", "cutscene": "zeus_intro", "boss": "zeus", "set_flag": "zeus_defeated"},
-      {"id": "c12_relic", "desc": "雷霆落定，奪回舍利塔。新梵市的信仰，重歸眾生。", "cutscene": "ending_true", "set_flag": "relic_recovered"}
+      {"id": "c12_relic", "desc": "雷霆落定，奪回舍利塔。新梵京的信仰，重歸眾生。", "cutscene": "ending_true", "set_flag": "relic_recovered"}
     ],
     "complete_flag": "ending_true", "rewards": {"gold": 5000, "merit": 30}
   }

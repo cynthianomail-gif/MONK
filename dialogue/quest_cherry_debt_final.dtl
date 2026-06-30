@@ -1,4 +1,4 @@
-天將亮，歌舞坂的霓虹一盞盞熄了。櫻 與無戒站在巷口，空氣裡有雨後的潮味。
+天將亮，歌舞坂的燈火一盞盞熄了。櫻 與無戒站在巷口，空氣裡有雨後的潮味。
 join Cherry (neutral)
 if GameManager.get_flag("cherry_escape"):
 	Cherry (sorrow): 我們就這樣……跑出來了。蝶子不會放過我們的，你知道吧。

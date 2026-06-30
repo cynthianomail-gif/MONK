@@ -8,7 +8,7 @@
     "scene_file": "res://assets/3d/environments/ximen_mrt.glb", "npc_model": "ah_ming"
   },
   "wannian_mall": {
-    "name": "萬年大樓", "district": "shrine",
+    "name": "櫻木会館", "district": "shrine",
     "scene_pos": {"x": 0.66, "y": 0.80}, "interior_2d": "res://assets/2d/map/interiors/wannian_mall.png",
     "actions": ["shop", "greed_break_trigger", "quest_zheng_ma", "quest_jie"],
     "available_periods": [0, 1, 2], "bgm": "ximen_day",

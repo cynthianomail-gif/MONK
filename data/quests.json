@@ -202,7 +202,7 @@
       },
       {
         "dialogue": "quest_grandma_s2",
-        "desc": "去萬年大樓找到健太，勸他回家",
+        "desc": "去櫻木会館找到健太，勸他回家",
         "location_required": "wannian_mall",
         "require_flag": "jie_defeated"
       },
@@ -228,7 +228,7 @@
       },
       {
         "dialogue": "quest_lao_wang_s2",
-        "desc": "帶源造去萬年大樓找人（對質）",
+        "desc": "帶源造去櫻木会館找人（對質）",
         "location_required": "wannian_mall"
       },
       {

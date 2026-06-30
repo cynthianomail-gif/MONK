@@ -1,4 +1,4 @@
-雨沒有要停的意思。無戒沿著新梵市的霓虹走了一夜——神社沒了，舍利沒了，連個落腳處都沒有。舊城區的巷子深處，一盞昏黃的燈下，支著一座沒有招牌的茶攤。
+雨沒有要停的意思。無戒沿著新梵京的燈火走了一夜——神社沒了，舍利沒了，連個落腳處都沒有。舊城區的巷子深處，一盞昏黃的燈下，支著一座沒有招牌的茶攤。
 攤後坐著一個獨臂的老者，空蕩的左袖在風裡晃。他替無戒斟了一碗熱茶，像是早就等著他來。
 Liaochen (default): 坐。淋成這樣，是從門前町一路走來的吧——那座被怪手推平的破神社。
 Wujie (calm): 老施主認得貧僧？
@@ -26,7 +26,7 @@ Liaochen (default): 豐收女神，狄蜜特。你餐桌上的每一粒米，都
 Liaochen (default): 匠神，赫菲斯托斯。拆你神社的那台怪手，正是出自他的工坊。建設、重工、軍火，他什麼都造。
 [signal arg="flag:intel_hephaestus"]
 [background arg="res://assets/2d/gods/aphrodite.jpg" fade="0.4"]
-Liaochen (default): 夜生活的女王，阿芙蘿黛蒂。霓虹與掌聲，都是她豢養的能源。
+Liaochen (default): 夜生活的女王，阿芙蘿黛蒂。燈火與掌聲，都是她豢養的能源。
 [signal arg="flag:intel_aphrodite"]
 [background arg="res://assets/2d/gods/apollo.jpg" fade="0.4"]
 Liaochen (default): 光明之神，阿波羅。全城聽見的聲音由他校準——你該信什麼，是他說了算。
