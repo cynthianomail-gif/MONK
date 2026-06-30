@@ -8,6 +8,7 @@ const SPAWN_INTERVAL: float = 1.2
 const ZONE_X: float = 760.0          # 化緣區左緣
 const ZONE_W: float = 400.0          # 化緣區寬
 const GREED_KARMA_PER: int = 5        # 每 N 次空揮 → karma +1
+const MINIGAME_ART_DIR: String = "res://assets/art_direction/new_ink_shrine_style/minigames/"
 
 const CITIZEN_TYPES: Dictionary = {
 	"office_worker": {"reward": 50,  "weight": 0.4, "speed": 180.0, "color": Color(0.4, 0.55, 0.8)},
@@ -18,7 +19,14 @@ const CITIZEN_TYPES: Dictionary = {
 
 # 可抽換美術（留空＝用程式繪製的佔位）。
 @export var background_path: String = "res://assets/2d/backgrounds/bg_battle_wanhua.png"
-@export var monk_portrait_path: String = "res://assets/2d/portraits/wujie/wujie_beggar_calm.jpg"
+@export var monk_portrait_path: String = MINIGAME_ART_DIR + "wujie_beggar_front_game_ready.png"
+@export var begging_sprite_path: String = MINIGAME_ART_DIR + "beggar_wujie_begging.png"
+@export var citizen_sprite_paths: Dictionary = {
+	"office_worker": [MINIGAME_ART_DIR + "beggar_ped_office_worker_a.png", MINIGAME_ART_DIR + "beggar_ped_office_worker_b.png"],
+	"tourist": [MINIGAME_ART_DIR + "beggar_ped_tourist_a.png", MINIGAME_ART_DIR + "beggar_ped_tourist_b.png"],
+	"rich_lady": [MINIGAME_ART_DIR + "beggar_ped_rich_lady_a.png", MINIGAME_ART_DIR + "beggar_ped_rich_lady_b.png"],
+	"drunk_man": [MINIGAME_ART_DIR + "beggar_ped_drunk_man_a.png", MINIGAME_ART_DIR + "beggar_ped_drunk_man_b.png"],
+}
 @export var auto_start: bool = true   # 測試時設 false 以停用計時/生成
 
 var score: int = 0
@@ -77,6 +85,7 @@ func _process(delta: float) -> void:
 		var c: Dictionary = _citizens[i]
 		var node: Node2D = c.node
 		node.position.x -= c.speed * delta
+		_update_citizen_walk_frame(c)
 		if node.position.x < -120.0:
 			node.queue_free()
 			_citizens.remove_at(i)
@@ -118,7 +127,17 @@ func _spawn_citizen() -> void:
 	var info: Dictionary = CITIZEN_TYPES[type]
 	var node := Node2D.new()
 	node.position = Vector2(2000.0, 760.0)
-	# 程式繪製的人形佔位
+	var frames := _citizen_frames(type)
+	if frames.size() >= 2:
+		var sp := Sprite2D.new()
+		sp.texture = frames[0]
+		sp.position = Vector2(0, -126)
+		sp.scale = Vector2(0.28, 0.28)
+		node.add_child(sp)
+		_world.add_child(node)
+		_citizens.append({"node": node, "type": type, "speed": info.speed, "sprite": sp, "frames": frames})
+		return
+	# 程式繪製的人形 fallback
 	var body := Polygon2D.new()
 	body.polygon = PackedVector2Array([
 		Vector2(-26, 0), Vector2(26, 0), Vector2(20, -120), Vector2(-20, -120)])
@@ -134,6 +153,28 @@ func _spawn_citizen() -> void:
 	node.add_child(head)
 	_world.add_child(node)
 	_citizens.append({"node": node, "type": type, "speed": info.speed})
+
+func _citizen_frames(type: String) -> Array[Texture2D]:
+	var frames: Array[Texture2D] = []
+	if not citizen_sprite_paths.has(type):
+		return frames
+	for path in citizen_sprite_paths[type]:
+		var tex := _try_load(str(path))
+		if tex:
+			frames.append(tex)
+	return frames
+
+func _update_citizen_walk_frame(c: Dictionary) -> void:
+	if not c.has("sprite") or not c.has("frames"):
+		return
+	var frames: Array = c.frames
+	if frames.size() < 2:
+		return
+	var sp := c.sprite as Sprite2D
+	if not sp:
+		return
+	var frame_idx := int(Time.get_ticks_msec() / 250) % 2
+	sp.texture = frames[frame_idx]
 
 func _weighted_pick() -> String:
 	var r := randf()
@@ -164,11 +205,13 @@ func _build_scene() -> void:
 	add_child(zone)
 	# 乞討的無戒（用立繪佔位）
 	var monk := Sprite2D.new()
-	var tex := _try_load(monk_portrait_path)
+	var tex := _try_load(begging_sprite_path)
+	if tex == null:
+		tex = _try_load(monk_portrait_path)
 	if tex:
 		monk.texture = tex
-		monk.position = Vector2(ZONE_X + ZONE_W * 0.5, 640)
-		monk.scale = Vector2(0.5, 0.5)
+		monk.position = Vector2(ZONE_X + ZONE_W * 0.5, 636)
+		monk.scale = Vector2(0.31, 0.31)
 		add_child(monk)
 	_build_hud()
 

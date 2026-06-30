@@ -1,8 +1,8 @@
-雨沒有要停的意思。無戒沿著新梵市的霓虹走了一夜——廟沒了，舍利沒了，連個落腳處都沒有。舊城區的巷子深處，一盞昏黃的燈下，支著一座沒有招牌的茶攤。
+雨沒有要停的意思。無戒沿著新梵市的霓虹走了一夜——神社沒了，舍利沒了，連個落腳處都沒有。舊城區的巷子深處，一盞昏黃的燈下，支著一座沒有招牌的茶攤。
 攤後坐著一個獨臂的老者，空蕩的左袖在風裡晃。他替無戒斟了一碗熱茶，像是早就等著他來。
-Liaochen (default): 坐。淋成這樣，是從萬華一路走來的吧——那座被怪手推平的破廟。
+Liaochen (default): 坐。淋成這樣，是從門前町一路走來的吧——那座被怪手推平的破神社。
 Wujie (calm): 老施主認得貧僧？
-Liaochen (default): 認得那座廟。也認得，是誰拆的。
+Liaochen (default): 認得那座神社。也認得，是誰拆的。
 他抬眼，渾濁的眼底卻有光。
 Liaochen (default): 萬神殿集團。這座城的水電、物流、媒體、夜生活，沒有一條命脈不在他們手裡。世人只當是間富可敵國的跨國巨頭。
 Wujie (calm): 老施主說的，聽來不只是『巨頭』這麼簡單。
@@ -11,7 +11,7 @@ Liaochen (default): 他們的高層，不是人。是降臨在這時代的神—
 Wujie (angry): ……荒唐。神佛若在世間斂財，那與妖魔何異。
 Liaochen (default): 你既要與他們為敵，總得先認得他們的臉。十二位主神，各據一條命脈。我一個一個，說給你聽。
 [background arg="res://assets/2d/gods/ares.jpg" fade="0.4"]
-Liaochen (default): 拆你廟、奪你塔的，是集團的拳頭——戰神，阿瑞斯。保全、傭兵、軍火，全握在他手裡。崇尚力量，瞧不起談判。
+Liaochen (default): 拆你神社、奪你塔的，是集團的拳頭——戰神，阿瑞斯。保全、傭兵、軍火，全握在他手裡。崇尚力量，瞧不起談判。
 [signal arg="flag:intel_ares"]
 [background arg="res://assets/2d/gods/hermes.jpg" fade="0.4"]
 Liaochen (default): 替貨抽成的盜神，荷米斯。這城裡每一筆流動，他都要分一杯——連地下情報，也是他的買賣。
@@ -23,7 +23,7 @@ Liaochen (default): 海運的霸主，波賽頓。潮水下的貨，沒有他點
 Liaochen (default): 豐收女神，狄蜜特。你餐桌上的每一粒米，都握在她一人手裡。
 [signal arg="flag:intel_demeter"]
 [background arg="res://assets/2d/gods/hephaestus.jpg" fade="0.4"]
-Liaochen (default): 匠神，赫菲斯托斯。拆你廟的那台怪手，正是出自他的工坊。建設、重工、軍火，他什麼都造。
+Liaochen (default): 匠神，赫菲斯托斯。拆你神社的那台怪手，正是出自他的工坊。建設、重工、軍火，他什麼都造。
 [signal arg="flag:intel_hephaestus"]
 [background arg="res://assets/2d/gods/aphrodite.jpg" fade="0.4"]
 Liaochen (default): 夜生活的女王，阿芙蘿黛蒂。霓虹與掌聲，都是她豢養的能源。

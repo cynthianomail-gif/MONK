@@ -5,11 +5,11 @@ extends Node3D
 
 const DIR := "res://assets/3d/environments/ximen/prototypes/"
 const BUILDINGS := [
-	"ximen_storefront_facade_01", "ximen_apartment_facade_01",
-	"ximen_corner_shophouse_01", "ximen_mrt_exit_01",
-	"ximen_convenience_entrance_01",
+	"ximen_storefront_facade_01", "ximen_corner_shophouse_01", "ximen_mrt_exit_01",
+	"ximen_neon_tower_01", "ximen_ktv_building_01", "ximen_bubbletea_shop_01",
+	"ximen_ramen_shop_01", "ximen_parking_garage_01", "ximen_drugstore_01",
 ]
-const WALL_SIGNS := ["ximen_neon_sign_cluster_01", "ximen_neon_horizontal_01"]
+const WALL_SIGNS := ["ximen_neon_sign_cluster_01"]
 const POLE_SIGN := "ximen_neon_vertical_01"
 const CLUTTER := ["ximen_street_clutter_01", "ximen_street_clutter_02"]
 

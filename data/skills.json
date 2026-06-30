@@ -17,7 +17,7 @@
     "name": "金剛怒目", "job": "ascetic",
     "cost": {"karma": 15}, "damage_type": "support", "target": "single",
     "special": "fear", "duration": 2,
-    "unlock_condition": "完成支線「街頭藝人阿明」",
+    "unlock_condition": "完成支線「街頭藝人翔太」",
     "description": "附加恐懼（2回合，50%跳過行動）。對 Boss 無效。",
     "animation": "anim_glare"
   },
@@ -66,14 +66,14 @@
     "name": "梵音氣功", "job": "chanter",
     "cost": {"merit": 15}, "damage_type": "merit", "power": 120, "target": "all",
     "special": "knockdown",
-    "unlock_condition": "完成支線「師傅阿忠的最後一鍋」",
+    "unlock_condition": "完成支線「師傅大村的最後一鍋」",
     "description": "命中功德弱點觸發 Down。", "animation": "anim_soundwave"
   },
   "great_compassion_shield": {
     "name": "大悲咒護罩", "job": "chanter",
     "cost": {"merit": 30}, "damage_type": "support", "target": "self",
     "special": "golden_body", "shield_value": 200, "duration": 3,
-    "unlock_condition": "完成支線「鄭媽的念珠債」",
+    "unlock_condition": "完成支線「水野的念珠債」",
     "description": "護盾抵擋下次傷害（上限200），持續3回合。",
     "animation": "anim_shield"
   },
@@ -97,7 +97,7 @@
     "name": "誦經結界", "job": "chanter",
     "cost": {"merit": 35}, "damage_type": "support", "target": "all_enemies",
     "special": "seal", "duration": 1,
-    "unlock_condition": "Cherry 好感度達到 50",
+    "unlock_condition": "櫻 好感度達到 50",
     "description": "全體封印 1 回合，無法使用技能。",
     "animation": "anim_seal"
   },
@@ -121,7 +121,7 @@
     "name": "獅子吼", "job": "beggar",
     "cost": {"karma": 25}, "damage_type": "karma", "power": 90, "target": "all",
     "special": "chaos", "duration": 2,
-    "unlock_condition": "完成支線「流浪漢老王的過去」",
+    "unlock_condition": "完成支線「流浪漢源造的過去」",
     "description": "全體傷害，附加混亂 2 回合。", "animation": "anim_roar"
   },
   "self_harm": {
@@ -135,7 +135,7 @@
     "name": "哀兵必勝", "job": "beggar",
     "cost": {}, "damage_type": "passive", "target": "self",
     "passive": {"hp_threshold": 0.3, "atk_bonus": 0.8, "evade_bonus": 0.3},
-    "unlock_condition": "完成支線「失業工程師大衛」（選擇認真傾聽）",
+    "unlock_condition": "完成支線「失業工程師大輔」（選擇認真傾聽）",
     "description": "【被動】HP<30% 時 ATK+80%，閃避+30%。",
     "animation": null
   },
@@ -151,7 +151,7 @@
     "name": "化緣大法", "job": "beggar",
     "cost": {"merit": 20}, "damage_type": "merit", "power": 150, "target": "all",
     "special": "mass_steal_gold", "steal_ratio": 0.3,
-    "unlock_condition": "完成支線「陳阿嬤找孫子」",
+    "unlock_condition": "完成支線「八重找孫子」",
     "description": "全體傷害，奪取所有敵人 30% 金幣。",
     "animation": "anim_alms_wave"
   },

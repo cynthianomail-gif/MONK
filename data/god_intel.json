@@ -1,5 +1,5 @@
 {
-  "_schema": "神祇情報圖鑑：萬神殿總覽＋12 神。每筆 {order, god, domain, pieces[]}。pieces=情報碎片，蒐集進度＝已解碎片/總碎片；piece.flag 支援一般旗標(intel_*)或 'quest:<id>'(完成該支線)。開場了塵簡介只給每神第 1 塊(intel_<id>)，進度條不滿；其餘碎片透過其他人/支線/各章補齊。GodIntel 系統純推導。阿瑞斯 4 塊(開場+阿忠/老王/鄭媽支線)ch1 可滿；其餘神第 2 塊待各自章節(intel_<god>_2)。",
+  "_schema": "神祇情報圖鑑：萬神殿總覽＋12 神。每筆 {order, god, domain, pieces[]}。pieces=情報碎片，蒐集進度＝已解碎片/總碎片；piece.flag 支援一般旗標(intel_*)或 'quest:<id>'(完成該支線)。開場了塵簡介只給每神第 1 塊(intel_<id>)，進度條不滿；其餘碎片透過其他人/支線/各章補齊。GodIntel 系統純推導。阿瑞斯 4 塊(開場+大村/源造/水野支線)ch1 可滿；其餘神第 2 塊待各自章節(intel_<god>_2)。",
   "pantheon": {
     "order": 0, "god": "萬神殿集團 Pantheon Corp.", "domain": "掌控新梵市的跨國巨頭",
     "pieces": [
@@ -10,9 +10,9 @@
     "order": 1, "god": "阿瑞斯 Ares", "domain": "武力·保全·軍火",
     "pieces": [
       {"flag": "intel_ares", "text": "集團的拳頭。掌保全、傭兵與軍火庫，連都更強拆都由他的人馬執行。崇尚力量、輕蔑談判——奪走舍利塔的，正是他。"},
-      {"flag": "quest:ah_zhong", "text": "阿忠師傅說，你師父生前就察覺廟產被盯上。經手強拆的建設公司登記負責人查無此人，幕後全是阿瑞斯的保全集團在運作。"},
-      {"flag": "quest:lao_wang", "text": "老王當年的公司，被同一批『顧問』用暴力與恐嚇逼到破產。阿瑞斯一向先亮拳頭，再談價錢。"},
-      {"flag": "quest:zheng_ma", "text": "逼鄭媽還債的討債人，臂上都有同一枚紅色戰矛刺青——阿瑞斯私人武裝的記號。順著他們，能摸到城西軍火庫的後門。"}
+      {"flag": "quest:ah_zhong", "text": "大村師傅說，你師父生前就察覺神社產被盯上。經手強拆的建設公司登記負責人查無此人，幕後全是阿瑞斯的保全集團在運作。"},
+      {"flag": "quest:lao_wang", "text": "源造當年的公司，被同一批『顧問』用暴力與恐嚇逼到破產。阿瑞斯一向先亮拳頭，再談價錢。"},
+      {"flag": "quest:zheng_ma", "text": "逼水野還債的討債人，臂上都有同一枚紅色戰矛刺青——阿瑞斯私人武裝的記號。順著他們，能摸到城西軍火庫的後門。"}
     ]
   },
   "hermes": {
@@ -37,10 +37,10 @@
     ]
   },
   "hephaestus": {
-    "order": 5, "god": "赫菲斯托斯 Hephaestus", "domain": "建設·重工·軍火（拆廟母公司）",
+    "order": 5, "god": "赫菲斯托斯 Hephaestus", "domain": "建設·重工·軍火（拆神社母公司）",
     "pieces": [
-      {"flag": "intel_hephaestus", "text": "拆掉破廟的怪手，出自他的工坊。"},
-      {"flag": "intel_hephaestus_2", "text": "拆廟的怪手、阿瑞斯的軍火，都從他的重工廠出。砲塔與機械雜兵是他的家臣。"}
+      {"flag": "intel_hephaestus", "text": "拆掉破神社的怪手，出自他的工坊。"},
+      {"flag": "intel_hephaestus_2", "text": "拆神社的怪手、阿瑞斯的軍火，都從他的重工廠出。砲塔與機械雜兵是他的家臣。"}
     ]
   },
   "aphrodite": {

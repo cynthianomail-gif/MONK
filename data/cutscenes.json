@@ -4,16 +4,16 @@
   "opening_temple_falls": {
     "bgm": "rain_street", "bgm_db": -9,
     "shots": [
-      {"image": "res://assets/cutscenes/opening_temple_falls/01_pov_temple.png", "duration": 4.5, "motion": "none"},
-      {"image": "res://assets/cutscenes/opening_temple_falls/01_pov_temple.png", "duration": 5.0, "motion": "none"},
-      {"image": "res://assets/cutscenes/opening_temple_falls/02_ares_cup.png", "duration": 4.5, "motion": "none", "blink": true},
-      {"image": "res://assets/cutscenes/opening_temple_falls/02b_ares_laugh.png", "duration": 6.5, "motion": "none", "blink": true},
-      {"image": "res://assets/cutscenes/opening_temple_falls/02c_ares_collar.png", "duration": 2.2, "motion": "none", "blink": true},
-      {"frames_dir": "res://assets/cutscenes/opening_temple_falls/punch_anim", "fps": 24, "duration": 5.04, "voice": "ares_taunt", "bgm_db": -18, "bgm_fade": 0.5,
+      {"image": "res://assets/cutscenes/opening_temple_falls/ok_01_pov.png", "duration": 4.5, "motion": "zoom_in"},
+      {"image": "res://assets/cutscenes/opening_temple_falls/ok_01_pov.png", "duration": 5.0, "motion": "zoom_in"},
+      {"image": "res://assets/cutscenes/opening_temple_falls/ok_02_taunt.png", "duration": 4.5, "motion": "none", "blink": true},
+      {"image": "res://assets/cutscenes/opening_temple_falls/ok_03_laugh.png", "duration": 6.5, "motion": "none", "blink": true},
+      {"image": "res://assets/cutscenes/opening_temple_falls/ok_04_collar.png", "duration": 2.2, "motion": "none", "blink": true},
+      {"frames_dir": "res://assets/cutscenes/opening_temple_falls/punch_okami", "fps": 24, "duration": 5.04, "voice": "ares_taunt", "bgm_db": -18, "bgm_fade": 0.5,
         "cues": [
-          {"t": 3.1, "sfx": "impact_heavy", "voice": "monk_grunt", "flash": true, "flash_strength": 1.0, "flash_time": 0.55, "knockout": true}
+          {"t": 0.2, "sfx": "impact_heavy", "voice": "monk_grunt", "flash": true, "flash_strength": 0.85, "flash_time": 0.35}
         ]},
-      {"image": "res://assets/cutscenes/opening_temple_falls/05_lineup.jpg", "duration": 10.4, "motion": "none", "eye_open": true, "groggy": true, "bgm_db": -9, "bgm_fade": 1.2},
+      {"image": "res://assets/cutscenes/opening_temple_falls/ok_06_lineup.png", "duration": 10.4, "motion": "zoom_in", "eye_open": true, "groggy": true, "bgm_db": -9, "bgm_fade": 1.2},
       {"black": true, "duration": 5.5, "bgm_db": -45, "bgm_fade": 1.6}
     ],
     "captions": [
@@ -34,7 +34,7 @@
     "bgm": "boss_theme",
     "shots": [
       {"black": true, "duration": 0.6, "fade_in": true},
-      {"image": "res://assets/cutscenes/ch1_ares/ares_reveal.jpg", "duration": 9.6, "motion": "zoom_in", "sfx": "encounter_sting"}
+      {"image": "res://assets/cutscenes/ch1_ares/ok_ares_reveal.png", "duration": 9.6, "motion": "zoom_in", "sfx": "encounter_sting"}
     ],
     "captions": [
       {"start": 0.8, "end": 3.4, "speaker": "保全主管", "text": "聖物？這裡沒有什麼廟產，只有萬神殿的資產。"},
@@ -47,10 +47,120 @@
     "bgm": "rain_street", "bgm_db": -9, "bgm_fade": 1.4,
     "shots": [
       {"black": true, "duration": 0.6, "fade_in": true},
-      {"image": "res://assets/cutscenes/ch1_aftermath_wake/tea_stall.jpg", "duration": 4.5, "motion": "none", "eye_open": true, "groggy": true}
+      {"image": "res://assets/cutscenes/ch1_aftermath_wake/ok_tea_stall.png", "duration": 4.5, "motion": "none", "eye_open": true, "groggy": true}
     ],
     "captions": [
       {"start": 0.9, "end": 4.2, "speaker": "", "text": "雨，沒有要停的意思。"}
     ]
+  }
+,
+
+  "hermes_intro": {
+    "bgm": "boss_theme",
+    "shots": [
+      {"black": true, "duration": 0.5, "fade_in": true},
+      {"image": "res://assets/cutscenes/hermes_intro/hermes_intro.png", "duration": 5.5, "motion": "zoom_in", "sfx": "encounter_sting"}
+    ],
+    "captions": []
+  },
+
+  "poseidon_intro": {
+    "bgm": "boss_theme",
+    "shots": [
+      {"black": true, "duration": 0.5, "fade_in": true},
+      {"image": "res://assets/cutscenes/poseidon_intro/poseidon_intro.png", "duration": 5.5, "motion": "zoom_in", "sfx": "encounter_sting"}
+    ],
+    "captions": []
+  },
+
+  "demeter_intro": {
+    "bgm": "boss_theme",
+    "shots": [
+      {"black": true, "duration": 0.5, "fade_in": true},
+      {"image": "res://assets/cutscenes/demeter_intro/demeter_intro.png", "duration": 5.5, "motion": "zoom_in", "sfx": "encounter_sting"}
+    ],
+    "captions": []
+  },
+
+  "hephaestus_intro": {
+    "bgm": "boss_theme",
+    "shots": [
+      {"black": true, "duration": 0.5, "fade_in": true},
+      {"image": "res://assets/cutscenes/hephaestus_intro/hephaestus_intro.png", "duration": 5.5, "motion": "zoom_in", "sfx": "encounter_sting"}
+    ],
+    "captions": []
+  },
+
+  "aphrodite_intro": {
+    "bgm": "boss_theme",
+    "shots": [
+      {"black": true, "duration": 0.5, "fade_in": true},
+      {"image": "res://assets/cutscenes/aphrodite_intro/aphrodite_intro.png", "duration": 5.5, "motion": "zoom_in", "sfx": "encounter_sting"}
+    ],
+    "captions": []
+  },
+
+  "apollo_intro": {
+    "bgm": "boss_theme",
+    "shots": [
+      {"black": true, "duration": 0.5, "fade_in": true},
+      {"image": "res://assets/cutscenes/apollo_intro/apollo_intro.png", "duration": 5.5, "motion": "zoom_in", "sfx": "encounter_sting"}
+    ],
+    "captions": []
+  },
+
+  "dionysus_intro": {
+    "bgm": "boss_theme",
+    "shots": [
+      {"black": true, "duration": 0.5, "fade_in": true},
+      {"image": "res://assets/cutscenes/dionysus_intro/dionysus_intro.png", "duration": 5.5, "motion": "zoom_in", "sfx": "encounter_sting"}
+    ],
+    "captions": []
+  },
+
+  "artemis_intro": {
+    "bgm": "boss_theme",
+    "shots": [
+      {"black": true, "duration": 0.5, "fade_in": true},
+      {"image": "res://assets/cutscenes/artemis_intro/artemis_intro.png", "duration": 5.5, "motion": "zoom_in", "sfx": "encounter_sting"}
+    ],
+    "captions": []
+  },
+
+  "athena_intro": {
+    "bgm": "boss_theme",
+    "shots": [
+      {"black": true, "duration": 0.5, "fade_in": true},
+      {"image": "res://assets/cutscenes/athena_intro/athena_intro.png", "duration": 5.5, "motion": "zoom_in", "sfx": "encounter_sting"}
+    ],
+    "captions": []
+  },
+
+  "hera_intro": {
+    "bgm": "boss_theme",
+    "shots": [
+      {"black": true, "duration": 0.5, "fade_in": true},
+      {"image": "res://assets/cutscenes/hera_intro/hera_intro.png", "duration": 5.5, "motion": "zoom_in", "sfx": "encounter_sting"}
+    ],
+    "captions": []
+  },
+
+  "zeus_intro": {
+    "bgm": "boss_theme",
+    "shots": [
+      {"black": true, "duration": 0.5, "fade_in": true},
+      {"image": "res://assets/cutscenes/zeus_intro/zeus_intro.png", "duration": 5.5, "motion": "zoom_in", "sfx": "encounter_sting"}
+    ],
+    "captions": []
+  },
+
+  "ending_true": {
+    "bgm": "rain_street",
+    "bgm_db": -9,
+    "shots": [
+      {"black": true, "duration": 0.5, "fade_in": true},
+      {"image": "res://assets/cutscenes/ending_true/ending_true.png", "duration": 6.5, "motion": "none"}
+    ],
+    "captions": []
   }
 }

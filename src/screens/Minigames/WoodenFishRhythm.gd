@@ -8,13 +8,17 @@ const PERFECT_SCORE: int = 100
 const GOOD_SCORE: int = 50
 const APPROACH_MS: float = 1400.0   # 音符從生成到判定線的飛行時間
 const LEAD_IN_MS: float = 1800.0    # 開場緩衝
+const MINIGAME_ART_DIR: String = "res://assets/art_direction/new_ink_shrine_style/minigames/"
 
 @export var bpm: float = 120.0
 @export var note_count: int = 32
 @export var opponent_accuracy: float = 0.82
 @export var background_path: String = "res://assets/2d/backgrounds/bg_battle_temple.png"
 @export var jie_portrait_path: String = "res://assets/2d/portraits/npcs/npc_jie.png"
-@export var monk_portrait_path: String = "res://assets/2d/portraits/wujie/wujie_chanter_calm.jpg"
+@export var monk_portrait_path: String = MINIGAME_ART_DIR + "wujie_chanter_front_game_ready.png"
+@export var woodenfish_sprite_path: String = MINIGAME_ART_DIR + "woodenfish_instrument.png"
+@export var note_sprite_path: String = MINIGAME_ART_DIR + "woodenfish_note.png"
+@export var hit_fx_sprite_path: String = MINIGAME_ART_DIR + "woodenfish_hit_fx.png"
 @export var auto_start: bool = true
 
 const JUDGE_Y: float = 840.0
@@ -139,6 +143,7 @@ func _register(note: Dictionary, judgement: String) -> void:
 	AudioManager.play_sfx("wooden_fish_tap")
 	if combo > 0 and combo % 10 == 0:
 		AudioManager.play_sfx("combo_up")
+	_show_hit_fx()
 	_show_judge("%s  x%d" % [judgement.to_upper(), combo],
 		Color(1, 0.85, 0.4) if judgement == "perfect" else Color(0.7, 0.85, 1))
 
@@ -156,17 +161,11 @@ func _build_chart() -> void:
 		_notes.append({"target_ms": LEAD_IN_MS + i * beat_ms, "node": null, "done": false})
 	# 為已生成的音符建立視覺節點
 	for n in _notes:
-		var dot := Polygon2D.new()
-		var pts := PackedVector2Array()
-		for a in range(16):
-			var ang := TAU * a / 16.0
-			pts.append(Vector2(cos(ang), sin(ang)) * 34.0)
-		dot.polygon = pts
-		dot.color = Color(0.788, 0.659, 0.38)
-		dot.position = Vector2(LANE_X, SPAWN_Y)
-		dot.visible = false   # 進入接近期才顯示
-		add_child(dot)
-		n.node = dot
+		var note_node: Node2D = _make_note_sprite()
+		note_node.position = Vector2(LANE_X, SPAWN_Y)
+		note_node.visible = false   # 進入接近期才顯示
+		add_child(note_node)
+		n.node = note_node
 	# 接近期才現身：用 process 控制 visible
 	set_process(true)
 
@@ -182,14 +181,21 @@ func _build_scene() -> void:
 	_fish = Node2D.new()
 	_fish.position = Vector2(LANE_X, JUDGE_Y)
 	add_child(_fish)
-	var fish_body := Polygon2D.new()
-	var pts := PackedVector2Array()
-	for a in range(20):
-		var ang := TAU * a / 20.0
-		pts.append(Vector2(cos(ang) * 70.0, sin(ang) * 50.0))
-	fish_body.polygon = pts
-	fish_body.color = Color(0.45, 0.32, 0.2)
-	_fish.add_child(fish_body)
+	var fish_tex := _try_load(woodenfish_sprite_path)
+	if fish_tex:
+		var fish_sprite := Sprite2D.new()
+		fish_sprite.texture = fish_tex
+		fish_sprite.scale = Vector2(0.42, 0.42)
+		_fish.add_child(fish_sprite)
+	else:
+		var fish_body := Polygon2D.new()
+		var pts := PackedVector2Array()
+		for a in range(20):
+			var ang := TAU * a / 20.0
+			pts.append(Vector2(cos(ang) * 70.0, sin(ang) * 50.0))
+		fish_body.polygon = pts
+		fish_body.color = Color(0.45, 0.32, 0.2)
+		_fish.add_child(fish_body)
 	# 對手 / 我方立繪
 	_add_portrait(jie_portrait_path, Vector2(300, 540), 0.6)
 	_add_portrait(monk_portrait_path, Vector2(1620, 540), 0.6)
@@ -201,6 +207,37 @@ func _animate_fish() -> void:
 	var tw := create_tween()
 	tw.tween_property(_fish, "scale", Vector2(0.85, 0.85), 0.05)
 	tw.tween_property(_fish, "scale", Vector2(1, 1), 0.1)
+
+func _make_note_sprite() -> Node2D:
+	var tex := _try_load(note_sprite_path)
+	if tex:
+		var sp := Sprite2D.new()
+		sp.texture = tex
+		sp.scale = Vector2(0.35, 0.35)
+		return sp
+	var dot := Polygon2D.new()
+	var pts := PackedVector2Array()
+	for a in range(16):
+		var ang := TAU * a / 16.0
+		pts.append(Vector2(cos(ang), sin(ang)) * 34.0)
+	dot.polygon = pts
+	dot.color = Color(0.788, 0.659, 0.38)
+	return dot
+
+func _show_hit_fx() -> void:
+	var tex := _try_load(hit_fx_sprite_path)
+	if tex == null:
+		return
+	var fx := Sprite2D.new()
+	fx.texture = tex
+	fx.position = Vector2(LANE_X, JUDGE_Y)
+	fx.scale = Vector2(0.7, 0.7)
+	fx.modulate.a = 0.9
+	add_child(fx)
+	var tw := create_tween()
+	tw.tween_property(fx, "scale", Vector2(1.15, 1.15), 0.18)
+	tw.parallel().tween_property(fx, "modulate:a", 0.0, 0.18)
+	tw.tween_callback(fx.queue_free)
 
 func _show_judge(text: String, color: Color) -> void:
 	if not _judge_popup:

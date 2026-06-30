@@ -2,34 +2,34 @@
   "ah_ming": {
     "name": "街頭藝人的最後一場",
     "location": "ximen_mrt",
-    "npc": "街頭藝人阿明",
+    "npc": "街頭藝人翔太",
     "available_periods": [1, 2],
     "stages": [
       {
         "dialogue": "quest_ah_ming_s1",
-        "desc": "阿明被警衛驅趕，請你幫他打節奏吸引人群",
+        "desc": "翔太被警衛驅趕，請你幫他打節奏吸引人群",
         "trigger_minigame": "wooden_fish_rhythm",
         "merit": 15
       },
       {
         "dialogue": "quest_ah_ming_s2",
-        "desc": "阿明逃過一劫，感謝無戒",
+        "desc": "翔太逃過一劫，感謝無戒",
         "merit": 10,
         "flag": "ah_ming_saved"
       }
     ],
-    "cross_effect": "ah_ming 完成後，古廟新增臨時存檔點"
+    "cross_effect": "ah_ming 完成後，荒廢神社新增臨時存檔點"
   },
 
   "rei": {
-    "name": "迷路的外國人",
+    "name": "迷路的背包客",
     "location": "ximen_mrt",
-    "npc": "日本背包客澪",
+    "npc": "背包客澪",
     "available_periods": [0, 1, 2],
     "stages": [
       {
         "dialogue": "quest_rei_choice",
-        "desc": "澪搭錯出口，三選一：帶去龍山寺/化緣/推薦林森北路",
+        "desc": "澪搭錯出口，三選一：帶去神社/化緣/推薦歌舞坂",
         "branches": {
           "guide":    {"merit": 25, "gold": 150, "flag": "rei_guided"},
           "beg":      {"karma": 10, "gold": 300, "flag": "rei_begged"},
@@ -41,14 +41,14 @@
   },
 
   "zheng_ma": {
-    "name": "鄭媽的念珠債",
+    "name": "水野的念珠債",
     "location": "wannian_mall",
-    "npc": "三樓佛具店老闆娘鄭媽",
+    "npc": "三樓佛具店老闆娘水野",
     "available_periods": [0, 1, 2],
     "stages": [
       {
         "dialogue": "quest_zheng_ma_s1",
-        "desc": "討債人威脅鄭媽關店，三選一：業障恐嚇/借錢/帶去古廟",
+        "desc": "討債人威脅水野關店，三選一：業障恐嚇/借錢/帶去神社",
         "branches": {
           "intimidate": {"karma": 20, "merit": 10, "flag": "zheng_ma_saved_karma"},
           "lend_gold":  {"gold": -2000, "merit": 30, "flag": "zheng_ma_saved_gold"},
@@ -57,57 +57,57 @@
       },
       {
         "dialogue": "quest_zheng_ma_s2",
-        "desc": "鄭媽感謝，開放特殊商品",
+        "desc": "水野感謝，開放特殊商品",
         "flag": "zheng_ma_shop_unlocked",
         "merit": 10
       }
     ],
-    "cross_effect": "解鎖鄭媽商店特殊道具（護身符、業障結晶）"
+    "cross_effect": "解鎖水野商店特殊道具（護身符、業障結晶）"
   },
 
   "jie": {
     "name": "電玩少年的挑戰書",
     "location": "wannian_mall",
-    "npc": "五樓電玩城少年小傑",
+    "npc": "五樓電玩城少年健太",
     "available_periods": [0, 1, 2],
     "stages": [
       {
         "dialogue": "quest_jie_challenge",
-        "desc": "小傑挑戰木魚節奏戰，賭 500 金幣",
+        "desc": "健太挑戰木魚節奏戰，賭 500 金幣",
         "trigger_minigame": "wooden_fish_rhythm",
         "win":  {"gold": 500, "flag": "jie_defeated"},
         "lose": {"gold": -500}
       }
     ],
-    "cross_effect": "小傑父親出現於第二幕，陳阿嬤支線前置條件"
+    "cross_effect": "健太父親出現於第二幕，八重支線前置條件"
   },
 
   "ah_zhong": {
-    "name": "師傅阿忠的最後一鍋",
+    "name": "大村師傅的最後一鍋",
     "location": "zen_bbq",
-    "npc": "老廚師阿忠師傅",
+    "npc": "老廚師大村師傅",
     "available_periods": [2, 3],
     "stages": [
       {
         "dialogue": "quest_ah_zhong_s1",
-        "desc": "阿忠說需要三樣食材，分別在不同地點",
+        "desc": "大村說需要三樣食材，分別在不同地點",
         "flag": "ah_zhong_started"
       },
       {
         "dialogue": "quest_ah_zhong_s2",
-        "desc": "取得龍山寺藥材（古廟互動獲得）",
+        "desc": "取得神社藥材（神社互動獲得）",
         "require_flag": "got_herb",
         "location_required": "old_temple"
       },
       {
         "dialogue": "quest_ah_zhong_s3",
-        "desc": "取得西門特製食材（西門 MRT 小販）",
+        "desc": "取得櫻木町特製食材（櫻木町站 小販）",
         "require_flag": "got_ingredient",
         "location_required": "ximen_mrt"
       },
       {
         "dialogue": "quest_ah_zhong_final",
-        "desc": "阿忠完成最後一道料理，揭露師父的過去",
+        "desc": "大村完成最後一道料理，揭露師父的過去",
         "merit": 40,
         "flag": "master_past_revealed",
         "hp_max_up": 100
@@ -119,12 +119,12 @@
   "david": {
     "name": "失業工程師的第三杯",
     "location": "zen_bbq",
-    "npc": "失業工程師大衛",
+    "npc": "失業工程師大輔",
     "available_periods": [3],
     "stages": [
       {
         "dialogue": "quest_david_choice",
-        "desc": "大衛喝悶酒，三選一：認真傾聽/勸打坐/化緣",
+        "desc": "大輔喝悶酒，三選一：認真傾聽/勸打坐/化緣",
         "branches": {
           "listen": {"merit": 20, "flag": "david_listened"},
           "meditate": {"merit": 10, "flag": "david_meditate"},
@@ -132,19 +132,19 @@
         }
       }
     ],
-    "cross_effect": "david 後續在西門出現，listen 路線解鎖被動技「哀兵必勝」"
+    "cross_effect": "david 後續在櫻木町出現，listen 路線解鎖被動技「哀兵必勝」"
   },
 
   "cherry_debt": {
-    "name": "Cherry 的債（主支線）",
+    "name": "櫻的債（主支線）",
     "location": "zuijin_club",
-    "npc": "Cherry",
+    "npc": "櫻",
     "available_periods": [3],
     "require_flag": "cherry_met",
     "stages": [
       {
         "dialogue": "quest_cherry_debt_s1",
-        "desc": "Cherry 欠老鴇 5 萬，告知無戒"
+        "desc": "櫻欠媽媽桑 5 萬，告知無戒"
       },
       {
         "dialogue": "quest_cherry_debt_choice",
@@ -161,23 +161,23 @@
         "flag": "cherry_debt_resolved"
       }
     ],
-    "cross_effect": "Cherry 解鎖為戰鬥後援（破色戒後），影響 Cherry 個人結局"
+    "cross_effect": "櫻 解鎖為戰鬥後援（破色戒後），影響 櫻 個人結局"
   },
 
   "cai_ma": {
     "name": "媽媽桑的神秘委託",
     "location": "zuijin_club",
-    "npc": "老鴇蔡媽",
+    "npc": "媽媽桑蝶子",
     "available_periods": [3],
     "require_flag": "linsen_unlocked",
     "stages": [
       {
         "dialogue": "quest_cai_ma_s1",
-        "desc": "蔡媽委託送包裹到古廟，不能打開"
+        "desc": "蝶子委託送包裹到神社，不能打開"
       },
       {
         "dialogue": "quest_cai_ma_choice",
-        "desc": "到達古廟後：照做/偷看",
+        "desc": "到達神社後：照做/偷看",
         "location_required": "old_temple",
         "branches": {
           "deliver":  {"merit": 30, "flag": "cai_ma_trusted"},
@@ -186,49 +186,49 @@
         }
       }
     ],
-    "cross_effect": "影響第二幕蔡媽立場（敵/友），peek_bad 路線觸發警察遭遇戰"
+    "cross_effect": "影響第二幕蝶子立場（敵/友），peek_bad 路線觸發警察遭遇戰"
   },
 
   "grandma": {
-    "name": "陳阿嬤找孫子",
+    "name": "八重找孫子",
     "location": "old_temple",
-    "npc": "老香客陳阿嬤",
+    "npc": "老香客八重",
     "available_periods": [0, 1, 2, 3],
     "require_completed": "jie",
     "stages": [
       {
         "dialogue": "quest_grandma_s1",
-        "desc": "阿嬤說孫子小傑三天沒回家"
+        "desc": "八重說孫子健太三天沒回家"
       },
       {
         "dialogue": "quest_grandma_s2",
-        "desc": "去萬年找到小傑，勸他回家",
+        "desc": "去萬年大樓找到健太，勸他回家",
         "location_required": "wannian_mall",
         "require_flag": "jie_defeated"
       },
       {
         "dialogue": "quest_grandma_final",
-        "desc": "小傑與阿嬤和好，父親出場",
+        "desc": "健太與八重和好，父親出場",
         "merit": 50,
         "flag": "true_ending_flag_1"
       }
     ],
-    "cross_effect": "解鎖真結局旗標之一，小傑父親開啟第二幕副線"
+    "cross_effect": "解鎖真結局旗標之一，健太父親開啟第二幕副線"
   },
 
   "lao_wang": {
-    "name": "流浪漢老王的過去",
+    "name": "流浪漢源造的過去",
     "location": "old_temple",
-    "npc": "廟前流浪漢老王",
+    "npc": "神社前流浪漢源造",
     "available_periods": [0, 1, 2, 3],
     "stages": [
       {
         "dialogue": "quest_lao_wang_s1",
-        "desc": "老王自稱前董事長，被合夥人背叛"
+        "desc": "源造自稱前董事長，被合夥人背叛"
       },
       {
         "dialogue": "quest_lao_wang_s2",
-        "desc": "帶老王去萬年找人（對質）",
+        "desc": "帶源造去萬年大樓找人（對質）",
         "location_required": "wannian_mall"
       },
       {
