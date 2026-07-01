@@ -34,6 +34,26 @@ var _playing: bool = false
 var _done: bool = false
 
 
+func _ready() -> void:
+	# 右下角半透明「ESC 跳過」提示（可按 confirm/cancel/ESC 跳過本過場；不擋輸入）。
+	var l := Label.new()
+	l.text = "ESC 跳過"
+	l.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	l.offset_left = -200.0; l.offset_top = -54.0
+	l.offset_right = -28.0; l.offset_bottom = -20.0
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	l.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	l.add_theme_font_size_override("font_size", 22)
+	l.add_theme_color_override("font_color", Color(0.92, 0.89, 0.82))
+	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
+	l.add_theme_constant_override("shadow_offset_x", 1)
+	l.add_theme_constant_override("shadow_offset_y", 1)
+	l.add_theme_constant_override("shadow_outline_size", 4)
+	l.modulate = Color(1, 1, 1, 0.5)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(l)
+
+
 func play(cutscene_id: String) -> void:
 	_cues = SFX_CUES.get(cutscene_id, {})
 	_load_frames(cutscene_id)

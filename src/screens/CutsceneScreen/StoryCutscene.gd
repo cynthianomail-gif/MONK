@@ -575,6 +575,28 @@ func _build_ui() -> void:
 	_type_player.volume_db = -5.0
 	add_child(_type_player)
 
+	# 右下角跳過提示（半透明小字，提醒可按 ESC 跳過劇情；疊在最上層、不擋輸入）。
+	add_child(_make_skip_hint())
+
+## 右下角半透明「ESC 跳過」提示。CutsceneScreen 也用同樣視覺（各自建）。
+func _make_skip_hint() -> Label:
+	var l := Label.new()
+	l.text = "ESC 跳過"
+	l.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	l.offset_left = -200.0; l.offset_top = -54.0
+	l.offset_right = -28.0; l.offset_bottom = -20.0
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	l.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	l.add_theme_font_size_override("font_size", 22)
+	l.add_theme_color_override("font_color", WARM)
+	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
+	l.add_theme_constant_override("shadow_offset_x", 1)
+	l.add_theme_constant_override("shadow_offset_y", 1)
+	l.add_theme_constant_override("shadow_outline_size", 4)
+	l.modulate = Color(1, 1, 1, 0.5)   # 稍微透明
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return l
+
 func _load_frames(dir: String) -> Array[Texture2D]:
 	var out: Array[Texture2D] = []
 	if dir == "":
