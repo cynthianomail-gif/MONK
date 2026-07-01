@@ -28,10 +28,37 @@ var player: Dictionary = {
 ## 計程車落點暫存：{area, x}。MapScreen 載入時讀一次後清空。不寫進 player、不存檔。
 var pending_arrival: Dictionary = {}
 
+## 無戒對話立繪依職業切換：對話 .dtl 一律寫 `Wujie (calm)` 等(不帶職)，
+## 由本機制在每段對話開始時把 Wujie 的 4 表情 image 覆寫成「當前職業」的 bust
+## (苦行 ascetic / 誦經 chanter / 化緣 beggar)→ 零 .dtl 改、零 addon 改。
+const WUJIE_DCH := "res://dialogue/Wujie.dch"
+const WUJIE_MOODS := ["calm", "angry", "happy", "surprised"]
+## 常駐持有 Wujie 角色資源：Dialogic 用 load() 取角色(有快取)，但若沒人持有強參考，
+## 我們 mutate 過的實例會被釋放、下次 load 重讀磁碟得回原圖。持有它 → 快取那份長存、
+## Dialogic load() 拿到的就是我們 mutate 過的同一份。
+var _wujie_char: Resource = load(WUJIE_DCH)
+
 func _ready() -> void:
 	# 對話橋接：timeline 內 [signal arg="type:value"] → 改動遊戲狀態。
 	# 慣例 type: flag(設旗標true) / affection(累加 cherry_affection) / merit / karma / gold。
 	Dialogic.signal_event.connect(_on_dialogic_signal)
+	# 每段對話開始 → 依玩家職業套無戒立繪。
+	Dialogic.timeline_started.connect(_apply_wujie_job_portraits)
+
+## 把 Wujie 角色資源的 4 表情立繪換成當前職業的 bust。Dialogic 以快取資源載入
+## "Wujie" → 改的就是它實際用的那份；image 用 var_to_str 格式(同 .dch 存法)。
+func _apply_wujie_job_portraits() -> void:
+	var job: String = "ascetic"
+	if player.has("job") and player["job"] in ["ascetic", "chanter", "beggar"]:
+		job = player["job"]
+	if _wujie_char == null:
+		_wujie_char = load(WUJIE_DCH)
+	if _wujie_char == null:
+		return
+	for mood in WUJIE_MOODS:
+		if _wujie_char.portraits.has(mood):
+			var path := "res://assets/2d/portraits/wujie/bust/wujie_%s_%s.png" % [job, mood]
+			_wujie_char.portraits[mood]["export_overrides"]["image"] = var_to_str(path)
 
 func _on_dialogic_signal(arg: Variant) -> void:
 	if typeof(arg) != TYPE_STRING:
