@@ -81,3 +81,30 @@ func _timeline_exists(timeline: String) -> bool:
 	if timeline.is_empty():
 		return false
 	return ResourceLoader.exists("res://dialogue/%s.dtl" % timeline)
+
+## 支線「現在可觸發」嗎？（同 trigger_action 的前置檢查：require_flag/require_completed
+## 滿足、目前 stage 未完、該 stage 對話已製作）。給 NPC「!」提示與小地圖標記共用。
+func is_quest_actionable(quest_id: String) -> bool:
+	var q: Dictionary = _quests.get(quest_id, {})
+	if q.is_empty():
+		return false
+	if q.has("require_flag") and not GameManager.get_flag(q.require_flag):
+		return false
+	if q.has("require_completed") and q.require_completed not in GameManager.player.completed_quests:
+		return false
+	var stage: int = GameManager.player.active_quests.get(quest_id, 0)
+	if stage >= q.stages.size():
+		return false
+	return _timeline_exists(q.stages[stage].get("dialogue", ""))
+
+## 地點是否有「現在可做」的任務（主線或支線）→ NPC 頭上「!」＋小地圖任務標記。
+func location_has_quest(loc_data: Dictionary) -> bool:
+	for action in loc_data.get("actions", []):
+		var a := String(action)
+		if a == "main_quest":
+			if not MainQuestManager.is_demo_complete():
+				return true
+		elif a.begins_with("quest_"):
+			if is_quest_actionable(a.replace("quest_", "")):
+				return true
+	return false

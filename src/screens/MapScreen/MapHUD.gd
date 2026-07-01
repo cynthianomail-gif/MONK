@@ -39,12 +39,17 @@ const JOB_NAMES: Dictionary = {
 @onready var menu_buttons: VBoxContainer = %MenuButtons
 @onready var toast_label: Label       = %Toast
 
+const MINIMAP := preload("res://src/screens/MapScreen/Minimap.gd")
+const QUEST_MARKERS := preload("res://src/screens/MapScreen/QuestMarkers.gd")
+
 var _toast_tween: Tween = null
 
 func _ready() -> void:
 	prompt.visible = false
 	action_menu.visible = false
 	toast_label.visible = false
+	_add_quest_markers()
+	_add_minimap()
 	GameManager.stat_changed.connect(func(_k, _v): update_stats())
 	GameManager.job_changed.connect(func(_j): update_stats())
 	EventBus.skill_unlocked.connect(func(n): show_toast("新技能解鎖：%s" % n))
@@ -114,3 +119,21 @@ func show_toast(text: String) -> void:
 func _clear_buttons() -> void:
 	for c in menu_buttons.get_children():
 		c.queue_free()
+
+## 右上角小地圖（雷達式，標地標＋任務地點）。
+func _add_minimap() -> void:
+	var mm: Control = MINIMAP.new()
+	mm.name = "Minimap"
+	mm.anchor_left = 1.0; mm.anchor_right = 1.0
+	mm.anchor_top = 0.0; mm.anchor_bottom = 0.0
+	# 右上角、時間標籤(top-right)下方，避免重疊。
+	mm.offset_left = -164.0; mm.offset_top = 60.0
+	mm.offset_right = -16.0; mm.offset_bottom = 208.0
+	add_child(mm)
+
+## NPC 頭上任務「！」（螢幕空間投影）。放最底層，讓選單/toast 蓋在上面。
+func _add_quest_markers() -> void:
+	var qm: Control = QUEST_MARKERS.new()
+	qm.name = "QuestMarkers"
+	add_child(qm)
+	move_child(qm, 0)
