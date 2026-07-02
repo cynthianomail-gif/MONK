@@ -30,11 +30,13 @@ void fragment() {
 	float dd = lin(SCREEN_UV + vec2(0.0, px.y), INV_PROJECTION_MATRIX);
 	float lap = abs(dl + dr - 2.0 * dc) + abs(du + dd - 2.0 * dc);   // 二階差分(曲率)：平面斜坡不誤判,只抓真深度跳變
 	float de = step(depth_rel, lap / max(dc, 0.001));
-	vec3 nc = texture(normal_tex, SCREEN_UV).xyz;
-	vec3 nl = texture(normal_tex, SCREEN_UV - vec2(px.x, 0.0)).xyz;
-	vec3 nr = texture(normal_tex, SCREEN_UV + vec2(px.x, 0.0)).xyz;
-	vec3 nu = texture(normal_tex, SCREEN_UV - vec2(0.0, px.y)).xyz;
-	vec3 nd = texture(normal_tex, SCREEN_UV + vec2(0.0, px.y)).xyz;
+	// normal buffer 存 0..1 編碼，要 *2-1 還原；不解碼的話平面上的緩慢色階變化
+	// 全會被 dot 差值當成「邊」→ 亮牆整面豹紋黑斑（暗牆看不出來所以以前沒發現）
+	vec3 nc = texture(normal_tex, SCREEN_UV).xyz * 2.0 - 1.0;
+	vec3 nl = texture(normal_tex, SCREEN_UV - vec2(px.x, 0.0)).xyz * 2.0 - 1.0;
+	vec3 nr = texture(normal_tex, SCREEN_UV + vec2(px.x, 0.0)).xyz * 2.0 - 1.0;
+	vec3 nu = texture(normal_tex, SCREEN_UV - vec2(0.0, px.y)).xyz * 2.0 - 1.0;
+	vec3 nd = texture(normal_tex, SCREEN_UV + vec2(0.0, px.y)).xyz * 2.0 - 1.0;
 	float nedge = (1.0-dot(nc,nl)) + (1.0-dot(nc,nr)) + (1.0-dot(nc,nu)) + (1.0-dot(nc,nd));
 	float ne = step(normal_thr, nedge);
 	float e = clamp(max(de, ne), 0.0, 1.0);

@@ -42,3 +42,54 @@ func finish(result: Dictionary) -> void:
 		minigame_finished.emit(r)
 
 signal minigame_finished(result: Dictionary)
+
+# --- 共用體感（畫面震動＋頓幀；HUD 都在 CanvasLayer 上不受震動影響）---
+
+## 畫面震動：搖場景根節點（強度遞減的隨機偏移）。命中/撞擊瞬間用。
+func shake(strength: float = 12.0, dur: float = 0.25) -> void:
+	var steps := maxi(int(dur / 0.04), 2)
+	var tw := create_tween()
+	for i in steps:
+		var falloff := 1.0 - float(i) / float(steps)
+		var off := Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * strength * falloff
+		tw.tween_property(self, "position", off, 0.04)
+	tw.tween_property(self, "position", Vector2.ZERO, 0.04)
+
+## 頓幀（hit-stop）：重擊瞬間全域慢動作一瞬，強化打擊感。
+## dur=真實秒數；重入保護（已在頓幀中就跳過）。
+func hit_stop(dur: float = 0.06, slow: float = 0.05) -> void:
+	if Engine.time_scale < 1.0:
+		return
+	Engine.time_scale = slow
+	await get_tree().create_timer(dur, true, false, true).timeout   # ignore_time_scale
+	Engine.time_scale = 1.0
+
+# --- 共用 FX（Codex fx_* 圖，additive 疊加、縮放+淡出後自清；缺圖靜默跳過）---
+
+const FX_ART := "res://assets/art_direction/new_ink_shrine_style/minigames/parlor/"
+
+## 命中爆點：飛鏢釘靶/保齡球撞瓶的瞬間。fx_scale＝最終 scale（圖 1254px 見方）。
+func spawn_fx_burst(pos: Vector2, fx_scale: float) -> void:
+	_spawn_fx("fx_impact_burst_game_ready.png", pos, fx_scale, 0.12, 0.28)
+
+## 贏錢金光：結算/紅心/全倒的慶祝閃光，停留久一點。
+func spawn_fx_sparkle(pos: Vector2, fx_scale: float) -> void:
+	_spawn_fx("fx_gold_sparkle_game_ready.png", pos, fx_scale, 0.18, 0.75)
+
+func _spawn_fx(file: String, pos: Vector2, fx_scale: float, grow_t: float, fade_t: float) -> void:
+	var path := FX_ART + file
+	if not ResourceLoader.exists(path):
+		return
+	var s := Sprite2D.new()
+	s.texture = load(path)
+	s.position = pos
+	s.scale = Vector2.ONE * fx_scale * 0.45
+	var m := CanvasItemMaterial.new()
+	m.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	s.material = m
+	add_child(s)
+	var tw := create_tween()
+	tw.tween_property(s, "scale", Vector2.ONE * fx_scale, grow_t) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(s, "modulate:a", 0.0, grow_t + fade_t)
+	tw.tween_callback(s.queue_free)

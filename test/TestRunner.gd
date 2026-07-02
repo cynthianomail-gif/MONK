@@ -17,9 +17,9 @@ func _run_test() -> void:
 		_fail("MapScreen 未載入")
 		return
 	var triggers := get_tree().get_nodes_in_group("location_trigger")
-	print("TEST: 西門區觸發器數量 = %d" % triggers.size())
+	print("TEST: 神社區互動點數量 = %d" % triggers.size())
 	if triggers.size() < 2:
-		_fail("西門區觸發器數量不足（應為 ximen_mrt+wannian_mall）")
+		_fail("神社區互動點數量不足（map_npcs 應灑多個 NPC/店/功能點）")
 		return
 
 	# ─── Step 3：完整戰鬥（弱點 → 總攻擊 → 勝利）───

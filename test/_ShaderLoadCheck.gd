@@ -2,10 +2,10 @@ extends SceneTree
 ## headless shader 載入檢查：godot --headless --script res://test/_ShaderLoadCheck.gd
 func _init() -> void:
 	var paths := [
-		"res://assets/shaders/okami/ink_toon.gdshader",
-		"res://assets/shaders/okami/ink_ground.gdshader",
-		"res://assets/shaders/okami/ink_outline.gdshader",
-		"res://assets/shaders/okami/ink_paper.gdshader",
+		"res://assets/shaders/stylized/plaster.gdshader",
+		"res://assets/shaders/stylized/cobblestone.gdshader",
+		"res://assets/shaders/stylized/roof_tiles.gdshader",
+		"res://assets/shaders/stylized/corrugated_metal.gdshader",
 	]
 	for p in paths:
 		assert(ResourceLoader.exists(p), "MISSING: " + p)

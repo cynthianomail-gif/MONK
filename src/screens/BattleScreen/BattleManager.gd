@@ -164,6 +164,7 @@ func _enemy_turn() -> void:
 			continue
 		var act: Dictionary = executor.execute_enemy_action(e, player_combatant, enemy_combatants)
 		if not act.is_empty():
+			ui.enemy_lunge(e)
 			battle_log.emit("%s 使出「%s」" % [e.display_name, act.get("name", "?")])
 			if e == _boss:
 				ui.flash_enemy_mood(_boss, _boss_fig(String(_boss.portrait_moods.get("act", ""))), 0.8)

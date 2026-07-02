@@ -122,6 +122,8 @@ func _on_hp_changed(current: int, max_hp: int) -> void:
 	var prev := int(_hp_bar.value)
 	_hp_bar.value = current
 	_hp_text.text = "%d / %d" % [current, max_hp]
+	if current < prev:
+		play_hit_shake()
 	if vfx != null:
 		if current <= 0:
 			vfx.play_defeat()
@@ -151,6 +153,31 @@ func set_base_portrait(path: String) -> void:
 	if _figure.visible:
 		_figure.texture = load(path)
 		_figure.reset_base()
+
+## 受擊演出：紅閃＋左右震動。呼吸只動 scale/rotation，position tween 不與其打架；
+## 結尾寫回起震時抓的 base，容器之後 re-layout 會自行修正。
+func play_hit_shake() -> void:
+	if _figure == null or not _figure.visible:
+		return
+	_figure.self_modulate = Color(1.7, 0.5, 0.45)
+	var flash := create_tween()
+	flash.tween_property(_figure, "self_modulate", Color.WHITE, 0.35)
+	var base_x := _figure.position.x
+	var shake := create_tween()
+	for i in 4:
+		shake.tween_property(_figure, "position:x", base_x + (7.0 if i % 2 == 0 else -7.0), 0.04)
+	shake.tween_property(_figure, "position:x", base_x, 0.04)
+
+## 出招演出：朝玩家(畫面左下)快速撲一步再回位。
+func play_lunge() -> void:
+	if _figure == null or not _figure.visible:
+		return
+	var base := _figure.position
+	var tw := create_tween()
+	tw.tween_property(_figure, "position", base + Vector2(-30.0, 22.0), 0.12) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_figure, "position", base, 0.18) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
 ## 暫態表情/姿勢：切 path，secs 後回 _base（新 flash 取消舊的）。
 func flash_mood(path: String, secs: float) -> void:

@@ -1,7 +1,6 @@
 extends Node3D
 ## 探索世界站立 NPC：載 Meshy GLB → 修透明材質+消光 → 程式呼吸搖擺(免綁骨)。
-## 保留 Meshy 貼圖(源自 okami 立繪、本身水墨味)，靠場景螢幕空間描邊給墨邊。
-## ponytail: 不套 ink_toon 平塗(會把 6 NPC 變同色灰、認不出)；要與主角平塗一致再改 _matte→toon。
+## 保留 Meshy 貼圖(源自 okami 立繪)；場景已去水墨(無描邊/toon)，角色靠貼圖本身立體感。
 
 const NPC_DIR := "res://assets/3d/characters/npcs/"
 

@@ -21,9 +21,8 @@ void fragment() {
 }
 void light() {
 	float ndl = max(dot(normalize(NORMAL), normalize(LIGHT)), 0.0);
-	float n = vnoise(wpos * 3.2);                       // 墨染邊界擾動 → 交界不規則
-	float t = 0.42 + (n - 0.5) * 0.30;
-	float band = smoothstep(t - 0.05, t + 0.05, ndl);   // 兩階墨色(暗墨/亮墨)
+	// 交界不加噪聲擾動：ndl 落在閾值附近的大面會炸出整片黑斑塊(雜點)，改乾淨柔和過渡
+	float band = smoothstep(0.32, 0.52, ndl);           // 兩階墨色(暗墨/亮墨)
 	float tone = mix(0.5, 1.0, band);
 	DIFFUSE_LIGHT += ALBEDO * LIGHT_COLOR * ATTENUATION * tone;
 }

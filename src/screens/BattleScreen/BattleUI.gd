@@ -63,6 +63,8 @@ func build(player: Combatant, enemies: Array) -> void:
 	_player_low = false
 	_set_player_portrait("normal")
 	player.hp_changed.connect(func(cur, mx):
+		if cur < player_hp_bar.value:
+			_shake_player_figure()
 		player_hp_bar.value = cur
 		player_hp_text.text = "%d / %d" % [cur, mx]
 		var low: bool = cur < mx * 0.3
@@ -227,9 +229,40 @@ func play_skill_effect(skill_name: String, hit_weakness: bool, is_crit: bool) ->
 		text += " 會心一擊！"
 	if hit_weakness:
 		AudioManager.play_sfx("weakness_hit")
+	_lunge_player_figure()
 	show_log(text)
 	_refresh_statuses()
 	await get_tree().create_timer(0.45).timeout
+
+## 玩家出招：背面立繪朝敵陣(右上)前撲再回位（position tween 不與呼吸 scale 打架）。
+func _lunge_player_figure() -> void:
+	if player_figure == null or not player_figure.visible:
+		return
+	var base := player_figure.position
+	var tw := create_tween()
+	tw.tween_property(player_figure, "position", base + Vector2(44.0, -26.0), 0.12) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(player_figure, "position", base, 0.18) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+
+## 玩家受擊：紅閃＋震動。
+func _shake_player_figure() -> void:
+	if player_figure == null or not player_figure.visible:
+		return
+	player_figure.self_modulate = Color(1.7, 0.5, 0.45)
+	var flash := create_tween()
+	flash.tween_property(player_figure, "self_modulate", Color.WHITE, 0.35)
+	var base_x := player_figure.position.x
+	var shake := create_tween()
+	for i in 4:
+		shake.tween_property(player_figure, "position:x", base_x + (8.0 if i % 2 == 0 else -8.0), 0.04)
+	shake.tween_property(player_figure, "position:x", base_x, 0.04)
+
+## 敵人出招前撲（BattleManager 敵人回合呼叫）。
+func enemy_lunge(c: Combatant) -> void:
+	var p := _panel_for(c)
+	if p != null:
+		p.play_lunge()
 
 func play_all_out() -> void:
 	all_out_overlay.visible = true

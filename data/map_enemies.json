@@ -1,0 +1,11 @@
+{
+  "_schema": "路上漫遊敵人（人中之龍式）：依 district 灑 RoamingEnemy，在 patrol_center 半徑內閒晃，玩家靠近就追，追到→遭遇戰（SLASH_RED 轉場）。model=assets/3d/characters/enemies/<model>.glb；enemy_id 對 enemies.json。座標分佈 L 形街(主街沿-Z＋西側支街z≈-13)＝多樣化不擠一直線。追擊速<走路速→走路可甩開，非高頻遭遇。",
+
+  "shrine": [
+    {"enemy_id": "street_punk",    "model": "street_punk",    "patrol_center": {"x": 2.0,   "z": -7.0},  "patrol_radius": 3.0},
+    {"enemy_id": "drunk_guard",    "model": "drunk_guard",    "patrol_center": {"x": 2.5,   "z": -20.0}, "patrol_radius": 2.8},
+    {"enemy_id": "temple_ghost",   "model": "temple_ghost",   "patrol_center": {"x": -2.5,  "z": -24.0}, "patrol_radius": 2.8},
+    {"enemy_id": "corrupt_vendor", "model": "corrupt_vendor", "patrol_center": {"x": -16.0, "z": -13.0}, "patrol_radius": 3.0},
+    {"enemy_id": "night_ghost",    "model": "night_ghost",    "patrol_center": {"x": -24.0, "z": -13.0}, "patrol_radius": 2.8}
+  ]
+}

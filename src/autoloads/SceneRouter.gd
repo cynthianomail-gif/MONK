@@ -143,7 +143,8 @@ func go_to_minigame(minigame_id: String, context: Dictionary = {}) -> void:
 	_active_minigame = minigame_id
 	await _change_scene(path, Transition.NEON_FLASH)
 
-## 由 MinigameBase.finish() 呼叫：套用獎勵、回報結果、返回地圖。
+## 由 MinigameBase.finish() 呼叫：套用獎勵、回報結果、返回地圖
+## （或 context.return_scene 指定的原 3D 場景）。
 func finish_minigame(result: Dictionary) -> void:
 	var ctx := _minigame_context
 	var id: String = result.get("id", _active_minigame)
@@ -159,9 +160,14 @@ func finish_minigame(result: Dictionary) -> void:
 	# ② 支線 win/lose 獎勵（quests.json 的 win/lose dict）
 	var branch: Dictionary = ctx.get("quest_win", {}) if result.get("win", false) else ctx.get("quest_lose", {})
 	_apply_quest_reward(branch)
-	# ③ 回報並返回地圖
+	# ③ 回報並返回。context 可帶 return_scene 指定回原 3D 場景
+	#（如地下遊藝場房間），沒帶或場景不存在則照舊回城市地圖。
 	minigame_finished.emit(id, result)
-	go_to_map()
+	var return_scene := String(ctx.get("return_scene", ""))
+	if return_scene != "" and ResourceLoader.exists(return_scene):
+		go_to_scene(return_scene)
+	else:
+		go_to_map()
 
 ## 套用 quests.json 風格的獎勵 dict（gold/merit/karma/flag/unlock_skill/hp_max_up）。
 func _apply_quest_reward(reward: Dictionary) -> void:

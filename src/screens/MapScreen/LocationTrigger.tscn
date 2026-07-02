@@ -7,16 +7,16 @@ radius = 2.5
 
 [sub_resource type="StandardMaterial3D" id="mat"]
 transparency = 1
-albedo_color = Color(0.224, 1, 0.078, 0.35)
+shading_mode = 0
+albedo_color = Color(1, 0.82, 0.38, 0.75)
 emission_enabled = true
-emission = Color(0.224, 1, 0.078, 1)
-emission_energy_multiplier = 0.6
+emission = Color(1, 0.78, 0.32, 1)
+emission_energy_multiplier = 1.1
 
-[sub_resource type="CylinderMesh" id="mesh"]
+[sub_resource type="TorusMesh" id="mesh"]
 material = SubResource("mat")
-top_radius = 2.0
-bottom_radius = 2.0
-height = 0.3
+inner_radius = 1.58
+outer_radius = 1.72
 
 [node name="LocationTrigger" type="Area3D"]
 script = ExtResource("1")
@@ -25,7 +25,7 @@ script = ExtResource("1")
 shape = SubResource("shape")
 
 [node name="Marker" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.06, 0)
 mesh = SubResource("mesh")
 
 [node name="NameLabel" type="Label3D" parent="."]

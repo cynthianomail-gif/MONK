@@ -15,14 +15,19 @@ func _ready() -> void:
 	var at := p.get_node_or_null("AnimationTree") as AnimationTree
 	if at == null: return _fail("無 AnimationTree")
 	if at.tree_root == null: return _fail("AnimationTree.tree_root 未建（clip 偵測失敗？）")
-	var v = at.get("parameters/blend/blend_amount")
-	if v == null: return _fail("無 parameters/blend/blend_amount")
+	if not (at.tree_root is AnimationNodeBlendSpace1D):
+		return _fail("tree_root 應為 BlendSpace1D(idle/walk/run)，實為 %s" % at.tree_root.get_class())
+	var v = at.get("parameters/blend_position")
+	if v == null: return _fail("無 parameters/blend_position")
 
-	# idle clip 應已生成在模型的 AnimationPlayer
+	# idle clip 應已生成、run clip 應已從 wujie_run.glb 併入
 	var ap := _find_ap(p)
 	if ap == null: return _fail("模型無 AnimationPlayer")
+	print("Player clips = %s" % str(ap.get_animation_list()))
 	if not ap.get_animation_list().has("idle_gen"):
 		return _fail("idle_gen 未生成，clips=%s" % str(ap.get_animation_list()))
+	if not ap.get_animation_list().has("run_merged"):
+		return _fail("run_merged 未從 wujie_run.glb 併入，clips=%s" % str(ap.get_animation_list()))
 
 	# 模擬移動：設 velocity 跑一次 physics，確認會位移
 	var before: Vector3 = p.global_position

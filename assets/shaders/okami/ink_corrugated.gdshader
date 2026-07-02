@@ -21,9 +21,8 @@ void fragment() {
 }
 void light() {
 	float ndl = max(dot(normalize(NORMAL), normalize(LIGHT)), 0.0);
-	float n = vnoise(wpos * 3.2);
-	float t = 0.42 + (n - 0.5) * 0.30;
-	float band = smoothstep(t - 0.05, t + 0.05, ndl);
+	// 同 ink_toon：交界不加噪聲擾動(避免大面黑斑雜點)，乾淨柔和過渡
+	float band = smoothstep(0.32, 0.52, ndl);
 	float tone = mix(0.5, 1.0, band);
 	DIFFUSE_LIGHT += ALBEDO * LIGHT_COLOR * ATTENUATION * tone;
 }
