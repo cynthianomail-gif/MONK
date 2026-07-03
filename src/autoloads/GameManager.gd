@@ -22,7 +22,11 @@ var player: Dictionary = {
 	"active_quests": {},
 	"last_position": {"x": 0.0, "y": 0.0, "z": 0.0},
 	"current_area": "shrine",
-	"inventory": {}
+	"inventory": {},
+	# 戰鬥改版新鍵（舊存檔缺鍵→load_game 保留預設，不炸）
+	"daoxing": 0,                 # 修行盤成長貨幣（第二期勝利發放，第三期消費）
+	"weakness_intel": {},         # enemy_id → [已探知的弱點屬性]（第一期，跨戰鬥保留）
+	"board_unlocked": ["core"]    # 修行盤已解鎖節點（第三期接點）
 }
 
 ## 計程車落點暫存：{area, x}。MapScreen 載入時讀一次後清空。不寫進 player、不存檔。
@@ -87,6 +91,8 @@ func _on_dialogic_signal(arg: Variant) -> void:
 		"vow":
 			# 由對話分支觸發破戒（例：Cherry 逃跑→色戒）。
 			BreakVowSystem.try_trigger(val)
+		"menu_action":
+			pass  # 街景多功能 NPC 對話內選單分流，由 MapScreen._on_dialogic_signal 處理，這裡不重複警告。
 		_:
 			push_warning("GameManager: 未知的對話訊號 %s" % arg)
 
@@ -138,6 +144,37 @@ func spend_gold(v: int) -> bool:
 func add_gold(v: int) -> void:
 	player.gold += v
 	stat_changed.emit("gold", player.gold)
+
+# ─── 道行（修行盤貨幣）／弱點探知（第一/二期）────────────────────
+## 舊存檔缺鍵防呆：存取前確保鍵存在（同 _ensure_inventory 模式）。
+func _ensure_battle_keys() -> void:
+	if not player.has("daoxing"):
+		player["daoxing"] = 0
+	if not player.has("weakness_intel") or typeof(player.weakness_intel) != TYPE_DICTIONARY:
+		player["weakness_intel"] = {}
+	if not player.has("board_unlocked") or typeof(player.board_unlocked) != TYPE_ARRAY:
+		player["board_unlocked"] = ["core"]
+
+func add_daoxing(v: int) -> void:
+	_ensure_battle_keys()
+	player.daoxing = maxi(0, int(player.daoxing) + v)
+	stat_changed.emit("daoxing", player.daoxing)
+
+## 命中某敵某屬性 → 記錄探知（跨戰鬥保留、進存檔）。回傳是否為「新探知」。
+func record_weakness_intel(enemy_id: String, element: String) -> bool:
+	_ensure_battle_keys()
+	var known: Array = player.weakness_intel.get(enemy_id, [])
+	if element in known:
+		return false
+	known.append(element)
+	player.weakness_intel[enemy_id] = known
+	stat_changed.emit("weakness_intel", player.weakness_intel)
+	return true
+
+## 查某敵某屬性是否已探知（EnemyPanel 決定顯示「弱 淨」或「弱 ？」）。
+func knows_weakness(enemy_id: String, element: String) -> bool:
+	_ensure_battle_keys()
+	return element in player.weakness_intel.get(enemy_id, [])
 
 # ─── 背包 / 道具 ───────────────────────────────────────
 ## 舊存檔可能無 inventory 鍵 → 存取前確保存在（belt-and-suspenders；
@@ -196,5 +233,8 @@ func new_game() -> void:
 		"active_quests": {},
 		"last_position": {"x": 0.0, "y": 1.2, "z": 6.0},
 		"current_area": "shrine",
-		"inventory": {}
+		"inventory": {},
+		"daoxing": 0,
+		"weakness_intel": {},
+		"board_unlocked": ["core"]
 	}

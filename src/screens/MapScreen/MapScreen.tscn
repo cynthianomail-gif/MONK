@@ -1,7 +1,25 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://src/screens/MapScreen/MapScreen.gd" id="1"]
 [ext_resource type="Script" path="res://src/screens/MapScreen/MapHUD.gd" id="3"]
+
+[sub_resource type="StyleBoxFlat" id="prompt_bg"]
+content_margin_left = 36.0
+content_margin_top = 12.0
+content_margin_right = 36.0
+content_margin_bottom = 12.0
+bg_color = Color(0.043, 0.043, 0.043, 0.82)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.82, 0.18, 0.13, 0.9)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+shadow_color = Color(0, 0, 0, 0.4)
+shadow_size = 8
 
 [node name="MapScreen" type="Node"]
 script = ExtResource("1")
@@ -42,21 +60,35 @@ theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 24
 text = "無戒"
 
-[node name="InteractionPrompt" type="Label" parent="HUD"]
+[node name="InteractionPrompt" type="PanelContainer" parent="HUD"]
 unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -350.0
-offset_top = -150.0
-offset_right = 350.0
-offset_bottom = -100.0
-theme_override_colors/font_color = Color(0.224, 1, 0.078, 1)
-theme_override_font_sizes/font_size = 30
-text = "[E] 進入"
+offset_left = -220.0
+offset_top = -130.0
+offset_right = 220.0
+offset_bottom = -80.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("prompt_bg")
+
+[node name="PromptLabel" type="RichTextLabel" parent="HUD/InteractionPrompt"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+text = "[center][color=#d12e21]〔E〕[/color][color=#f5f2e8]進入[/color][/center]"
 horizontal_alignment = 1
+theme_override_font_sizes/normal_font_size = 28
 
 [node name="ActionMenu" type="PanelContainer" parent="HUD"]
 unique_name_in_owner = true

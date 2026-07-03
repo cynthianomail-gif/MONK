@@ -24,6 +24,7 @@ SceneRouter="*res://src/autoloads/SceneRouter.gd"
 QuestManager="*res://src/systems/QuestManager.gd"
 BreakVowSystem="*res://src/systems/BreakVowSystem.gd"
 SkillUnlockManager="*res://src/systems/SkillUnlockManager.gd"
+CultivationBoard="*res://src/autoloads/CultivationBoard.gd"
 MainQuestManager="*res://src/systems/MainQuestManager.gd"
 AchievementSystem="*res://src/systems/AchievementSystem.gd"
 GodIntel="*res://src/systems/GodIntel.gd"
@@ -51,7 +52,9 @@ directories/dtl_directory={
 "armory_worker_freed": "res://dialogue/armory_worker_freed.dtl",
 "armory_worker_locked": "res://dialogue/armory_worker_locked.dtl",
 "cherry_first_meeting": "res://dialogue/cherry_first_meeting.dtl",
+"cherry_hub": "res://dialogue/cherry_hub.dtl",
 "demo_end": "res://dialogue/demo_end.dtl",
+"liaochen_hub": "res://dialogue/liaochen_hub.dtl",
 "main_ares_lead": "res://dialogue/main_ares_lead.dtl",
 "main_ch1_aftermath": "res://dialogue/main_ch1_aftermath.dtl",
 "main_ch1_armory_breach": "res://dialogue/main_ch1_armory_breach.dtl",
@@ -82,7 +85,8 @@ directories/dtl_directory={
 "quest_zheng_ma_s2": "res://dialogue/quest_zheng_ma_s2.dtl",
 "vow_break_food": "res://dialogue/vow_break_food.dtl",
 "vow_break_greed": "res://dialogue/vow_break_greed.dtl",
-"vow_break_lust": "res://dialogue/vow_break_lust.dtl"
+"vow_break_lust": "res://dialogue/vow_break_lust.dtl",
+"zheng_ma_hub": "res://dialogue/zheng_ma_hub.dtl"
 }
 layout/style_directory={
 "": "res://src/ui/dialogue_style/monk_dialogue_style.tres",

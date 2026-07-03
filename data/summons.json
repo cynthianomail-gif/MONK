@@ -1,0 +1,26 @@
+{
+  "fuhu_luohan": {
+    "name": "伏虎羅漢",
+    "gold_cost": 800,
+    "effect_kind": "damage",
+    "damage_type": "karma",
+    "power": 260,
+    "target": "single",
+    "special": "knockdown",
+    "portrait": "res://assets/2d/portraits/summons/fuhu_luohan.png",
+    "desc": "香油錢請下伏虎尊者，業障凝拳單體重擊並擊倒。",
+    "cutscene_text": "伏虎羅漢　現身"
+  },
+  "weituo_tian": {
+    "name": "韋馱天",
+    "gold_cost": 600,
+    "effect_kind": "support",
+    "special": "party_heal_and_guard",
+    "heal_value": 220,
+    "def_buff_value": 0.4,
+    "def_buff_duration": 2,
+    "portrait": "res://assets/2d/portraits/summons/weituo_tian.png",
+    "desc": "香油錢請下韋馱護法，為無戒大補並附加防禦加持。",
+    "cutscene_text": "韋馱天　現身"
+  }
+}

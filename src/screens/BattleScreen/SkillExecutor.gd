@@ -93,8 +93,16 @@ func _deal_damage(sk: Dictionary, caster: Combatant, target: Combatant) -> Dicti
 		GameManager.set_flag("weakness_hit_count", cnt + 1)
 	return r
 
-## 統一傷害入口：處理護盾 / 反彈
+## 統一傷害入口：處理護盾 / 反彈 / 防禦與完美格擋減傷（第二期）
 func apply_damage(target: Combatant, dmg: int, attacker: Combatant, dtype: String) -> void:
+	# 玩家防禦/完美格擋減傷：防禦 50%／完美 70%／疊加 90%
+	if target.is_player and dmg > 0:
+		var reduce: float = _guard_reduction(target)
+		if reduce > 0.0:
+			dmg = maxi(1, int(dmg * (1.0 - reduce)))
+	# 護法/技能附加的 def_up 加持：獨立疊乘（第四期，韋馱天防禦 buff）
+	if dmg > 0 and target.has_buff("def_up"):
+		dmg = maxi(1, int(dmg * (1.0 - target.buff_value("def_up"))))
 	if target.has_buff("iron_shirt"):
 		var reduced: int = int(dmg * 0.2)
 		var reflect: int = int(dmg * 0.5)
@@ -111,6 +119,18 @@ func apply_damage(target: Combatant, dmg: int, attacker: Combatant, dtype: Strin
 		target.consume_buff("golden_body")
 	target.take_damage(dmg)
 	damage_dealt.emit(target.id, dmg, dtype)
+
+## 防禦/完美格擋的減傷比例。防禦 0.5／完美 0.7／兩者疊加 0.9。
+func _guard_reduction(target: Combatant) -> float:
+	var defend: bool = target.is_guarding
+	var perfect: bool = target.perfect_guard_ready
+	if defend and perfect:
+		return 0.9
+	if perfect:
+		return 0.7
+	if defend:
+		return 0.5
+	return 0.0
 
 func _eval_formula(formula: String, target: Combatant) -> float:
 	match formula:

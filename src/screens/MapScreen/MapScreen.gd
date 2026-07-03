@@ -7,6 +7,15 @@ const SHOP_SCREEN := preload("res://src/ui/menu/ShopScreen.gd")
 const LOCATION_TRIGGER := preload("res://src/screens/MapScreen/LocationTrigger.tscn")
 const ROAMING_ENEMY := preload("res://src/screens/MapScreen/RoamingEnemy.gd")
 
+## 多功能 NPC：按 E 不跳 ActionMenu，改進對話——NPC 先問話，玩家在 Dialogic 選項裡分流。
+## 選項各自 [signal arg="menu_action:<action id>"]，由 _on_dialogic_signal 收到後
+## deferred 呼叫 perform_action；「沒事，先離開」選項不帶 signal，對話結束即靜靜收場。
+const NPC_ENTRY_TIMELINE: Dictionary = {
+	"npc_liaochen": "liaochen_hub",
+	"npc_zheng_ma": "zheng_ma_hub",
+	"npc_cherry":   "cherry_hub",
+}
+
 @onready var world: Node3D = $World
 @onready var hud: CanvasLayer = $HUD
 
@@ -28,6 +37,7 @@ func _ready() -> void:
 	_current_area = String(GameManager.player.get("current_area", "shrine"))
 	GameManager.time_advanced.connect(_on_time_advanced)
 	EventBus.achievement_unlocked.connect(_on_achievement_unlocked)
+	Dialogic.signal_event.connect(_on_dialogic_signal)
 	_drain_pending_achievements()
 	_load_area(_current_area)
 	_update_hud()
@@ -121,12 +131,29 @@ func _spawn_position(area: Dictionary) -> Vector3:
 	var ds: Dictionary = area.get("default_spawn", {"x": 0.0, "y": 1.2, "z": 6.0})
 	return Vector3(float(ds.get("x", 0.0)), float(ds.get("y", 1.2)), float(ds.get("z", 6.0)))
 
+## 進入類動作（場所/設施入口）：提示用「進入」，其餘（NPC對話、賽錢箱等）用「對話」/「參拜」。
+const ENTER_ACTIONS: Array = [
+	"bowling_minigame", "batting_minigame", "enter_parlor", "beggar_minigame"
+]
+
+## 依該點的 action 與是否有 NPC 模型，決定畫面提示動詞（對話 / 進入 / 參拜）。
+func _prompt_verb(loc: Dictionary) -> String:
+	var actions: Array = loc.get("actions", [])
+	if actions.size() == 1 and String(actions[0]) in ENTER_ACTIONS:
+		return "進入"
+	if actions.size() == 1 and String(actions[0]) == "offering_toss":
+		return "參拜"
+	if loc.has("npc_model") and String(loc.get("npc_model", "")) != "":
+		return "對話"
+	return "互動"
+
 ## 走近某互動點：顯示提示（不直接跳選單），並在破戒場所自動觸發一次誘惑。
 func _on_trigger_entered(id: String) -> void:
 	_current_loc = id
 	var loc: Dictionary = _npcs.get(id, {})
 	_current_actions = loc.get("actions", [])
-	hud.show_prompt("〔E〕%s" % String(loc.get("name", id)))
+	var verb := _prompt_verb(loc)
+	hud.show_prompt("%s%s" % [verb, String(loc.get("name", id))])
 	if loc.has("ambient_break") and not _broken_zones.has(id):
 		_broken_zones[id] = true
 		BreakVowSystem.try_trigger(String(loc.ambient_break))
@@ -159,7 +186,7 @@ func _input(event: InputEvent) -> void:
 	elif event.is_action_pressed("interact"):
 		_interact()
 
-## 走近互動點後按 E：只 1 項＝直接執行；多項＝跳「該人」小選單。
+## 走近互動點後按 E：只 1 項＝直接執行；多項的多功能 NPC＝進對話讓 NPC 問話、玩家選項分流。
 func _interact() -> void:
 	if _current_loc == "" or _current_actions.is_empty():
 		return
@@ -169,9 +196,24 @@ func _interact() -> void:
 		return
 	if _current_actions.size() == 1:
 		perform_action(String(_current_actions[0]))
+	elif NPC_ENTRY_TIMELINE.has(_current_loc):
+		Dialogic.start(String(NPC_ENTRY_TIMELINE[_current_loc]))
 	else:
+		# 保底：未建對話分流的多動作點（理論上不該再有），沿用舊選單避免卡死。
 		var loc: Dictionary = _npcs.get(_current_loc, {})
 		hud.show_action_menu(String(loc.get("name", _current_loc)), _current_actions, perform_action)
+
+## Dialogic 選項用 [signal arg="menu_action:<action>"] 把選到的功能傳出來；
+## deferred 呼叫避免在 Dialogic 事件處理當下就重入 perform_action（可能立刻再 Dialogic.start）。
+func _on_dialogic_signal(arg: Variant) -> void:
+	if typeof(arg) != TYPE_STRING:
+		return
+	var s := (arg as String)
+	if not s.begins_with("menu_action:"):
+		return
+	var action := s.substr("menu_action:".length()).strip_edges()
+	if action != "":
+		call_deferred("perform_action", action)
 
 ## 執行期註冊「interact」動作（E 鍵），避免動 project.godot 的 InputEvent 序列化格式。
 func _register_interact_action() -> void:

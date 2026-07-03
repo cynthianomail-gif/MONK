@@ -58,9 +58,9 @@
   "wooden_fish": {
     "name": "木魚敲擊", "job": "chanter",
     "cost": {}, "damage_type": "physical", "power": 60, "target": "single",
-    "side_effect": {"merit": 3},
+    "side_effect": {"merit": 2},
     "unlock_condition": "初始解鎖",
-    "description": "基本攻擊，附加功德 +3。", "animation": "anim_woodenfish"
+    "description": "基本攻擊，附加功德 +2。", "animation": "anim_woodenfish"
   },
   "sound_wave": {
     "name": "梵音氣功", "job": "chanter",
@@ -164,5 +164,28 @@
     "description": "【業障≥80+持有3000金】三連擊，每擊奪金500，上限1500。",
     "animation": "anim_heat_thousand",
     "cutscene": "heat_thousand"
+  },
+  "vajra_fist_seal": {
+    "name": "金剛拳印", "job": "ascetic",
+    "cost": {"karma": 10}, "damage_type": "physical", "power": 150, "target": "single",
+    "unlock_condition": "修行盤習得",
+    "description": "修行盤所授拳法，凝勁一擊。",
+    "animation": "anim_arhat"
+  },
+  "sutra_of_stillness": {
+    "name": "止觀經", "job": "chanter",
+    "cost": {"merit": 15}, "damage_type": "support", "target": "self",
+    "special": "heal_and_cleanse", "heal_value": 150,
+    "unlock_condition": "修行盤習得",
+    "description": "修行盤所授經文，療傷並清除異常狀態。",
+    "animation": "anim_chant"
+  },
+  "beggars_stride": {
+    "name": "化緣疾步", "job": "beggar",
+    "cost": {"merit": 10}, "damage_type": "merit", "power": 130, "target": "single",
+    "special": "steal_gold", "steal_min": 40, "steal_max": 80,
+    "unlock_condition": "修行盤習得",
+    "description": "修行盤所授身法，出手帶走些許香油錢。",
+    "animation": "anim_beg"
   }
 }

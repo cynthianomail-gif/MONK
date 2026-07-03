@@ -1,0 +1,17 @@
+雨巷茶攤，了塵獨臂拄著茶壺，抬眼看無戒走近。
+join Liaochen (default)
+Liaochen (default): 來了。坐一會，還是有事找我？
+- 繼續說阿瑞斯的事（主線）
+	Liaochen (default): 好。這條路走到哪了，我們接著說。
+	[signal arg="menu_action:main_quest"]
+- 把這陣子的事記下來（存檔）
+	Liaochen (default): 該記的都記下，走到哪都不怕忘了來時路。
+	[signal arg="menu_action:save"]
+- 想換個修行的路子（職業切換）
+	Liaochen (default): 苦行、誦經、化緣，路數不同，走的都是同一條道。你選。
+	[signal arg="menu_action:job_switch"]
+- 在茶攤歇口氣（休息）
+	Liaochen (default): 坐下。這壺茶不值錢，但暖。
+	[signal arg="menu_action:rest"]
+- 沒事，先走了
+	Liaochen (default): 去吧。這攤子，天不亮都在。

@@ -1,0 +1,45 @@
+{
+  "board_name": "修行盤",
+  "currency": "daoxing",
+  "rings": [
+    {"ring": 0},
+    {"ring": 1, "radius": 120},
+    {"ring": 2, "radius": 220},
+    {"ring": 3, "radius": 320, "unlock_flag": "c1_master_trial"}
+  ],
+  "nodes": [
+    {"id": "core", "ring": 0, "angle_deg": 0, "type": "passive", "effect": {"passive": "core_awakened"}, "cost": 0, "requires": [], "name": "本心", "desc": "修行盤核心，與生俱來。"},
+
+    {"id": "atk_1", "ring": 1, "angle_deg": 0, "type": "stat", "effect": {"stat": "atk", "add": 8}, "cost": 200, "requires": ["core"], "name": "金剛力・壹", "desc": "攻擊力+8"},
+    {"id": "def_1", "ring": 1, "angle_deg": 30, "type": "stat", "effect": {"stat": "def", "add": 4}, "cost": 200, "requires": ["core"], "name": "羅漢身・壹", "desc": "防禦力+4"},
+    {"id": "hp_1", "ring": 1, "angle_deg": 60, "type": "stat", "effect": {"stat": "hp", "add": 60}, "cost": 220, "requires": ["core"], "name": "金身・壹", "desc": "HP上限+60"},
+    {"id": "spd_1", "ring": 1, "angle_deg": 90, "type": "stat", "effect": {"stat": "spd", "add": 3}, "cost": 250, "requires": ["core"], "name": "疾風步・壹", "desc": "敏捷+3"},
+    {"id": "atk_2", "ring": 1, "angle_deg": 120, "type": "stat", "effect": {"stat": "atk", "add": 8}, "cost": 260, "requires": ["atk_1"], "name": "金剛力・貳", "desc": "攻擊力+8"},
+    {"id": "def_2", "ring": 1, "angle_deg": 150, "type": "stat", "effect": {"stat": "def", "add": 5}, "cost": 260, "requires": ["def_1"], "name": "羅漢身・貳", "desc": "防禦力+5"},
+    {"id": "hp_2", "ring": 1, "angle_deg": 180, "type": "stat", "effect": {"stat": "hp", "add": 70}, "cost": 280, "requires": ["hp_1"], "name": "金身・貳", "desc": "HP上限+70"},
+    {"id": "skill_vajra_fist", "ring": 1, "angle_deg": 210, "type": "skill", "effect": {"learn_skill": "vajra_fist_seal"}, "cost": 320, "requires": ["atk_1"], "name": "金剛拳印", "desc": "習得新技能：金剛拳印（苦行）"},
+    {"id": "spd_2", "ring": 1, "angle_deg": 240, "type": "stat", "effect": {"stat": "spd", "add": 3}, "cost": 280, "requires": ["spd_1"], "name": "疾風步・貳", "desc": "敏捷+3"},
+    {"id": "skill_stillness", "ring": 1, "angle_deg": 270, "type": "skill", "effect": {"learn_skill": "sutra_of_stillness"}, "cost": 320, "requires": ["hp_1"], "name": "止觀經", "desc": "習得新技能：止觀經（念經）"},
+    {"id": "def_3", "ring": 1, "angle_deg": 300, "type": "stat", "effect": {"stat": "def", "add": 5}, "cost": 300, "requires": ["def_2"], "name": "羅漢身・參", "desc": "防禦力+5"},
+    {"id": "skill_beggars_stride", "ring": 1, "angle_deg": 330, "type": "skill", "effect": {"learn_skill": "beggars_stride"}, "cost": 320, "requires": ["spd_1"], "name": "化緣疾步", "desc": "習得新技能：化緣疾步（化緣）"},
+
+    {"id": "atk_3", "ring": 2, "angle_deg": 0, "type": "stat", "effect": {"stat": "atk", "add": 12}, "cost": 700, "requires": ["atk_2"], "name": "金剛力・參", "desc": "攻擊力+12"},
+    {"id": "def_4", "ring": 2, "angle_deg": 30, "type": "stat", "effect": {"stat": "def", "add": 8}, "cost": 700, "requires": ["def_3"], "name": "羅漢身・肆", "desc": "防禦力+8"},
+    {"id": "hp_3", "ring": 2, "angle_deg": 60, "type": "stat", "effect": {"stat": "hp", "add": 100}, "cost": 750, "requires": ["hp_2"], "name": "金身・參", "desc": "HP上限+100"},
+    {"id": "spd_3", "ring": 2, "angle_deg": 90, "type": "stat", "effect": {"stat": "spd", "add": 5}, "cost": 800, "requires": ["spd_2"], "name": "疾風步・參", "desc": "敏捷+5"},
+    {"id": "passive_iron_will", "ring": 2, "angle_deg": 120, "type": "passive", "effect": {"passive": "guard_boost"}, "cost": 900, "requires": ["atk_3", "def_4"], "name": "不動明王・心法", "desc": "被動：完美格擋窗略延長（戰鬥端讀取旗標）"},
+    {"id": "atk_4", "ring": 2, "angle_deg": 150, "type": "stat", "effect": {"stat": "atk", "add": 14}, "cost": 850, "requires": ["atk_3"], "name": "金剛力・肆", "desc": "攻擊力+14"},
+    {"id": "def_5", "ring": 2, "angle_deg": 180, "type": "stat", "effect": {"stat": "def", "add": 8}, "cost": 850, "requires": ["def_4"], "name": "羅漢身・伍", "desc": "防禦力+8"},
+    {"id": "hp_4", "ring": 2, "angle_deg": 210, "type": "stat", "effect": {"stat": "hp", "add": 120}, "cost": 900, "requires": ["hp_3"], "name": "金身・肆", "desc": "HP上限+120"},
+    {"id": "spd_4", "ring": 2, "angle_deg": 240, "type": "stat", "effect": {"stat": "spd", "add": 5}, "cost": 950, "requires": ["spd_3"], "name": "疾風步・肆", "desc": "敏捷+5"},
+    {"id": "passive_one_more_edge", "ring": 2, "angle_deg": 270, "type": "passive", "effect": {"passive": "one_more_edge"}, "cost": 1000, "requires": ["spd_3", "hp_3"], "name": "業風破・心法", "desc": "被動：再行動判定更容易觸發（戰鬥端讀取旗標）"},
+    {"id": "atk_5", "ring": 2, "angle_deg": 300, "type": "stat", "effect": {"stat": "atk", "add": 14}, "cost": 1100, "requires": ["atk_4"], "name": "金剛力・伍", "desc": "攻擊力+14"},
+    {"id": "hp_5", "ring": 2, "angle_deg": 330, "type": "stat", "effect": {"stat": "hp", "add": 140}, "cost": 1200, "requires": ["hp_4"], "name": "金身・伍", "desc": "HP上限+140"},
+
+    {"id": "master_atk", "ring": 3, "angle_deg": 0, "type": "stat", "effect": {"stat": "atk", "add": 20}, "cost": 1600, "requires": ["atk_5"], "name": "了塵傳・剛", "desc": "攻擊力+20（師鎖）"},
+    {"id": "master_def", "ring": 3, "angle_deg": 72, "type": "stat", "effect": {"stat": "def", "add": 15}, "cost": 1600, "requires": ["def_5"], "name": "了塵傳・柔", "desc": "防禦力+15（師鎖）"},
+    {"id": "master_hp", "ring": 3, "angle_deg": 144, "type": "stat", "effect": {"stat": "hp", "add": 200}, "cost": 1700, "requires": ["hp_5"], "name": "了塵傳・體", "desc": "HP上限+200（師鎖）"},
+    {"id": "master_spd", "ring": 3, "angle_deg": 216, "type": "stat", "effect": {"stat": "spd", "add": 8}, "cost": 1700, "requires": ["spd_4"], "name": "了塵傳・迅", "desc": "敏捷+8（師鎖）"},
+    {"id": "master_passive", "ring": 3, "angle_deg": 288, "type": "passive", "effect": {"passive": "master_trial_cleared"}, "cost": 1800, "requires": ["passive_iron_will", "passive_one_more_edge"], "name": "了塵傳・印可", "desc": "被動：師父印可（師鎖，全能微幅提升）"}
+  ]
+}

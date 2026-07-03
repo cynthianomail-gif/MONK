@@ -70,10 +70,12 @@ func _test_unlock_states() -> void:
 	_check(sum.get_unlock_state("great_compassion_shield").learnable, "compassion learnable w/ quest")
 
 func _test_job_mastery() -> void:
+	# 第三期修行盤每職各加一支專屬新技能（vajra_fist_seal/sutra_of_stillness/beggars_stride），
+	# 6→7：get_job_mastery() 依 skills.json 的 job 欄位計數，不分是否經 SkillUnlockManager 習得。
 	var m := SkillUnlockManager.get_job_mastery()
-	_check(m.ascetic.total == 6, "ascetic learnable total=6 (got %d)" % m.ascetic.total)
-	_check(m.chanter.total == 6, "chanter learnable total=6 (got %d)" % m.chanter.total)
-	_check(m.beggar.total == 6, "beggar learnable total=6 (got %d)" % m.beggar.total)
+	_check(m.ascetic.total == 7, "ascetic learnable total=7 (got %d)" % m.ascetic.total)
+	_check(m.chanter.total == 7, "chanter learnable total=7 (got %d)" % m.chanter.total)
+	_check(m.beggar.total == 7, "beggar learnable total=7 (got %d)" % m.beggar.total)
 	_check(SkillUnlockManager.get_heat_skill_ids().size() == 3, "3 heat skills")
 
 func _test_check_unlocks() -> void:
@@ -192,19 +194,19 @@ func _smoke_scenes() -> void:
 		for i in 4:
 			await get_tree().process_frame
 		_check(is_instance_valid(shell), "MenuShell alive")
-		# 手機應有 5 頁：任務/情報/移動/打工/設定
+		# 手機應有 6 頁：任務/情報/移動/打工/修行/設定（第三期新增「修行」app）
 		_check(shell.has_method("_show_device"), "MenuShell has _show_device")
 		if shell.has_method("_show_device"):
 			shell._show_device("phone")
 			await get_tree().process_frame
 			_check("phone" in shell._devices, "phone device exists in _devices")
 			var phone_pages: Array = shell._devices["phone"]["pages"]
-			_check(phone_pages.size() == 5, "phone has 5 pages (got %d)" % phone_pages.size())
+			_check(phone_pages.size() == 6, "phone has 6 pages (got %d)" % phone_pages.size())
 			var titles := []
 			for p in phone_pages:
 				titles.append(p.title)
-			_check("移動" in titles and "打工" in titles and "設定" in titles,
-				"phone tabs include 移動/打工/設定")
+			_check("移動" in titles and "打工" in titles and "設定" in titles and "修行" in titles,
+				"phone tabs include 移動/打工/設定/修行")
 			# 逐頁開啟不崩
 			for i in phone_pages.size():
 				shell._show_page(i)

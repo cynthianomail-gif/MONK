@@ -6,6 +6,12 @@ enum State { PLAYER_TURN, ENEMY_TURN, SKILL_ANIM, ALL_OUT, HOLD_UP, END }
 
 const ALL_OUT_DMG: int = 9999
 const MAX_ENEMIES: int = 4
+const GUARD_WINDOW_SECS: float = 0.5   # 完美格擋判定窗（第二期）
+
+# 減傷檔位（第二期第 2 點）：防禦 50%／完美格擋 70%／兩者疊加 90%
+const REDUCE_DEFEND: float = 0.5
+const REDUCE_PERFECT: float = 0.7
+const REDUCE_BOTH: float = 0.9
 
 signal state_changed(s: State)
 signal enemy_weakpoint_hit(id: String)
@@ -20,10 +26,20 @@ var player_combatant: Combatant
 var enemy_combatants: Array = []
 var _hits: int = 0
 var _enemies_data: Dictionary = {}
+
+# ─── 行動佇列（第二期第 1 點）───────────────────────────────
+## 每回合開始把存活戰鬥者按 speed 降冪排成佇列，依序行動（取代固定我方→敵方）。
+var _turn_queue: Array = []     # Array[Combatant]，本回合尚未行動的順序
+var _queue_idx: int = 0         # 目前行動者在「本回合完整佇列」的索引（給 TurnOrderBar 高亮）
+var _full_queue: Array = []     # 本回合完整佇列快照（渲染用，不隨行動縮短）
 var _boss: Combatant = null      # 有階段的 Boss 參照（無則為 null）
 var _boss_phases: Array = []     # boss.json 的 phases 陣列
 var _boss_phase_idx: int = -1    # 目前階段索引（-1 = 非階段型 Boss）
 var _boss_hp_seen: int = 0        # 上次見到的 Boss HP（判斷掉血→受擊表情）
+
+# ─── 護法召喚（第四期）───────────────────────────────────
+var _summons: Dictionary = {}      # summons.json 內容
+var _summons_used: Dictionary = {} # summon_id → true（本場戰鬥已用過，每場每尊限 1 次）
 
 func _ready() -> void:
 	add_to_group("battle_manager")
@@ -32,6 +48,8 @@ func _ready() -> void:
 func setup(enemy_id: String) -> void:
 	_enemies_data = JsonLoader.load_json("res://data/enemies.json")
 	_enemies_data.merge(JsonLoader.load_json("res://data/boss.json"))
+	_summons = JsonLoader.load_json("res://data/summons.json")
+	_summons_used.clear()
 	var data: Dictionary = _enemies_data.get(enemy_id, {})
 	if data.is_empty():
 		push_error("BattleManager: 找不到敵人 %s" % enemy_id)
@@ -52,7 +70,84 @@ func setup(enemy_id: String) -> void:
 	EventBus.battle_started.emit(data)
 	if data.get("is_boss", false):
 		AudioManager.switch_bgm("boss_theme")
-	_begin_player_turn()
+	_start_round()
+
+# ─── 行動佇列（第二期第 1 點）───────────────────────────────
+
+## 回合開始：把所有存活戰鬥者按 speed 降冪排成佇列，依序行動。
+func _start_round() -> void:
+	if state == State.END:
+		return
+	_full_queue = _build_turn_queue()
+	_turn_queue = _full_queue.duplicate()
+	_queue_idx = 0
+	_render_turn_order()
+	_advance_queue()
+
+## 依 speed 降冪排（同速：玩家優先，其餘依原順序穩定）。
+func _build_turn_queue() -> Array:
+	var actors: Array = []
+	if player_combatant.is_alive():
+		actors.append(player_combatant)
+	for e in enemy_combatants:
+		if e.is_alive():
+			actors.append(e)
+	actors.sort_custom(func(a, b):
+		if a.speed != b.speed:
+			return a.speed > b.speed
+		# 同速玩家優先
+		return a.is_player and not b.is_player)
+	return actors
+
+func _render_turn_order() -> void:
+	if ui.has_method("render_turn_order"):
+		ui.render_turn_order(_full_queue, _queue_idx)
+
+## 取出佇列下一位行動；空了→回合結束結算→下一回合。
+func _advance_queue() -> void:
+	if state == State.END:
+		return
+	# 跳過已死者
+	while not _turn_queue.is_empty() and not _turn_queue[0].is_alive():
+		_turn_queue.pop_front()
+		_queue_idx += 1
+	if _turn_queue.is_empty():
+		_end_round()
+		return
+	var actor: Combatant = _turn_queue[0]
+	_queue_idx = _full_queue.find(actor)
+	_render_turn_order()
+	if actor.is_player:
+		_begin_player_turn()
+	else:
+		_enemy_single_turn(actor)
+
+## 目前行動者行動完 → 從佇列移除，推進下一位。
+func _pop_and_advance() -> void:
+	if not _turn_queue.is_empty():
+		_turn_queue.pop_front()
+	_advance_queue()
+
+## One More：玩家命中弱點 → 在佇列最前插入一次額外玩家行動（不移除當前）。
+func _insert_player_extra_action() -> void:
+	# 當前玩家 slot 仍在 _turn_queue[0]；不 pop，直接再給一次玩家回合。
+	if not _turn_queue.is_empty() and _turn_queue[0].is_player:
+		return  # 已在最前，直接重開玩家回合即可
+	_turn_queue.push_front(player_combatant)
+
+## 回合結束結算：狀態/buff tick，然後開新回合。
+func _end_round() -> void:
+	status.process_turn_end(player_combatant)
+	player_combatant.tick_buffs()
+	player_combatant.is_guarding = false  # 防禦只維持自己那回合
+	for e in enemy_combatants:
+		status.process_turn_end(e)
+		e.tick_buffs()
+	_check_end()
+	if state != State.END:
+		_hits = 0
+		EventBus.combo_count_changed.emit(0)
+		_start_round()
 
 # ─── 玩家回合 ───────────────────────────────────────────
 
@@ -61,10 +156,134 @@ func _begin_player_turn() -> void:
 		return
 	if not status.process_turn_start(player_combatant):
 		battle_log.emit("無戒動彈不得……")
-		_enemy_turn()
+		_pop_and_advance()
 		return
+	player_combatant.is_guarding = false  # 每次輪到玩家先清，選了防禦才設回
 	_set_state(State.PLAYER_TURN)
-	ui.show_skill_menu(available_skills())
+	if ui.has_method("open_command_menu"):
+		ui.open_command_menu(_disabled_commands())
+	else:
+		ui.show_skill_menu(available_skills())
+
+## 護法指令灰置條件（第四期）：至少 1 尊「未用過且金幣夠」才可選；否則灰置。
+func _disabled_commands() -> Array:
+	if _any_summon_available():
+		return []
+	return ["summon"]
+
+## 是否還有至少一尊護法本場未用過、且金幣足夠請動。
+func _any_summon_available() -> bool:
+	for sid in _summons.keys():
+		if can_summon(sid):
+			return true
+	return false
+
+## 單尊護法是否可召喚：本場未用過 + 金幣足夠。
+func can_summon(summon_id: String) -> bool:
+	if _summons_used.get(summon_id, false):
+		return false
+	var data: Dictionary = _summons.get(summon_id, {})
+	if data.is_empty():
+		return false
+	return GameManager.player.gold >= int(data.get("gold_cost", 0))
+
+## 供 UI 列護法子選單：回傳 summons.json 內容（含已用/金幣不足資訊由 can_summon 判）。
+func summon_defs() -> Dictionary:
+	return _summons
+
+func summon_used(summon_id: String) -> bool:
+	return _summons_used.get(summon_id, false)
+
+## CommandMenu 回傳指令 → 分派。攻擊/技能/道具沿用既有；防禦為新指令。
+func on_command(cmd: String) -> void:
+	if state != State.PLAYER_TURN:
+		return
+	match cmd:
+		"attack":
+			var basic: String = _basic_skill_id()
+			if basic != "":
+				ui.begin_target_or_use(basic)
+		"skill":
+			ui.show_skill_menu(available_skills())
+		"item":
+			ui.show_item_menu()
+		"defend":
+			player_use_defend()
+		"summon":
+			ui.show_summon_menu()
+
+## 依職業取 basic 技（攻擊指令＝免費基本攻擊）。
+func _basic_skill_id() -> String:
+	var job: String = GameManager.player.job
+	# basic 技慣例：damage_type 非 passive、無 cost、優先 id 含 basic 或 punch
+	for id in GameManager.player.skills_unlocked:
+		var sk: Dictionary = executor.get_skill(id)
+		if sk.is_empty() or sk.get("job", "") != job:
+			continue
+		if sk.get("cost", {}).is_empty() and sk.get("damage_type", "") in ["physical", "karma", "merit"]:
+			return id
+	# fallback：第一個可用技
+	var avail: Array = available_skills()
+	return avail[0] if not avail.is_empty() else ""
+
+## 防禦指令：本回合減傷 50%（＋完美格擋可疊加至 90%），消耗行動 → 推進佇列。
+func player_use_defend() -> void:
+	if state != State.PLAYER_TURN:
+		return
+	player_combatant.is_guarding = true
+	battle_log.emit("無戒擺出防禦架式（減傷）")
+	_hits = 0
+	EventBus.combo_count_changed.emit(0)
+	_pop_and_advance()
+
+## 護法召喚（第四期）：花金幣＝香油錢請神，不動業/淨資源。每尊每場限 1 次。
+## 消耗一回合 → 佇列下一位（不觸發 One More，同道具指令）。
+func player_use_summon(summon_id: String) -> void:
+	if state != State.PLAYER_TURN:
+		return
+	if not can_summon(summon_id):
+		battle_log.emit("此護法本場已請過，或香油錢不足……")
+		_begin_player_turn()
+		return
+	var data: Dictionary = _summons.get(summon_id, {})
+	if not GameManager.spend_gold(int(data.get("gold_cost", 0))):
+		_begin_player_turn()
+		return
+	_summons_used[summon_id] = true
+	_set_state(State.SKILL_ANIM)
+	battle_log.emit("請下　%s！" % data.get("name", summon_id))
+	await ui.play_summon_effect(summon_id, data)
+	_apply_summon_effect(data)
+	_hits = 0
+	EventBus.combo_count_changed.emit(0)
+	_check_end()
+	if state != State.END:
+		_pop_and_advance()
+
+## 護法效果結算：damage（單體傷害+擊倒）或 support（全體治療+防禦加持）。
+func _apply_summon_effect(data: Dictionary) -> void:
+	match String(data.get("effect_kind", "")):
+		"damage":
+			var target: Combatant = _valid_target(_first_alive_enemy_index())
+			if target == null:
+				return
+			var dtype: String = String(data.get("damage_type", "karma"))
+			var base: float = float(data.get("power", 200)) * (player_combatant.attack / 100.0)
+			var w_mult: float = 2.0 if dtype in target.weaknesses else (0.5 if dtype in target.resistances else 1.0)
+			var dmg: int = maxi(int(base * w_mult) - target.defense, 1)
+			executor.apply_damage(target, dmg, player_combatant, dtype)
+			if data.get("special", "") == "knockdown" and target.is_alive():
+				target.set_down(true)
+		"support":
+			if data.get("special", "") == "party_heal_and_guard":
+				player_combatant.heal(int(data.get("heal_value", 200)))
+				player_combatant.add_buff("def_up", float(data.get("def_buff_value", 0.4)), int(data.get("def_buff_duration", 2)))
+
+func _first_alive_enemy_index() -> int:
+	for i in enemy_combatants.size():
+		if enemy_combatants[i].is_alive():
+			return i
+	return -1
 
 func available_skills() -> Array:
 	var job: String = GameManager.player.job
@@ -116,9 +335,32 @@ func player_use_skill(skill_id: String, target_idx: int) -> void:
 		var cut: String = sk.get("cutscene", "")
 		if cut != "":
 			await SceneRouter.play_battle_cutscene(cut)
+	_record_weakness_intel(sk, target)
 	await ui.play_skill_effect(sk.get("name", skill_id), result.hit_weakness, result.is_crit)
 	await _maybe_trigger_boss_phase2()
 	_process_result(result)
+
+## 弱點探知（第一期）：命中屬性 = 敵人弱點 → 記錄並揭曉徽章（跨戰鬥保留、進存檔）。
+## 傷害技才探知；命中的目標（單體或全體）逐一比對。
+func _record_weakness_intel(sk: Dictionary, primary_target: Combatant) -> void:
+	var dtype: String = sk.get("damage_type", "")
+	if dtype in ["", "support", "passive"]:
+		return
+	var targets: Array = []
+	if sk.get("target", "single") in ["all", "all_enemies"]:
+		targets = enemy_combatants
+	else:
+		targets = [primary_target]
+	for t in targets:
+		if t == null:
+			continue
+		if dtype in t.weaknesses:
+			var eid: String = t.base_id if t.base_id != "" else t.id
+			if GameManager.record_weakness_intel(eid, dtype):
+				battle_log.emit("看破 %s 的弱點！" % t.display_name)
+	# 揭曉徽章
+	if ui.has_method("refresh_all_weakness_badges"):
+		ui.refresh_all_weakness_badges()
 
 func _valid_target(idx: int) -> Combatant:
 	if idx >= 0 and idx < enemy_combatants.size() and enemy_combatants[idx].is_alive():
@@ -140,51 +382,80 @@ func _process_result(r: Dictionary) -> void:
 			return
 		_check_end()
 		if state != State.END:
+			_insert_player_extra_action()  # One More：插入額外玩家行動
 			_begin_player_turn()
 		return
 	_hits = 0
 	EventBus.combo_count_changed.emit(0)
 	_check_end()
 	if state != State.END:
-		_enemy_turn()
+		_pop_and_advance()  # 玩家行動完 → 佇列下一位
 
 # ─── 敵人回合 ───────────────────────────────────────────
 
-func _enemy_turn() -> void:
+## 單一敵人行動（佇列驅動）。含完美格擋判定窗（第二期第 2 點）。
+func _enemy_single_turn(e: Combatant) -> void:
 	_set_state(State.ENEMY_TURN)
-	for e in enemy_combatants:
-		if not e.is_alive():
-			continue
-		if e.is_downed:
-			e.set_down(false)
-			battle_log.emit("%s 爬了起來" % e.display_name)
-			continue
-		if not status.process_turn_start(e):
-			battle_log.emit("%s 無法行動" % e.display_name)
-			continue
-		var act: Dictionary = executor.execute_enemy_action(e, player_combatant, enemy_combatants)
-		if not act.is_empty():
-			ui.enemy_lunge(e)
-			battle_log.emit("%s 使出「%s」" % [e.display_name, act.get("name", "?")])
-			if e == _boss:
-				ui.flash_enemy_mood(_boss, _boss_fig(String(_boss.portrait_moods.get("act", ""))), 0.8)
-				ui.boss_vfx(_boss, "attack")
-		if act.has("summon") and enemy_combatants.size() < MAX_ENEMIES:
-			_summon(act.summon)
-		await get_tree().create_timer(0.5).timeout
-		if not player_combatant.is_alive():
-			break
-	# 回合結束：狀態結算
-	status.process_turn_end(player_combatant)
-	player_combatant.tick_buffs()
-	for e in enemy_combatants:
-		status.process_turn_end(e)
-		e.tick_buffs()
+	if not e.is_alive():
+		_pop_and_advance()
+		return
+	if e.is_downed:
+		e.set_down(false)
+		battle_log.emit("%s 爬了起來" % e.display_name)
+		_pop_and_advance()
+		return
+	if not status.process_turn_start(e):
+		battle_log.emit("%s 無法行動" % e.display_name)
+		_pop_and_advance()
+		return
+
+	# 完美格擋判定窗：出招前先開紅色警示窗，等玩家（或 AI 測試）反應
+	await _run_guard_window(e)
+
+	var act: Dictionary = executor.execute_enemy_action(e, player_combatant, enemy_combatants)
+	if not act.is_empty():
+		ui.enemy_lunge(e)
+		battle_log.emit("%s 使出「%s」" % [e.display_name, act.get("name", "?")])
+		if e == _boss:
+			ui.flash_enemy_mood(_boss, _boss_fig(String(_boss.portrait_moods.get("act", ""))), 0.8)
+			ui.boss_vfx(_boss, "attack")
+	if act.has("summon") and enemy_combatants.size() < MAX_ENEMIES:
+		_summon(act.summon)
+	# 敵行動後清掉玩家的完美格擋旗標（只護這一擊）
+	player_combatant.perfect_guard_ready = false
+	await get_tree().create_timer(0.35).timeout
 	_check_end()
 	if state != State.END:
-		_hits = 0
-		EventBus.combo_count_changed.emit(0)
-		_begin_player_turn()
+		_pop_and_advance()
+
+## 完美格擋判定窗：實機用 UI 的警示光圈＋餵真輸入；headless 用可注入假輸入。
+## 命中窗口按 interact(E) → perfect_guard_ready = true（SkillExecutor 讀取套 70%/90% 減傷）。
+func _run_guard_window(attacker: Combatant) -> void:
+	player_combatant.perfect_guard_ready = false
+	var gw := GuardWindow.new(GUARD_WINDOW_SECS)
+	gw.open()
+	if ui.has_method("show_guard_warning"):
+		ui.show_guard_warning(attacker)
+	# 逐幀餵真輸入（headless 無鍵盤→自然過期；測試走 inject_guard_input）
+	var frames: int = maxi(1, int(GUARD_WINDOW_SECS / 0.05))
+	for _i in frames:
+		var t := get_tree().create_timer(0.05)
+		await t.timeout
+		var pressed: bool = Input.is_action_pressed("interact") or _test_guard_pressed
+		if gw.tick(0.05, pressed):
+			player_combatant.perfect_guard_ready = true
+			if ui.has_method("flash_perfect_guard"):
+				ui.flash_perfect_guard()
+			break
+		if not gw.is_open():
+			break
+	if ui.has_method("hide_guard_warning"):
+		ui.hide_guard_warning()
+
+## 測試注入：設 true 模擬玩家在格擋窗按下 interact。
+var _test_guard_pressed: bool = false
+func inject_guard_input(pressed: bool) -> void:
+	_test_guard_pressed = pressed
 
 func _summon(summon_id: String) -> void:
 	var data: Dictionary = _enemies_data.get(summon_id, {})
@@ -193,6 +464,10 @@ func _summon(summon_id: String) -> void:
 	var c := Combatant.from_enemy(summon_id, data, "_b%d" % enemy_combatants.size())
 	enemy_combatants.append(c)
 	ui.add_enemy_panel(c)
+	# 援兵加入本回合佇列尾（本回合稍後行動），並更新順序條
+	_turn_queue.append(c)
+	_full_queue.append(c)
+	_render_turn_order()
 	battle_log.emit("%s 的兄弟加入戰鬥！" % data.get("name", summon_id))
 
 # ─── 總攻擊 / Hold-up ──────────────────────────────────
@@ -229,7 +504,7 @@ func _hold_up() -> void:
 				battle_log.emit("什麼都沒搜到……")
 	_check_end()
 	if state != State.END:
-		_begin_player_turn()
+		_start_round()  # 總攻擊/Hold-up 後重開新回合（重排佇列）
 
 func _all_downed() -> bool:
 	return enemy_combatants.all(func(e): return e.is_downed or not e.is_alive())
@@ -258,14 +533,19 @@ func _check_end() -> void:
 func _victory() -> void:
 	var gold: int = 0
 	var kills: int = 0
+	var daoxing: int = 0
 	for e in enemy_combatants:
 		gold += e.gold_reward
+		daoxing += e.level * 15            # 道行基準＝敵 level×15（第二期第 4 點）
+		if e.is_boss:
+			daoxing += 200                 # Boss 加成
 		kills += 1
 	if GameManager.get_flag("gold_multiplier_active"):
 		gold = int(gold * 1.5)
-	await ui.play_victory(gold)
+	await ui.play_victory(gold, 15, daoxing)  # 結算三行：金幣/功德/道行
 	GameManager.add_gold(gold)
 	GameManager.add_merit(15)
+	GameManager.add_daoxing(daoxing)
 	GameManager.set_flag("kill_count", GameManager.get_flag("kill_count", 0) + kills)
 	GameManager.player.current_hp = player_combatant.current_hp
 	SkillUnlockManager.check_unlocks()
@@ -392,7 +672,7 @@ func player_use_item(item_id: String) -> void:
 	EventBus.combo_count_changed.emit(0)
 	_check_end()
 	if state != State.END:
-		_enemy_turn()  # 道具消耗一回合 → 進敵方回合
+		_pop_and_advance()  # 道具消耗一回合 → 佇列下一位
 
 ## 依 effect.kind 套用——複用既有戰鬥效果機制（不經 SkillExecutor）。
 func _apply_item_effect(effect: Dictionary) -> void:

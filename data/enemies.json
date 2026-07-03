@@ -1,7 +1,7 @@
 {
   "street_punk": {
     "name": "櫻木町混混", "district": "shrine",
-    "max_hp": 150, "attack": 25, "defense": 10, "level": 2,
+    "max_hp": 150, "attack": 25, "defense": 10, "level": 2, "speed": 14,
     "weaknesses": ["merit"], "resistances": ["physical"],
     "ai_pattern": "aggressive",
     "skills": ["punk_punch", "provoke", "call_backup"],
@@ -16,7 +16,7 @@
 
   "corrupt_vendor": {
     "name": "黑心攤販", "district": "shrine",
-    "max_hp": 200, "attack": 20, "defense": 25, "level": 3,
+    "max_hp": 200, "attack": 20, "defense": 25, "level": 3, "speed": 16,
     "weaknesses": ["karma"], "resistances": ["merit"],
     "ai_pattern": "defensive",
     "skills": ["overcharge", "smoke_screen", "fake_goods"],
@@ -31,7 +31,7 @@
 
   "night_ghost": {
     "name": "深夜孤魂", "district": "shrine",
-    "max_hp": 120, "attack": 40, "defense": 0, "level": 4,
+    "max_hp": 120, "attack": 40, "defense": 0, "level": 4, "speed": 18,
     "weaknesses": ["merit"], "resistances": ["physical"],
     "ai_pattern": "random",
     "skills": ["haunt", "spirit_claw", "drain_merit"],
@@ -47,7 +47,7 @@
 
   "drunk_guard": {
     "name": "醉漢保鑣", "district": "shrine",
-    "max_hp": 180, "attack": 35, "defense": 15, "level": 5,
+    "max_hp": 180, "attack": 35, "defense": 15, "level": 5, "speed": 20,
     "weaknesses": ["karma"], "resistances": [],
     "ai_pattern": "aggressive",
     "skills": ["bottle_smash", "double_hit", "bodyguard"],
@@ -63,7 +63,7 @@
 
   "temple_ghost": {
     "name": "神社宇惡鬼", "district": "shrine",
-    "max_hp": 350, "attack": 30, "defense": 30, "level": 6,
+    "max_hp": 350, "attack": 30, "defense": 30, "level": 6, "speed": 22,
     "weaknesses": ["merit"], "resistances": ["karma", "physical"],
     "ai_pattern": "defensive",
     "skills": ["curse_seal", "ghost_fire", "dark_regen", "karma_burst"],
@@ -79,7 +79,7 @@
 
   "pantheon_guard": {
     "name": "萬神殿重裝保全", "district": "armory",
-    "max_hp": 220, "attack": 38, "defense": 22, "level": 7,
+    "max_hp": 220, "attack": 38, "defense": 22, "level": 7, "speed": 24,
     "weaknesses": ["merit"], "resistances": ["physical"],
     "ai_pattern": "aggressive",
     "skills": ["baton_strike", "riot_shield", "call_reinforcement"],

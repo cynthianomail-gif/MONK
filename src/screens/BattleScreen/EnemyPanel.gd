@@ -19,8 +19,13 @@ var _hp_bar: ProgressBar
 var _hp_text: Label
 var _status_label: Label
 var _down_label: Label
+var _weak_label: Label       # 弱點徽章列（第一期）：已探知顯示「弱 淨」，否則「弱 ？」
+var _lv_label: Label         # 名字後綴 Lv
 var _base_portrait: String = ""
 var _mood_timer: SceneTreeTimer = null
+
+## 三系屬性 → 顯示名（弱點徽章用）
+const ELEM_NAMES := {"physical": "物", "karma": "業", "merit": "淨"}
 
 func _init(c: Combatant, idx: int) -> void:
 	combatant = c
@@ -54,10 +59,17 @@ func _init(c: Combatant, idx: int) -> void:
 	plate.add_child(pv)
 
 	_name_label = Label.new()
-	_name_label.text = c.display_name
+	_name_label.text = "%s  Lv%d" % [c.display_name, c.level]
 	_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_name_label.add_theme_font_size_override("font_size", 24)
 	pv.add_child(_name_label)
+
+	# 弱點徽章列（第一期）：命中過才顯示屬性，否則「弱 ？」
+	_weak_label = Label.new()
+	_weak_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_weak_label.add_theme_font_size_override("font_size", 15)
+	_weak_label.add_theme_color_override("font_color", Color("#FFD700"))
+	pv.add_child(_weak_label)
 
 	_hp_bar = ProgressBar.new()
 	_hp_bar.max_value = c.max_hp
@@ -105,6 +117,7 @@ func _init(c: Combatant, idx: int) -> void:
 	c.hp_changed.connect(_on_hp_changed)
 	c.down_changed.connect(_on_down_changed)
 	_on_hp_changed(c.current_hp, c.max_hp)
+	refresh_weakness_badges()
 
 	# boss：掛 VFX 疊層(待機霧+火星常駐；受擊/攻擊/phase2/擊敗觸發)
 	if c.is_boss and ResourceLoader.exists("res://assets/2d/portraits/boss/fx/idle_mist.png"):
@@ -141,6 +154,23 @@ func _on_down_changed(is_down: bool) -> void:
 
 func set_statuses(statuses: Array) -> void:
 	_status_label.text = "、".join(statuses)
+
+## 弱點徽章（第一期）：走訪敵人 weaknesses，已探知的顯示屬性名，未探知顯示「？」。
+## 無弱點的敵人不顯示。BattleManager 命中弱點後呼叫刷新（探知→揭曉）。
+func refresh_weakness_badges() -> void:
+	if _weak_label == null:
+		return
+	if combatant.weaknesses.is_empty():
+		_weak_label.text = ""
+		return
+	var parts: Array = []
+	var eid: String = combatant.base_id if combatant.base_id != "" else combatant.id
+	for w in combatant.weaknesses:
+		if GameManager.knows_weakness(eid, w):
+			parts.append(ELEM_NAMES.get(w, w))
+		else:
+			parts.append("？")
+	_weak_label.text = "弱 " + " ".join(parts)
 
 func set_target_mode(enabled: bool) -> void:
 	_hit_button.visible = enabled and combatant.is_alive()

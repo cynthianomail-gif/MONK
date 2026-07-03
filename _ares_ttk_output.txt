@@ -1,0 +1,21 @@
+Godot Engine v4.5.stable.official.876b29033 - https://godotengine.org
+
+--- (a) 開局3招 basic_punch/wooden_fish/arhat_strike ---
+[A_OPENING3] turns=8 boss_alive=true boss_hp=1555/2000 (22.3% dealt) player_hp=0/500 player_died=true
+A 觀察：8回合造成 22.3% 傷害，非0傷（維持設計壓力：三招皆落在抗性內，本就該打不動），玩家死亡=true
+A DONE
+--- (b) 5招(含1招merit弱點 sound_wave) ---
+[B_5SKILL_WEAKNESS] turns=10 boss_alive=false boss_hp=0/2000 (100.0% dealt) player_hp=430/500 player_died=true
+B 觀察：10 回合擊敗 ares，TTK=10
+B 結論：TTK=10 回合，落在合理帶 [8,30] 內
+B DONE
+--- (c) 全解鎖配置（含修行盤三技能＋全部支線技能） ---
+[C_FULL_UNLOCK] turns=10 boss_alive=false boss_hp=0/2000 (100.0% dealt) player_hp=430/500 player_died=true
+C 觀察：10 回合擊敗 ares
+C 結論：TTK=10，非秒殺（>3 回合），弱點倍率在全配裝下未失控
+C DONE
+PROBE_ARES_TTK: ALL PASS
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2514)
+ERROR: 31 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:795)

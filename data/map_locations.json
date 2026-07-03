@@ -24,7 +24,7 @@
     "scene_file": "res://assets/3d/environments/zen_bbq.glb", "npc_model": "ah_zhong"
   },
   "zuijin_club": {
-    "name": "紫醉金迷俱樂部", "district": "shrine",
+    "name": "醉金閣", "district": "shrine",
     "scene_pos": {"x": 0.55, "y": 0.80}, "interior_2d": "res://assets/2d/map/interiors/zuijin_club.png",
     "actions": ["cherry_dialogue", "lust_break_trigger", "quest_cherry_debt", "quest_cai_ma"],
     "available_periods": [3], "bgm": "linsen_night",

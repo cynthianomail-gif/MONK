@@ -33,22 +33,28 @@ const JOB_NAMES: Dictionary = {
 
 @onready var time_label: Label        = %TimeLabel
 @onready var stats_label: Label       = %StatsLabel
-@onready var prompt: Label            = %InteractionPrompt
+@onready var prompt: PanelContainer   = %InteractionPrompt
+@onready var prompt_label: RichTextLabel = %PromptLabel
 @onready var action_menu: PanelContainer = %ActionMenu
 @onready var menu_title: Label        = %MenuTitle
 @onready var menu_buttons: VBoxContainer = %MenuButtons
 @onready var toast_label: Label       = %Toast
 
 const MINIMAP := preload("res://src/screens/MapScreen/Minimap.gd")
-const QUEST_MARKERS := preload("res://src/screens/MapScreen/QuestMarkers.gd")
+
+const PROMPT_FADE_IN: float = 0.25
+const PROMPT_FADE_OUT: float = 0.2
+const KEY_COLOR: String = "#d12e21"      # 朱紅：按鍵強調
+const TEXT_COLOR: String = "#f5f2e8"     # 近白：提示文字
 
 var _toast_tween: Tween = null
+var _prompt_tween: Tween = null
 
 func _ready() -> void:
 	prompt.visible = false
+	prompt.modulate.a = 0.0
 	action_menu.visible = false
 	toast_label.visible = false
-	_add_quest_markers()
 	_add_minimap()
 	GameManager.stat_changed.connect(func(_k, _v): update_stats())
 	GameManager.job_changed.connect(func(_j): update_stats())
@@ -66,12 +72,28 @@ func update_stats() -> void:
 		p.current_hp, p.max_hp, p.karma, p.merit, p.gold
 	]
 
-func show_prompt(text: String) -> void:
-	prompt.text = text
+## action_text 例：「與了塵對話」「進入保齡球館」——本函式負責套朱紅〔E〕前綴＋淡入。
+func show_prompt(action_text: String) -> void:
+	prompt_label.text = "[center][color=%s]〔E〕[/color][color=%s]%s[/color][/center]" % [
+		KEY_COLOR, TEXT_COLOR, action_text
+	]
+	if prompt.visible and prompt.modulate.a > 0.0:
+		return  # 已顯示中（例如換了目標但仍在範圍內）：文字更新即可，不重播淡入
 	prompt.visible = true
+	_play_prompt_tween(1.0, PROMPT_FADE_IN)
 
 func hide_prompt() -> void:
-	prompt.visible = false
+	if not prompt.visible:
+		return
+	_play_prompt_tween(0.0, PROMPT_FADE_OUT, true)
+
+func _play_prompt_tween(target_alpha: float, duration: float, hide_when_done: bool = false) -> void:
+	if _prompt_tween:
+		_prompt_tween.kill()
+	_prompt_tween = create_tween()
+	_prompt_tween.tween_property(prompt, "modulate:a", target_alpha, duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	if hide_when_done:
+		_prompt_tween.tween_callback(func(): prompt.visible = false)
 
 func show_action_menu(title: String, actions: Array, callback: Callable) -> void:
 	menu_title.text = title
@@ -130,10 +152,3 @@ func _add_minimap() -> void:
 	mm.offset_left = -164.0; mm.offset_top = 60.0
 	mm.offset_right = -16.0; mm.offset_bottom = 208.0
 	add_child(mm)
-
-## NPC 頭上任務「！」（螢幕空間投影）。放最底層，讓選單/toast 蓋在上面。
-func _add_quest_markers() -> void:
-	var qm: Control = QUEST_MARKERS.new()
-	qm.name = "QuestMarkers"
-	add_child(qm)
-	move_child(qm, 0)

@@ -1,8 +1,8 @@
 {
   "ares": {
     "name": "阿瑞斯", "subtitle": "新梵戰神",
-    "max_hp": 2000, "attack": 80, "defense": 40, "level": 20,
-    "weaknesses": [], "resistances": ["karma", "merit", "physical"],
+    "max_hp": 2000, "attack": 80, "defense": 40, "level": 20, "speed": 30,
+    "weaknesses": ["merit"], "resistances": ["karma", "physical"],
     "is_boss": true,
     "portrait": "ares_base.jpg",
     "portrait_moods": { "hurt": "ares_pained.jpg", "act": "ares_mocking_laugh.jpg", "phase2": "ares_phase2.jpg" },

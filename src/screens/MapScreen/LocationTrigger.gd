@@ -18,7 +18,6 @@ func setup(id: String, data: Dictionary) -> void:
 	var radius: float = data.get("trigger_radius", 2.5)
 	shape.radius = radius
 	get_node("CollisionShape3D").shape = shape
-	get_node("NameLabel").text = data.get("name", id)
 	# 地面金環標記隨觸發半徑縮放（環 mesh 原生外徑 1.72≈半徑 2.5 的視覺佔比）
 	var ring_scale := clampf(radius / 2.5, 0.5, 1.4)
 	get_node("Marker").scale = Vector3(ring_scale, 1.0, ring_scale)

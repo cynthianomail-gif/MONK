@@ -14,31 +14,31 @@ Liaochen (default): 你既要與他們為敵，總得先認得他們的臉。十
 Liaochen (default): 拆你神社、奪你塔的，是集團的拳頭——戰神，阿瑞斯。保全、傭兵、軍火，全握在他手裡。崇尚力量，瞧不起談判。
 [signal arg="flag:intel_ares"]
 [background arg="res://assets/2d/gods/hermes.jpg" fade="0.4"]
-Liaochen (default): 替貨抽成的盜神，荷米斯。這城裡每一筆流動，他都要分一杯——連地下情報，也是他的買賣。
+Liaochen (default): 替貨抽成的盜神，荷米斯——這城裡每一筆流動，他都要分一杯。
 [signal arg="flag:intel_hermes"]
 [background arg="res://assets/2d/gods/poseidon.jpg" fade="0.4"]
-Liaochen (default): 海運的霸主，波賽頓。潮水下的貨，沒有他點頭，進不了港。
+Liaochen (default): 海運的霸主，波賽頓——沒他點頭，進不了港。
 [signal arg="flag:intel_poseidon"]
 [background arg="res://assets/2d/gods/demeter.jpg" fade="0.4"]
-Liaochen (default): 豐收女神，狄蜜特。你餐桌上的每一粒米，都握在她一人手裡。
+Liaochen (default): 豐收女神，狄蜜特——你餐桌上的米，都在她手裡。
 [signal arg="flag:intel_demeter"]
 [background arg="res://assets/2d/gods/hephaestus.jpg" fade="0.4"]
-Liaochen (default): 匠神，赫菲斯托斯。拆你神社的那台怪手，正是出自他的工坊。建設、重工、軍火，他什麼都造。
+Liaochen (default): 匠神，赫菲斯托斯——拆你神社的怪手，就出自他的工坊。
 [signal arg="flag:intel_hephaestus"]
 [background arg="res://assets/2d/gods/aphrodite.jpg" fade="0.4"]
-Liaochen (default): 夜生活的女王，阿芙蘿黛蒂。燈火與掌聲，都是她豢養的能源。
+Liaochen (default): 夜生活的女王，阿芙蘿黛蒂——燈火與掌聲，都是她的能源。
 [signal arg="flag:intel_aphrodite"]
 [background arg="res://assets/2d/gods/apollo.jpg" fade="0.4"]
-Liaochen (default): 光明之神，阿波羅。全城聽見的聲音由他校準——你該信什麼，是他說了算。
+Liaochen (default): 光明之神，阿波羅——全城聽見的聲音，由他說了算。
 [signal arg="flag:intel_apollo"]
 [background arg="res://assets/2d/gods/dionysus.jpg" fade="0.4"]
 Liaochen (default): 酒神，戴歐尼修斯。讓人沉淪、停不下來，就是他的生意。
 [signal arg="flag:intel_dionysus"]
 [background arg="res://assets/2d/gods/artemis.jpg" fade="0.4"]
-Liaochen (default): 狩獵女神，阿緹蜜絲。掛上她賞金單的獵物，從沒逃掉過。她養著一支私人軍隊。
+Liaochen (default): 狩獵女神，阿緹蜜絲——賞金單上的獵物，從沒逃掉過。
 [signal arg="flag:intel_artemis"]
 [background arg="res://assets/2d/gods/athena.jpg" fade="0.4"]
-Liaochen (default): 智慧女神，雅典娜。這座城的每一隻眼睛——監視器、數據、那些會學習的機器——都向她回報。
+Liaochen (default): 智慧女神，雅典娜——這座城的每一隻眼睛，都向她回報。
 [signal arg="flag:intel_athena"]
 [background arg="res://assets/2d/gods/hera.jpg" fade="0.4"]
 Liaochen (default): 天后，赫拉。權勢之網的織者，宙斯之后，集團的二把手。

@@ -31,9 +31,17 @@ func go_to_scene(path: String) -> void:
 func go_to_battle(enemy_id: String) -> void:
 	_store_player_position()
 	await _change_scene(BATTLE_SCENE, Transition.SLASH_RED)
+	# change_scene_to_file 是延遲換場，換場後第一幀群組可能還查不到（同 play_cutscene 的等待迴圈）。
 	var bm := get_tree().get_first_node_in_group("battle_manager")
+	var tries := 0
+	while bm == null and tries < 10:
+		await get_tree().process_frame
+		bm = get_tree().get_first_node_in_group("battle_manager")
+		tries += 1
 	if bm and bm.has_method("setup"):
 		bm.setup(enemy_id)
+	else:
+		push_error("SceneRouter: 換場後找不到 battle_manager，戰鬥未初始化（enemy_id=%s）" % enemy_id)
 
 ## 全螢幕過場：切到 CutsceneScreen 場景、播完後依 next_scene 轉場
 ## （next_scene == "map" 回地圖；其他非空字串視為下一段過場 id 串接）。

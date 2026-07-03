@@ -9,6 +9,7 @@ const QuestsApp := preload("res://src/ui/menu/pages/QuestsApp.gd")
 const IntelApp := preload("res://src/ui/menu/pages/IntelApp.gd")
 const TravelApp := preload("res://src/ui/menu/pages/TravelApp.gd")
 const JobApp := preload("res://src/ui/menu/pages/JobApp.gd")
+const BoardApp := preload("res://src/ui/menu/pages/BoardApp.gd")
 const SettingsApp := preload("res://src/ui/menu/pages/SettingsApp.gd")
 
 const GOLD := Color(0.788, 0.659, 0.38)
@@ -46,6 +47,7 @@ func _ready() -> void:
 			{"title": "情報", "factory": func() -> Control: return IntelApp.new()},
 			{"title": "移動", "factory": func() -> Control: return TravelApp.new()},
 			{"title": "打工", "factory": func() -> Control: return JobApp.new()},
+			{"title": "修行", "factory": func() -> Control: return BoardApp.new()},
 			{"title": "設定", "factory": func() -> Control: return SettingsApp.new()},
 		]},
 	}

@@ -9,11 +9,13 @@ signal buff_changed()
 signal died
 
 var id: String = ""
+var base_id: String = ""   # 敵人原始 id（不含 spawn 後綴）→ 弱點探知記錄用（跨戰鬥同型敵共享）
 var display_name: String = ""
 var max_hp: int = 100
 var current_hp: int = 100
 var attack: int = 50
 var defense: int = 0
+var speed: int = 10          # 行動佇列排序用（第二期）：敵暫值＝10＋level×2，玩家基礎 15＋盤加成
 var level: int = 1
 var karma: int = 0
 var weaknesses: Array = []
@@ -28,18 +30,22 @@ var is_downed: bool = false
 var summoned_backup: bool = false
 var chaos_target: Combatant = null
 var buffs: Dictionary = {}  # buff_name → {"value": float, "duration": int}
+var is_guarding: bool = false      # 本回合選了「防禦」指令 → 普通減傷 50%（第二期）
+var perfect_guard_ready: bool = false  # 完美格擋判定窗有效期間為 true（BattleManager 控制）
 var portrait_path: String = ""        # 已解析的立繪 res:// 路徑（空＝無立繪）
 var portrait_moods: Dictionary = {}   # mood_key → 已解析 res:// 路徑（Boss 動態表情）
 
 static func from_enemy(enemy_id: String, data: Dictionary, suffix: String = "") -> Combatant:
 	var c := Combatant.new()
 	c.id = enemy_id + suffix
+	c.base_id = enemy_id
 	c.display_name = data.get("name", enemy_id)
 	c.max_hp = data.get("max_hp", 100)
 	c.current_hp = c.max_hp
 	c.attack = data.get("attack", 30)
 	c.defense = data.get("defense", 0)
 	c.level = data.get("level", 1)
+	c.speed = data.get("speed", 10 + c.level * 2)  # enemies.json 有 speed 用之，否則暫值公式
 	c.karma = data.get("karma", c.level * 10)
 	c.weaknesses = data.get("weaknesses", [])
 	c.resistances = data.get("resistances", [])
@@ -60,10 +66,13 @@ static func from_player() -> Combatant:
 	var p: Dictionary = GameManager.player
 	c.id = "player"
 	c.display_name = p.name
-	c.max_hp = p.max_hp
-	c.current_hp = p.current_hp
-	c.attack = 100
-	c.defense = 10
+	# 基礎值 HP500／攻100／防10／敏15 不變，成長全靠修行盤（第三期）：bonus 讀 board_unlocked 計算。
+	var bonus: Dictionary = CultivationBoard.compute_bonus()
+	c.max_hp = p.max_hp + int(bonus.get("hp", 0))
+	c.current_hp = mini(p.current_hp, c.max_hp)
+	c.attack = 100 + int(bonus.get("atk", 0))
+	c.defense = 10 + int(bonus.get("def", 0))
+	c.speed = 15 + int(bonus.get("spd", 0))
 	c.karma = p.karma
 	c.is_player = true
 	return c

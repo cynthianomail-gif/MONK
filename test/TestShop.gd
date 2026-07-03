@@ -74,15 +74,18 @@ func _test_battle_items() -> void:
 	# shield → golden_body buff
 	battle._apply_item_effect({ "kind": "shield", "value": 250, "duration": 3 })
 	_check(battle.player_combatant.has_buff("golden_body"), "shield 道具上 golden_body buff")
-	# player_use_item：消耗 + 套效果 + 轉 ENEMY_TURN
+	# player_use_item：消耗 + 套效果 + 消耗一回合（佇列推進）
+	# 用真回合佇列驅動：_start_round 讓玩家在佇列最前，再用道具。
 	GameManager.player.inventory = { "heal_salve": 1 }
-	battle.state = battle.State.PLAYER_TURN
 	battle.player_combatant.current_hp = 100
+	battle._start_round()
+	await get_tree().process_frame
+	_check(battle.state == battle.State.PLAYER_TURN, "回合開始為玩家回合（speed 玩家先手）")
 	battle.player_use_item("heal_salve")
 	_check(GameManager.item_count("heal_salve") == 0, "player_use_item 消耗道具")
 	_check(battle.player_combatant.current_hp == 300, "player_use_item 套用 heal")
-	_check(battle.state == battle.State.ENEMY_TURN, "player_use_item → ENEMY_TURN")
-	await get_tree().create_timer(0.8).timeout   # 讓 _enemy_turn 在 live 節點上跑完再 free
+	# 道具消耗一回合 → 佇列推進到敵人（或回合結算後重開）；不再停在同一玩家 slot
+	await get_tree().create_timer(0.8).timeout   # 讓後續敵人回合在 live 節點上跑完再 free
 	# 非 PLAYER_TURN：不消耗
 	GameManager.player.inventory = { "heal_salve": 1 }
 	battle.state = battle.State.ENEMY_TURN
@@ -107,22 +110,20 @@ func _test_battle_ui_items() -> void:
 	battle.setup("street_punk")
 	await get_tree().process_frame
 	var ui = battle.get_node("BattleUI")
-	# 空背包：道具鈕 disabled
+	# 道具改為 CommandMenu 頂層指令（第一期）：show_item_menu() 開子選單。
+	# 空背包：show_item_menu() 走 _has_usable_items()=false → 退回指令選單，不列道具。
 	GameManager.player.inventory = {}
-	ui.show_skill_menu(battle.available_skills())
+	ui.show_item_menu()
 	await get_tree().process_frame
-	var item_btn := _find_button(ui.skill_buttons, "🎒 道具")
-	_check(item_btn != null and item_btn.disabled, "空背包道具鈕 disabled")
-	# 有道具：道具鈕 enabled，子選單列出該道具 + 返回
+	_check(_find_button(ui.skill_buttons, "金瘡藥 ×2") == null, "空背包不列出道具")
+	_check(not ui._has_usable_items(), "空背包 _has_usable_items 為 false")
+	# 有道具：子選單列出該道具 + 返回指令
 	GameManager.player.inventory = { "heal_salve": 2 }
-	ui.show_skill_menu(battle.available_skills())
-	await get_tree().process_frame
-	item_btn = _find_button(ui.skill_buttons, "🎒 道具")
-	_check(item_btn != null and not item_btn.disabled, "有道具時道具鈕 enabled")
-	ui._show_item_menu()
+	_check(ui._has_usable_items(), "有道具時 _has_usable_items 為 true")
+	ui.show_item_menu()
 	await get_tree().process_frame
 	_check(_find_button(ui.skill_buttons, "金瘡藥 ×2") != null, "子選單列出 金瘡藥 ×2")
-	_check(_find_button(ui.skill_buttons, "← 返回") != null, "子選單有返回鈕")
+	_check(_find_button(ui.skill_buttons, "← 返回指令") != null, "子選單有返回指令鈕")
 	battle.queue_free()
 	GameManager.player.inventory = {}
 	await get_tree().process_frame
@@ -133,15 +134,15 @@ func _test_shop_purchase() -> void:
 	get_tree().root.add_child(shop)
 	await get_tree().process_frame
 	_check(is_instance_valid(shop), "ShopScreen 實例化不崩")
-	# 金幣足：扣款 + 入袋
+	# 金幣足：扣款 + 入袋（第四期道具漲價：heal_salve 220／amulet 500）
 	GameManager.player.gold = 1000
 	GameManager.player.inventory = {}
-	shop._on_buy("heal_salve")   # price 150
-	_check(GameManager.player.gold == 850, "買 heal_salve 扣 150 (got %d)" % GameManager.player.gold)
+	shop._on_buy("heal_salve")   # price 220
+	_check(GameManager.player.gold == 780, "買 heal_salve 扣 220 (got %d)" % GameManager.player.gold)
 	_check(GameManager.item_count("heal_salve") == 1, "買後入袋 1")
 	# 金幣不足：不扣、不入袋
 	GameManager.player.gold = 100
-	shop._on_buy("amulet")   # price 350
+	shop._on_buy("amulet")   # price 500
 	_check(GameManager.player.gold == 100, "不足: 金幣不變")
 	_check(GameManager.item_count("amulet") == 0, "不足: 未入袋")
 	shop.close()
