@@ -58,6 +58,8 @@ var _type_done := 0         # 已揭示字數（整數，已播過音）
 var _type_total := 0
 var _type_cps := TYPE_CPS
 var _type_blip_on := false   # 只有旁白(無主詞)與「無戒」台詞播打字機音；阿瑞斯等有配音者不播
+var _input_ready := false   # play() 呼叫後、清空殘留輸入前，暫不「立即」接受跳過鍵（見 play() 內說明）
+var _pending_skip := false  # 尚未 _input_ready 時按下的跳過鍵：記下來，轉 ready 的當下立刻補放行
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -78,10 +80,26 @@ func play(cutscene_id: String) -> void:
 	_shot_idx = -1
 	_cur_cap_idx = -1
 	_playing = true
+	_input_ready = false
+	_pending_skip = false
 	# 保險：開場確保圓形眼罩全開（close=0，全透明），避免上次被打閉眼殘留。
 	if _eye != null and _eye.material is ShaderMaterial:
 		(_eye.material as ShaderMaterial).set_shader_parameter("close", 0.0)
 	_advance_shot()
+	# 清掉啟動本過場那次按鍵（Enter/空白/ESC）殘留的輸入佇列，避免同一次按鍵瞬間又把
+	# 本過場跳掉；用「清空佇列＋下一幀才開始接受跳過鍵」取代舊的「開頭 0.4s 一律忽略」，
+	# 因為固定時間窗會連玩家之後真的想跳過的第二次按鍵都吃掉（雨段連續過場即實際踩雷案例：
+	# 玩家剛跳過上一段的按鍵一鬆手就緊接著按下一段的跳過，若落在窗內會被靜音吞掉、
+	# 畫面上毫無提示，玩家以為「按了沒用」便不再按，只能眼睜睜等整段播完）。
+	# 光是「清空＋等一幀」仍有極短的競態窗：玩家的按鍵剛好落在「已清空但還沒等滿一幀」
+	# 之間，會被 _unhandled_input 直接丟掉。所以未 ready 前收到的跳過鍵改記到
+	# _pending_skip，一旦轉 ready 立刻補放行，不會漏接。
+	Input.flush_buffered_events()
+	await get_tree().process_frame
+	_input_ready = true
+	if _pending_skip:
+		_pending_skip = false
+		_finish()
 
 # --- 流程 ---
 
@@ -459,9 +477,19 @@ func _play_impact() -> void:
 		tw.tween_property(_frame, "position", Vector2.ZERO, IMPACT_SHAKE / float(steps + 1))
 
 func _unhandled_input(event: InputEvent) -> void:
-	# 開頭 0.4s 內忽略跳過鍵：避免啟動本過場的那次按鍵（Enter/空白）殘留輸入瞬間跳過。
-	if _playing and _t > 0.4 and (event.is_action_pressed("confirm") or event.is_action_pressed("cancel")):
+	if not _playing:
+		return
+	if not (event.is_action_pressed("confirm") or event.is_action_pressed("cancel")):
+		return
+	get_viewport().set_input_as_handled()
+	# _input_ready 在 play() 清空殘留輸入佇列＋等過一幀後才轉 true：避免啟動本過場的
+	# 那次按鍵（Enter/空白/ESC）殘留輸入瞬間跳過。不用固定時間窗（見 play() 內註解）。
+	# 未 ready 前收到的按鍵不會被丟棄，記到 _pending_skip，轉 ready 當下立刻補放行，
+	# 確保玩家跳過上一段後緊接著按下一段跳過鍵，不會被吞掉。
+	if _input_ready:
 		_finish()
+	else:
+		_pending_skip = true
 
 func _finish() -> void:
 	if _done:

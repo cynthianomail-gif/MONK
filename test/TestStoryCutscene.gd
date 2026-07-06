@@ -9,6 +9,7 @@ func _ready() -> void:
 	await get_tree().process_frame
 	_test_data()
 	await _test_player()
+	await _test_consecutive_skip()
 	print("STORY_CUTSCENE_TEST: ", "ALL PASS" if ok else "HAS FAILURES")
 	get_tree().quit(0 if ok else 1)
 
@@ -68,3 +69,58 @@ func _test_player() -> void:
 	cs.queue_free()
 	cs2.queue_free()
 	await get_tree().process_frame
+
+## 迴歸測試：跳過第一段開場過場後緊接著播下一段（雨段 ch1_aftermath_wake），
+## 用同樣的跳過鍵操作應該也能跳過。修正前的 bug：StoryCutscene 用「開頭 0.4s 一律
+## 忽略跳過鍵」擋掉啟動本過場那次殘留輸入，但玩家剛跳過上一段、手指一鬆又緊接著
+## 按下一段的跳過鍵時，這次按鍵常常就落在新過場的 0.4s 忽略窗內——結果被無聲吞掉，
+## 畫面沒有任何提示，玩家以為「按了沒用」便不再按，只能乾等雨段整段播完。
+## 修法：改成「清空殘留輸入佇列＋等一幀」而非固定時間窗（見 StoryCutscene.play()），
+## 所以本測試特意在雨段一出現就立刻按跳過鍵（模擬最壞情況：手指幾乎同時按下），
+## 驗證仍會在該次按鍵後、或最晚下一次按鍵時正常跳過，不會卡到整段播完。
+func _test_consecutive_skip() -> void:
+	var ps: PackedScene = load("res://src/screens/CutsceneScreen/StoryCutscene.tscn")
+
+	# 第一段：opening_temple_falls，播放中按跳過。
+	var cs1 = ps.instantiate()
+	get_tree().root.add_child(cs1)
+	await get_tree().process_frame
+	cs1.play("opening_temple_falls")
+	await get_tree().create_timer(0.6).timeout
+	await get_tree().process_frame
+	_press_confirm()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_check(not cs1._playing, "迴歸-第一段開場跳過後 _playing=false")
+	cs1.queue_free()
+
+	# 緊接著第二段：ch1_aftermath_wake（雨段），一出現就立刻按跳過（最壞情況：落在
+	# 舊版 0.4s 忽略窗內）。新版設計下最多晚一幀生效，不應該卡住整段播完。
+	var cs2 = ps.instantiate()
+	get_tree().root.add_child(cs2)
+	await get_tree().process_frame
+	cs2.play("ch1_aftermath_wake")
+	_press_confirm()  # 立刻按：舊版會被 0.4s 忽略窗吞掉且不會再有第二次按鍵
+	# 給最多 1 秒讓 play() 的「清空佇列＋等一幀」流程走完並生效；
+	# 若仍在播放，代表卡住（迴歸），修正前這裡會一路播到自然結束（約 4.5s）才 false。
+	var waited := 0.0
+	while cs2._playing and waited < 1.0:
+		await get_tree().process_frame
+		waited += get_process_delta_time()
+	_check(not cs2._playing, "迴歸-雨段緊接著按跳過（落在啟動窗內）仍應在 1s 內生效 (waited=%.2fs)" % waited)
+	cs2.queue_free()
+	await get_tree().process_frame
+
+func _press_confirm() -> void:
+	var ev := InputEventKey.new()
+	ev.physical_keycode = KEY_SPACE
+	ev.keycode = KEY_SPACE
+	ev.unicode = 32
+	ev.pressed = true
+	Input.parse_input_event(ev)
+	var ev_up := InputEventKey.new()
+	ev_up.physical_keycode = KEY_SPACE
+	ev_up.keycode = KEY_SPACE
+	ev_up.unicode = 32
+	ev_up.pressed = false
+	Input.parse_input_event(ev_up)
