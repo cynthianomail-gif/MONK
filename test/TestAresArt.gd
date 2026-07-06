@@ -1,14 +1,16 @@
 extends Node
 ## headless 驗證：第 1 章 Ares 過場/對話的正式美術接線。
-##  - A1 阿瑞斯現身圖 (ares_reveal.jpg) 已匯入、可載入為 Texture2D
-##  - HQ 外觀圖 (hq_exterior.jpg) 已匯入、可載入為 Texture2D（洗字後的 B2）
-##  - cutscenes.json 的 ares_intro 指向 ares_reveal.jpg（不再借 gods/ares.jpg）
+##  - okami 現身圖 (ok_ares_reveal.png) 已匯入、可載入為 Texture2D
+##  - HQ 外觀圖 (hq_exterior.jpg) 已匯入、可載入為 Texture2D
+##  - cutscenes.json 的 ares_intro 指向 ok_ares_reveal.png（不再借 gods/ares.jpg，也不再是洗字前的 ares_reveal.jpg）
 ##  - main_ares_lead.dtl 解析正常，含開頭 HQ 背景事件 + 結尾清空事件
 ## 跑法：Godot --headless res://test/TestAresArt.tscn
+## 註：2026-06-24 okami 水墨整合（commit 2eb4bec）把 ares_intro 的現身圖從 ares_reveal.jpg
+## 換成 ok_ares_reveal.png；本測試於 2026-07-06 同步更新斷言以反映此事實。
 
 var ok: bool = true
 
-const ARES_REVEAL := "res://assets/cutscenes/ch1_ares/ares_reveal.jpg"
+const ARES_REVEAL := "res://assets/cutscenes/ch1_ares/ok_ares_reveal.png"
 const HQ_EXTERIOR := "res://assets/cutscenes/ch1_ares/hq_exterior.jpg"
 const OLD_BORROW := "res://assets/2d/gods/ares.jpg"
 
@@ -37,7 +39,7 @@ func _test_cutscene_wiring() -> void:
 	var images: Array = []
 	for s in shots:
 		images.append(String(s.get("image", "")))
-	_check(images.has(ARES_REVEAL), "ares_intro 指向 A1 (ares_reveal.jpg)")
+	_check(images.has(ARES_REVEAL), "ares_intro 指向 okami 現身圖 (ok_ares_reveal.png)")
 	_check(not images.has(OLD_BORROW), "ares_intro 不再借 gods/ares.jpg")
 
 func _test_dialogue_background() -> void:

@@ -34,7 +34,6 @@ const SKILL_ATTR_GLYPH := {
 @onready var all_out_label: Label = %AllOutLabel
 @onready var battle_bg: TextureRect = %BattleBg
 @onready var player_figure: BreathingFigure = %PlayerFigure
-@onready var turn_order_host: Control = %TurnOrderHost
 @onready var command_host: Control = %CommandHost
 @onready var float_layer: Control = %FloatLayer
 @onready var focus_dim: ColorRect = %FocusDim
@@ -47,7 +46,6 @@ var _pending_skill: String = ""
 var _items: Dictionary = {}
 var _player_job: String = "ascetic"
 var _player_low: bool = false
-var _turn_order: TurnOrderBar = null
 var _command_menu: CommandMenu = null
 
 # 技能子選單卡片導航（候選 A）：skill_menu 顯示技能列表時才啟用鍵盤/手把輸入。
@@ -74,20 +72,13 @@ func _ready() -> void:
 	var status: Node = executor.get_node("StatusEffects")
 	status.status_applied.connect(func(_id, _t): _refresh_statuses())
 	status.status_damage.connect(func(id, amount, t):
-		show_log("%s 受到 %s 傷害 %d" % [_panel_name(id), STATUS_NAMES.get(t, t), amount]))
+		show_log("%s　%s　%d" % [_panel_name(id), STATUS_NAMES.get(t, t), amount]))
 	%HoldUpGold.pressed.connect(func(): _choose_hold_up("gold"))
 	%HoldUpInfo.pressed.connect(func(): _choose_hold_up("info"))
 	%HoldUpItem.pressed.connect(func(): _choose_hold_up("item"))
 	focus_dim.visible = false
-	_setup_turn_order()
 	_setup_command_menu()
 	_update_daoxing()
-
-## 行動順序條（第一期）：掛在 TurnOrderHost 下。
-func _setup_turn_order() -> void:
-	_turn_order = TurnOrderBar.new()
-	_turn_order.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	turn_order_host.add_child(_turn_order)
 
 ## 主指令選單（第一期）：掛在 CommandHost 下。
 func _setup_command_menu() -> void:
@@ -96,9 +87,9 @@ func _setup_command_menu() -> void:
 	_command_menu.command_chosen.connect(_on_command_chosen)
 	command_host.add_child(_command_menu)
 
-func render_turn_order(queue: Array, current_idx: int) -> void:
-	if _turn_order != null:
-		_turn_order.render(queue, current_idx)
+# 左上回合順序條（TurnOrderBar chip）已依使用者需求整個移除（2026-07-03 體感打磨）：
+# 「左上不用寫現在是誰的回合」涵蓋 chip 形式的視覺指示。BattleManager 的 _render_turn_order()
+# 以 has_method("render_turn_order") 防呆呼叫，本檔不再提供該方法＝自然跳過，佇列機制零改動。
 
 ## BattleManager 呼叫：開主指令選單，disabled＝要灰置的指令（如護法未實作）。
 func open_command_menu(disabled_cmds: Array) -> void:
@@ -209,7 +200,7 @@ func show_skill_menu(skill_ids: Array) -> void:
 		_skill_nav_ids.append(id)
 
 	var back_btn := Button.new()
-	back_btn.text = "← 返回指令"
+	back_btn.text = "← 返回"
 	back_btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	back_btn.pressed.connect(_back_to_command)
 	skill_buttons.add_child(back_btn)
@@ -419,7 +410,7 @@ func _on_skill_card_pressed(skill_id: String) -> void:
 	skill_menu.visible = false
 	if needs_target:
 		_pending_skill = skill_id
-		show_log("選擇目標……")
+		show_log("選擇目標")
 		_set_focus_dim(true)  # 聚焦演出：背景壓暗
 		for p in _panels:
 			p.set_target_mode(true)
@@ -483,7 +474,7 @@ func show_summon_menu() -> void:
 		btn.pressed.connect(_on_summon_pressed.bind(sid))
 		skill_buttons.add_child(btn)
 	var back := Button.new()
-	back.text = "← 返回指令"
+	back.text = "← 返回"
 	back.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	back.pressed.connect(_back_to_command)
 	skill_buttons.add_child(back)
@@ -493,10 +484,10 @@ func _summon_button_text(sid: String, data: Dictionary) -> String:
 	var name: String = data.get("name", sid)
 	var cost: int = int(data.get("gold_cost", 0))
 	if manager.summon_used(sid):
-		return "%s（本場已請過）" % name
+		return "%s（已請）" % name
 	if GameManager.player.gold < cost:
-		return "%s（金幣不足，需 %d）" % [name, cost]
-	return "%s（金幣 %d）" % [name, cost]
+		return "%s（需%d）" % [name, cost]
+	return "%s（%d）" % [name, cost]
 
 func _on_summon_pressed(summon_id: String) -> void:
 	skill_menu.visible = false
@@ -571,7 +562,7 @@ func _show_item_menu() -> void:
 		btn.pressed.connect(_on_item_pressed.bind(id))
 		skill_buttons.add_child(btn)
 	var back := Button.new()
-	back.text = "← 返回指令"
+	back.text = "← 返回"
 	back.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	back.pressed.connect(_back_to_command)
 	skill_buttons.add_child(back)
@@ -583,16 +574,28 @@ func _on_item_pressed(item_id: String) -> void:
 
 # ─── 演出 ──────────────────────────────────────────────
 
-func play_skill_effect(skill_name: String, hit_weakness: bool, is_crit: bool) -> void:
-	var text: String = "「%s」" % skill_name
+## 技能命中演出：立繪前撲（不閃紅，紅閃只保留給玩家受擊路徑）＋依 skill.fx 播程式特效＋精簡戰報。
+func play_skill_effect(sk: Dictionary, hit_weakness: bool, is_crit: bool, target_id: String = "") -> void:
+	var skill_name: String = sk.get("name", "")
+	var text: String = skill_name
 	if is_crit:
-		text += " 會心一擊！"
+		text += "！會心"
 	if hit_weakness:
 		AudioManager.play_sfx("weakness_hit")
 	_lunge_player_figure()
+	_play_skill_fx_at(sk, target_id)
 	show_log(text)
 	_refresh_statuses()
 	await get_tree().create_timer(0.45).timeout
+
+## 依技能 fx 欄在目標位置播特效；找不到目標位置則落在敵陣中央。
+func _play_skill_fx_at(sk: Dictionary, target_id: String) -> void:
+	var pos: Vector2 = _floater_pos_for(target_id) if target_id != "" else _floater_pos_for("")
+	SkillFx.play_for_skill(sk, float_layer, pos)
+
+## 敵人出招 FX：act 為 SkillExecutor.execute_enemy_action() 的回傳字典（含 damage_type），播在玩家立繪位置。
+func play_enemy_skill_fx(act: Dictionary) -> void:
+	SkillFx.play_for_skill(act, float_layer, _floater_pos_for("player"))
 
 ## 傷害漂浮字（第一期）：命中/爆擊/弱點/Miss 四態，飄在目標立繪上方。
 func _on_damage_dealt(target_id: String, amount: int, dtype: String) -> void:
@@ -649,16 +652,16 @@ func hide_guard_warning() -> void:
 				tw.kill()
 		player_figure.self_modulate = Color.WHITE
 
-## 完美格擋成功：立繪閃白＋斜切「格擋！」字樣＋短 hit-stop。
+## 完美格擋成功：立繪閃白＋斜切「E 格擋」關鍵字樣＋短 hit-stop。
 func flash_perfect_guard() -> void:
 	AudioManager.play_sfx("impact_heavy")
 	if player_figure != null and player_figure.visible:
 		player_figure.self_modulate = Color(2.2, 2.2, 2.2)
 		var tw := create_tween()
 		tw.tween_property(player_figure, "self_modulate", Color.WHITE, 0.25)
-	# 斜切「格擋！」字樣
+	# 斜切「E 格擋」關鍵字樣
 	var lbl := Label.new()
-	lbl.text = "格擋！"
+	lbl.text = "E 格擋"
 	lbl.add_theme_font_size_override("font_size", 52)
 	lbl.add_theme_color_override("font_color", Color(0.788, 0.659, 0.38))
 	lbl.rotation_degrees = -10.0
@@ -818,12 +821,12 @@ func _choose_hold_up(choice: String) -> void:
 ## 勝利結算（第二期第 4 點）：金幣/功德/道行三行。
 func play_victory(gold: int, merit: int = 15, daoxing: int = 0) -> void:
 	AudioManager.switch_bgm("victory_jingle")
-	show_log("勝利！　金幣 +%d　功德 +%d　道行 +%d" % [gold, merit, daoxing])
+	show_log("勝利　金幣+%d　功德+%d　道行+%d" % [gold, merit, daoxing])
 	await get_tree().create_timer(0.8).timeout
 
 func play_defeat() -> void:
 	AudioManager.switch_bgm("defeat_sting")
-	show_log("無戒倒下了……（金幣減半，回古廟休養）")
+	show_log("倒下（金幣減半）")
 	await get_tree().create_timer(1.2).timeout
 
 # ─── 顯示更新 ──────────────────────────────────────────
@@ -849,10 +852,10 @@ func _on_combo(count: int) -> void:
 
 func _on_gold_stolen(amount: int) -> void:
 	if amount >= 0:
-		show_log("奪得 %d 金幣！" % amount)
+		show_log("奪金 +%d" % amount)
 		AudioManager.play_sfx("gold_collect")
 	else:
-		show_log("被搶走了 %d 金幣！" % -amount)
+		show_log("失金 -%d" % -amount)
 
 func _update_resources() -> void:
 	var p: Dictionary = GameManager.player

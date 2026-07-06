@@ -169,7 +169,20 @@ func _end() -> void:
 	_phase = "done"
 	var result := build_result()
 	AudioManager.switch_bgm("victory_jingle" if result.win else "defeat_sting")
-	finish(result)
+	var rating := "全壘打王" if result.win else "再練練"
+	show_result_panel("打擊場", rating, [
+		{"label": "安打", "value": "%d/%d" % [hits, PITCHES]},
+		{"label": "全壘打", "value": "%d" % homeruns},
+		{"label": "獲得金幣", "value": "%d" % result.gold},
+	], result)
+
+## 重開一局：歸零計數，重新開始投球。
+func restart() -> void:
+	pitches_done = 0
+	hits = 0
+	homeruns = 0
+	_finished = false
+	_new_pitch()
 
 # --- 視覺（Codex 資產＋最小 UI）---
 

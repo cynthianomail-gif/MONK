@@ -11,7 +11,7 @@
     "name": "街頭藝人阿明", "district": "shrine",
     "position_3d": {"x": 4.5, "y": 0.0, "z": -5.0}, "trigger_radius": 2.2,
     "npc_model": "ah_ming", "npc_facing_deg": 90.0,
-    "actions": ["quest_ah_ming"]
+    "actions": ["quest_ah_ming", "wooden_fish_replay"]
   },
   "npc_rei": {
     "name": "迷路的背包客澪", "district": "shrine",

@@ -90,7 +90,8 @@ func _ready() -> void:
 	_fix_player_deferred()
 	_apply_time_profile(int(GameManager.player.get("period", 0)))
 	GameManager.time_advanced.connect(_apply_time_profile)
-	print("SHRINE_STREET ready")
+	if OS.is_debug_build():
+		print("SHRINE_STREET ready")
 
 ## 依時段套光照 profile（time_advanced 直接接這裡；時段切換都發生在選單/轉場後，直接套不做過渡）。
 func _apply_time_profile(period: int) -> void:
@@ -198,7 +199,8 @@ func _fix_player_deferred() -> void:
 	var player := get_tree().get_first_node_in_group("player")
 	if player != null:
 		_fix_figure_materials(player)
-		print("SHRINE_PLAYER_MAT ok")
+		if OS.is_debug_build():
+			print("SHRINE_PLAYER_MAT ok")
 
 ## 玩家材質：保留 Meshy 貼圖＋修透明雷（base-color alpha 會把整模型變透明），消光防塑膠感。
 func _fix_figure_materials(node: Node) -> void:
@@ -719,7 +721,8 @@ func _build_shrine_hall(root: Node3D) -> void:
 	l.omni_range = 12.0
 	root.add_child(l)
 	_warm_lights.append([l, 1.4])
-	print("SHRINE_HALL ok")
+	if OS.is_debug_build():
+		print("SHRINE_HALL ok")
 
 ## 修 Meshy 材質（同 npc_figure：關透明+消光、保貼圖）。
 func _fix_glb_materials(node: Node) -> void:

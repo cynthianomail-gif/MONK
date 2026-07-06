@@ -1,0 +1,11 @@
+神社口，阿明抱著吉他盒，見無戒走近便咧嘴一笑。
+join AhMing (default)
+AhMing (default): 師父，又來啦？
+- 有事找你談（支線）
+	AhMing (default): 說吧說吧，師父有什麼事。
+	[signal arg="menu_action:quest_ah_ming"]
+- 再切磋一場木魚
+	AhMing (default): 手癢了？來來來，看誰先亂了拍子！
+	[signal arg="menu_action:wooden_fish_replay"]
+- 沒事，隨便聽聽
+	AhMing (default): 好嘞，師父慢走，有空常來捧場。

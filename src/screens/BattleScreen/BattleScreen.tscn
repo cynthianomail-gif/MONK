@@ -45,15 +45,6 @@ color = Color(0, 0, 0, 0.6)
 visible = false
 mouse_filter = 2
 
-[node name="TurnOrderHost" type="Control" parent="BattleUI"]
-unique_name_in_owner = true
-anchors_preset = 0
-offset_left = 40.0
-offset_top = 30.0
-offset_right = 900.0
-offset_bottom = 100.0
-mouse_filter = 2
-
 [node name="CommandHost" type="Control" parent="BattleUI"]
 unique_name_in_owner = true
 anchors_preset = 2
@@ -251,7 +242,7 @@ theme_override_constants/separation = 14
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.843, 0, 1)
 theme_override_font_sizes/font_size = 30
-text = "Hold Up！要求什麼？"
+text = "Hold Up"
 horizontal_alignment = 1
 
 [node name="HoldUpGold" type="Button" parent="BattleUI/HoldUpMenu/Panel/Margin/VBox"]
@@ -259,21 +250,21 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(360, 52)
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "「香油錢拿來」（金幣）"
+text = "香油錢（金幣）"
 
 [node name="HoldUpInfo" type="Button" parent="BattleUI/HoldUpMenu/Panel/Margin/VBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(360, 52)
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "「老實交代」（弱點情報）"
+text = "老實交代（弱點）"
 
 [node name="HoldUpItem" type="Button" parent="BattleUI/HoldUpMenu/Panel/Margin/VBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(360, 52)
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "「身上有什麼好東西」（道具）"
+text = "搜身（道具）"
 
 [node name="AllOutOverlay" type="ColorRect" parent="BattleUI"]
 unique_name_in_owner = true
@@ -289,6 +280,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 120
-text = "超　渡　大　陣"
+text = "超　渡"
 horizontal_alignment = 1
 vertical_alignment = 1

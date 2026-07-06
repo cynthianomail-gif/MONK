@@ -32,6 +32,9 @@ var _idx: int = 0
 var _accum: float = 0.0
 var _playing: bool = false
 var _done: bool = false
+## 跳過時的行為：false（預設，戰鬥/劇情過場既有行為）＝立即結束、停在跳過當下那一幀；
+## true（小遊戲過場專用）＝跳過時先跳到最後一幀再結束，滿足「停在最後一幀」的需求。
+var _skip_jumps_to_last: bool = false
 
 
 func _ready() -> void:
@@ -54,7 +57,10 @@ func _ready() -> void:
 	add_child(l)
 
 
-func play(cutscene_id: String) -> void:
+## skip_to_last：true 時「跳過」會先跳到最後一幀再結束（小遊戲過場用，
+## 見 SceneRouter.play_minigame_cutscene）；預設 false 維持既有戰鬥/劇情過場行為。
+func play(cutscene_id: String, skip_to_last: bool = false) -> void:
+	_skip_jumps_to_last = skip_to_last
 	_cues = SFX_CUES.get(cutscene_id, {})
 	_load_frames(cutscene_id)
 	if _frames.is_empty():
@@ -116,7 +122,27 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not _playing:
 		return
 	if event.is_action_pressed("confirm") or event.is_action_pressed("cancel"):
-		_finish()
+		_skip()
+
+
+## 滑鼠點擊跳過（小遊戲過場需求：「按任意鍵/滑鼠可跳過」）。用 _input 而非
+## _unhandled_input，因為本場景根節點是全螢幕 Control（MOUSE_FILTER_STOP 預設），
+## 滑鼠事件在 GUI 派發階段就會被標記為已處理，不會傳到 _unhandled_input。
+func _input(event: InputEvent) -> void:
+	if not _playing:
+		return
+	if event is InputEventMouseButton and event.pressed:
+		_skip()
+		get_viewport().set_input_as_handled()
+
+
+## 跳過：_skip_jumps_to_last=true 時先跳到最後一幀再結束（停在最後一幀）；
+## 否則維持舊行為，停在跳過當下那一幀直接結束。
+func _skip() -> void:
+	if _skip_jumps_to_last and not _frames.is_empty():
+		_idx = _frames.size() - 1
+		frame_rect.texture = _frames[_idx]
+	_finish()
 
 
 func _finish() -> void:

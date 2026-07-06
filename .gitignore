@@ -26,3 +26,6 @@ Thumbs.db
 /_cap_ares_phase2/
 /assets/3d/environments/cyberpunk_city/
 /_cap_*/
+
+# Media-generation scratch scripts / working files
+/tmp/

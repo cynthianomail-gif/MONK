@@ -95,15 +95,11 @@
       },
       {
         "dialogue": "quest_ah_zhong_s2",
-        "desc": "取得神社藥材（神社互動獲得）",
-        "require_flag": "got_herb",
-        "location_required": "old_temple"
+        "desc": "取得神社藥材（神社互動獲得）"
       },
       {
         "dialogue": "quest_ah_zhong_s3",
-        "desc": "取得櫻木町特製食材（櫻木町站 小販）",
-        "require_flag": "got_ingredient",
-        "location_required": "ximen_mrt"
+        "desc": "取得櫻木町特製食材（櫻木町站 小販）"
       },
       {
         "dialogue": "quest_ah_zhong_final",
@@ -178,7 +174,6 @@
       {
         "dialogue": "quest_cai_ma_choice",
         "desc": "到達神社後：照做/偷看",
-        "location_required": "old_temple",
         "branches": {
           "deliver":  {"merit": 30, "flag": "cai_ma_trusted"},
           "peek_good": {"merit": 20, "flag": "cai_ma_peeked_good"},
@@ -202,9 +197,7 @@
       },
       {
         "dialogue": "quest_grandma_s2",
-        "desc": "去櫻木会館找到健太，勸他回家",
-        "location_required": "wannian_mall",
-        "require_flag": "jie_defeated"
+        "desc": "去櫻木会館找到健太，勸他回家"
       },
       {
         "dialogue": "quest_grandma_final",
@@ -228,8 +221,7 @@
       },
       {
         "dialogue": "quest_lao_wang_s2",
-        "desc": "帶源造去櫻木会館找人（對質）",
-        "location_required": "wannian_mall"
+        "desc": "帶源造去櫻木会館找人（對質）"
       },
       {
         "dialogue": "quest_lao_wang_choice",

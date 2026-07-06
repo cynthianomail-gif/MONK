@@ -16,6 +16,7 @@ const ACTION_LABELS: Dictionary = {
 	"greed_break_trigger": "金色的誘惑……（破貪戒）",
 	"lust_break_trigger":  "留下來……（破色戒）",
 	"quest_ah_ming":       "街頭藝人阿明",
+	"wooden_fish_replay":  "再切磋一場木魚",
 	"quest_rei":           "迷路的背包客澪",
 	"quest_zheng_ma":      "佛具店鄭媽",
 	"quest_jie":           "電玩少年小傑",

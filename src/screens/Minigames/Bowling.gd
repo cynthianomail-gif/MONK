@@ -227,7 +227,22 @@ func _end() -> void:
 	_phase = "done"
 	var result := build_result()
 	AudioManager.switch_bgm("victory_jingle" if result.win else "defeat_sting")
-	finish(result)
+	var rating := "全倒高手" if result.win else "再練練"
+	show_result_panel("保齡球", rating, [
+		{"label": "倒瓶數", "value": "%d" % pins_total},
+		{"label": "bonus", "value": "+%d" % bonus},
+		{"label": "獲得金幣", "value": "%d" % result.gold},
+	], result)
+
+## 重開一局：歸零局數與計分，重新開始第一局。
+func restart() -> void:
+	frame_no = 0
+	roll_in_frame = 0
+	pins_total = 0
+	bonus = 0
+	hooked = false
+	_finished = false
+	_new_frame()
 
 # --- 視覺（Codex 資產＋程式 UI）---
 

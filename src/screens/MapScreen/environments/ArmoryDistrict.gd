@@ -19,7 +19,8 @@ func _ready() -> void:
 	_build_backdrop(self)
 	_build_ambient(self)
 	_fix_player_deferred()
-	print("ARMORY_DISTRICT ready")
+	if OS.is_debug_build():
+		print("ARMORY_DISTRICT ready")
 
 ## 軍火庫固定夜調(見 _build_env)，環境音也固定單一軌，不像神社街分時段。音檔缺就靜默跳過。
 func _build_ambient(root: Node3D) -> void:
@@ -47,7 +48,8 @@ func _fix_player_deferred() -> void:
 	var player := get_tree().get_first_node_in_group("player")
 	if player != null:
 		_fix_figure_materials(player)
-		print("ARMORY_PLAYER_MAT ok")
+		if OS.is_debug_build():
+			print("ARMORY_PLAYER_MAT ok")
 
 ## 玩家材質：保留 Meshy 貼圖＋修透明雷，消光防塑膠感。
 func _fix_figure_materials(node: Node) -> void:
@@ -262,7 +264,8 @@ func _build_forge(root: Node3D) -> void:
 			forge.scale = Vector3(sc, sc, sc)
 			forge.position = Vector3(-aabb.get_center().x * sc, -aabb.position.y * sc, zf - aabb.get_center().z * sc)
 		_cam_blocker(root, Vector3(0, FORGE_H * 0.5, zf), Vector3(12.0, FORGE_H, 8.0))
-		print("FORGE_HERO ok")
+		if OS.is_debug_build():
+			print("FORGE_HERO ok")
 	else:
 		push_warning("ArmoryDistrict: 熔鑄爐模型不存在 %s(用程式盒體)" % FORGE_GLB)
 		_steel_box(root, Vector3(0, 5.5, zf), Vector3(12.0, 11.0, 7.0), Color(0.18, 0.17, 0.19))

@@ -43,6 +43,223 @@ func finish(result: Dictionary) -> void:
 
 signal minigame_finished(result: Dictionary)
 
+## 子類覆寫：重置內部狀態、重開一局。由「再玩一次」呼叫。
+## 不得重新扣打工時段（那是進場時做的事，restart 不會碰到）、不得重複發獎勵
+## （獎勵只在最終「離開」時，依最後一局的 result 結算一次）。
+func restart() -> void:
+	pass
+
+## 依 result.win 播 minigame_<id>_win / minigame_<id>_lose 過場短片，
+## 停最後一幀後淡出移除（見 SceneRouter.play_minigame_cutscene/dismiss_minigame_cutscene）。
+## 找不到素材（缺檔）或沒有 SceneRouter autoload（測試情境）時安全跳過，不擋結算面板。
+func _play_end_cutscene(result: Dictionary) -> void:
+	var id := minigame_id()
+	if id == "":
+		return
+	if not (Engine.has_singleton("SceneRouter") or get_node_or_null("/root/SceneRouter") != null):
+		return
+	var suffix := "win" if bool(result.get("win", false)) else "lose"
+	var overlay: CanvasLayer = await SceneRouter.play_minigame_cutscene("minigame_%s_%s" % [id, suffix])
+	await SceneRouter.dismiss_minigame_cutscene(overlay)
+
+# ════════════════════════════════════════════════════════════════
+# 共用結算面板：遊戲結束不直接 finish()，先停在這裡讓玩家選
+# 「再玩一次」（呼叫 restart()，面板關閉，不觸發任何獎勵/切場）
+# 或「離開」（此刻才 finish(result)，套用獎勵並返回）。
+# ════════════════════════════════════════════════════════════════
+
+const PANEL_BG := Color(0.129, 0.106, 0.086)       # #211b16
+const PANEL_BORDER := Color(0.788, 0.588, 0.180)   # #c9962e
+const PANEL_GOLD := Color(0.941, 0.753, 0.290)     # #f0c04a
+const PANEL_TEXT := Color(0.909, 0.863, 0.761)     # #e8dcc2
+
+var _result_layer: CanvasLayer
+var _result_pending: Dictionary = {}
+var _result_btn_idx: int = 0
+var _result_buttons: Array[Button] = []
+var _result_leave_label: String = "離開"
+
+## 測試專用旗標：跳過結尾過場短片，讓 show_result_panel 同幀內直接建面板
+## （見 test/TestResultPanel.gd _make_game()）。真正遊戲流程一律播放，預設 false。
+var suppress_end_cutscene: bool = false
+
+signal result_panel_shown(rating: String, rows: Array)
+signal result_panel_leave(result: Dictionary)
+signal result_panel_restart()
+
+## 顯示共用結算面板。title=遊戲名；rating=評級大字（金色）；
+## rows=[{label, value}] 明細列；result=最終 result dict（離開時才真正 finish）。
+## leave_label 可覆寫「離開」鈕文字（21 點用「離開賭桌」）。
+##
+## 規格第 4 節（2026-07-04 minigame-overhaul-design.md）：結尾流程＝依 result.win
+## 播 minigame_<id>_win / _lose 過場 → 停最後一幀 → 結算面板疊上。此處採「過場在
+## 面板出現時移除」（二選一的後者）：cutscene 淡出移除後才建面板，不與過場疊層。
+## 9 個小遊戲的 _end() 都只呼叫這個函式，所以掛在這裡就等於全部接好，不必逐一改寫。
+func show_result_panel(title: String, rating: String, rows: Array, result: Dictionary, leave_label: String = "離開") -> void:
+	if not suppress_end_cutscene:
+		await _play_end_cutscene(result)
+	_close_result_panel()
+	_result_pending = result
+	_result_leave_label = leave_label
+	_result_btn_idx = 0
+	_result_buttons.clear()
+
+	_result_layer = CanvasLayer.new()
+	_result_layer.layer = 100
+	add_child(_result_layer)
+
+	var dim := ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.72)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	_result_layer.add_child(dim)
+
+	var panel := Panel.new()
+	var panel_w := 620.0
+	var panel_h := 300.0 + rows.size() * 40.0
+	panel.position = Vector2(960.0 - panel_w * 0.5, 540.0 - panel_h * 0.5)
+	panel.size = Vector2(panel_w, panel_h)
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = PANEL_BG
+	sb.border_color = PANEL_BORDER
+	sb.set_border_width_all(4)
+	sb.set_corner_radius_all(10)
+	panel.add_theme_stylebox_override("panel", sb)
+	_result_layer.add_child(panel)
+
+	var title_l := Label.new()
+	title_l.text = title
+	title_l.position = Vector2(0, 24)
+	title_l.size = Vector2(panel_w, 44)
+	title_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_l.add_theme_font_size_override("font_size", 30)
+	title_l.add_theme_color_override("font_color", PANEL_TEXT)
+	panel.add_child(title_l)
+
+	var rating_l := Label.new()
+	rating_l.text = rating
+	rating_l.position = Vector2(0, 72)
+	rating_l.size = Vector2(panel_w, 68)
+	rating_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	rating_l.add_theme_font_size_override("font_size", 52)
+	rating_l.add_theme_color_override("font_color", PANEL_GOLD)
+	panel.add_child(rating_l)
+
+	var row_y := 150.0
+	for row in rows:
+		var d: Dictionary = row
+		var name_l := Label.new()
+		name_l.text = String(d.get("label", ""))
+		name_l.position = Vector2(48, row_y)
+		name_l.size = Vector2(panel_w * 0.5 - 48.0, 34)
+		name_l.add_theme_font_size_override("font_size", 24)
+		name_l.add_theme_color_override("font_color", PANEL_TEXT)
+		panel.add_child(name_l)
+		var val_l := Label.new()
+		val_l.text = String(d.get("value", ""))
+		val_l.position = Vector2(panel_w * 0.5, row_y)
+		val_l.size = Vector2(panel_w * 0.5 - 48.0, 34)
+		val_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		val_l.add_theme_font_size_override("font_size", 24)
+		val_l.add_theme_color_override("font_color", PANEL_TEXT)
+		panel.add_child(val_l)
+		row_y += 40.0
+
+	var btn_y := panel_h - 84.0
+	var btn_w := 240.0
+	var btn_gap := 24.0
+	var total_w := btn_w * 2 + btn_gap
+	var btn_x0 := (panel_w - total_w) * 0.5
+	var replay_btn := _make_result_button("再玩一次", Vector2(btn_x0, btn_y), Vector2(btn_w, 56))
+	replay_btn.pressed.connect(_on_result_restart)
+	panel.add_child(replay_btn)
+	_result_buttons.append(replay_btn)
+	var leave_btn := _make_result_button(leave_label, Vector2(btn_x0 + btn_w + btn_gap, btn_y), Vector2(btn_w, 56))
+	leave_btn.pressed.connect(_on_result_leave)
+	panel.add_child(leave_btn)
+	_result_buttons.append(leave_btn)
+
+	_result_refresh_selection()
+	result_panel_shown.emit(rating, rows)
+
+func _make_result_button(text: String, pos: Vector2, size: Vector2) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.position = pos
+	b.size = size
+	b.focus_mode = Control.FOCUS_NONE
+	b.add_theme_font_size_override("font_size", 26)
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.08, 0.06, 0.05, 0.95)
+	normal.border_color = PANEL_BORDER
+	normal.set_border_width_all(2)
+	normal.set_corner_radius_all(8)
+	var sel := normal.duplicate() as StyleBoxFlat
+	sel.bg_color = Color(0.24, 0.16, 0.07, 0.98)
+	sel.border_color = PANEL_GOLD
+	sel.set_border_width_all(3)
+	b.add_theme_stylebox_override("normal", normal)
+	b.add_theme_stylebox_override("hover", sel)
+	b.add_theme_stylebox_override("pressed", sel)
+	b.add_theme_stylebox_override("focus", sel)
+	b.add_theme_color_override("font_color", PANEL_TEXT)
+	b.add_theme_color_override("font_hover_color", PANEL_GOLD)
+	b.add_theme_color_override("font_pressed_color", PANEL_GOLD)
+	b.mouse_entered.connect(func() -> void:
+		var idx := _result_buttons.find(b)
+		if idx >= 0:
+			_result_btn_idx = idx
+			_result_refresh_selection())
+	return b
+
+func _result_refresh_selection() -> void:
+	for i in _result_buttons.size():
+		var b := _result_buttons[i]
+		var box := (b.get_theme_stylebox("hover") if i == _result_btn_idx else b.get_theme_stylebox("normal")) as StyleBoxFlat
+		b.add_theme_stylebox_override("normal", box)
+
+func is_result_panel_open() -> bool:
+	return _result_layer != null and is_instance_valid(_result_layer)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not is_result_panel_open():
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		match event.keycode:
+			KEY_LEFT, KEY_A:
+				_result_btn_idx = maxi(0, _result_btn_idx - 1)
+				_result_refresh_selection()
+				get_viewport().set_input_as_handled()
+			KEY_RIGHT, KEY_D:
+				_result_btn_idx = mini(_result_buttons.size() - 1, _result_btn_idx + 1)
+				_result_refresh_selection()
+				get_viewport().set_input_as_handled()
+			KEY_ENTER, KEY_KP_ENTER, KEY_SPACE:
+				if _result_btn_idx >= 0 and _result_btn_idx < _result_buttons.size():
+					_result_buttons[_result_btn_idx].pressed.emit()
+				get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("confirm"):
+		if _result_btn_idx >= 0 and _result_btn_idx < _result_buttons.size():
+			_result_buttons[_result_btn_idx].pressed.emit()
+		get_viewport().set_input_as_handled()
+
+func _on_result_restart() -> void:
+	_close_result_panel()
+	result_panel_restart.emit()
+	restart()
+
+func _on_result_leave() -> void:
+	var r := _result_pending
+	_close_result_panel()
+	result_panel_leave.emit(r)
+	finish(r)
+
+func _close_result_panel() -> void:
+	if _result_layer != null and is_instance_valid(_result_layer):
+		_result_layer.queue_free()
+	_result_layer = null
+	_result_buttons.clear()
+
 # --- 共用體感（畫面震動＋頓幀；HUD 都在 CanvasLayer 上不受震動影響）---
 
 ## 畫面震動：搖場景根節點（強度遞減的隨機偏移）。命中/撞擊瞬間用。

@@ -25,7 +25,7 @@ func _test_characters() -> bool:
 	if cherry == null or not (cherry is DialogicCharacter):
 		push_error("Cherry.dch 載入失敗或型別錯誤")
 		return false
-	if cherry.display_name != "Cherry":
+	if cherry.display_name != "櫻":
 		push_error("Cherry display_name 錯：%s" % cherry.display_name); ok = false
 	for p in ["neutral", "smile", "sorrow", "angry"]:
 		if not cherry.portraits.has(p):

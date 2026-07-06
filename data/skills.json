@@ -3,7 +3,7 @@
     "name": "鐵拳", "job": "ascetic",
     "cost": {}, "damage_type": "physical", "power": 80, "target": "single",
     "unlock_condition": "初始解鎖",
-    "description": "基本近身攻擊。", "animation": "anim_punch"
+    "description": "基本近身攻擊。", "animation": "anim_punch", "fx": "slash_white"
   },
   "arhat_strike": {
     "name": "羅漢伏虎", "job": "ascetic",
@@ -11,7 +11,7 @@
     "special": "knockdown",
     "unlock_condition": "了塵親授（第一章劇情）",
     "description": "業障凝聚成鐵拳。命中弱點觸發 Down，可繼續行動。",
-    "animation": "anim_arhat"
+    "animation": "anim_arhat", "fx": "ink_burst"
   },
   "vajra_glare": {
     "name": "金剛怒目", "job": "ascetic",
@@ -19,7 +19,7 @@
     "special": "fear", "duration": 2,
     "unlock_condition": "完成支線「街頭藝人翔太」",
     "description": "附加恐懼（2回合，50%跳過行動）。對 Boss 無效。",
-    "animation": "anim_glare"
+    "animation": "anim_glare", "fx": "karma_seal_dark"
   },
   "ascetic_temper": {
     "name": "苦行淬煉", "job": "ascetic",
@@ -28,7 +28,7 @@
     "side_effect": {"karma": 10},
     "unlock_condition": "達成成就「行」（弱點連擊累積 10 次）",
     "description": "ATK+60% 持續 2 回合，獲得業障 10。",
-    "animation": "anim_temper"
+    "animation": "anim_temper", "fx": "self_glow_red"
   },
   "iron_shirt": {
     "name": "鐵布衫", "job": "ascetic",
@@ -36,7 +36,7 @@
     "special": "reflect_shield", "shield_value": 0.8, "reflect_value": 0.5,
     "unlock_condition": "首次完成任意破戒後自動解鎖",
     "description": "本回合受到傷害減 80%，反彈 50% 給攻擊者。",
-    "animation": "anim_iron_shirt"
+    "animation": "anim_iron_shirt", "fx": "punch_ring_white"
   },
   "sacrifice_strike": {
     "name": "捨身一擊", "job": "ascetic",
@@ -44,7 +44,7 @@
     "special": "self_weaken", "duration": 1,
     "unlock_condition": "累計擊倒 20 名敵人",
     "description": "消耗大量 HP，攻擊後自身虛弱一回合。",
-    "animation": "anim_sacrifice"
+    "animation": "anim_sacrifice", "fx": "heavy_slam"
   },
   "tathagata_palm": {
     "name": "如來神掌", "job": "ascetic",
@@ -52,7 +52,7 @@
     "ignore_defense": true, "is_heat_action": true,
     "description": "【業障滿值】從天而降，傷害無視防禦。業障歸零。",
     "animation": "anim_heat_tathagata",
-    "cutscene": "heat_tathagata"
+    "cutscene": "heat_tathagata", "fx": "ink_burst_all"
   },
 
   "wooden_fish": {
@@ -60,14 +60,14 @@
     "cost": {}, "damage_type": "physical", "power": 60, "target": "single",
     "side_effect": {"merit": 2},
     "unlock_condition": "初始解鎖",
-    "description": "基本攻擊，附加功德 +2。", "animation": "anim_woodenfish"
+    "description": "基本攻擊，附加功德 +2。", "animation": "anim_woodenfish", "fx": "punch_ring_white"
   },
   "sound_wave": {
     "name": "梵音氣功", "job": "chanter",
     "cost": {"merit": 15}, "damage_type": "merit", "power": 120, "target": "all",
     "special": "knockdown",
     "unlock_condition": "完成支線「師傅大村的最後一鍋」",
-    "description": "命中功德弱點觸發 Down。", "animation": "anim_soundwave"
+    "description": "命中功德弱點觸發 Down。", "animation": "anim_soundwave", "fx": "sound_wave_gold"
   },
   "great_compassion_shield": {
     "name": "大悲咒護罩", "job": "chanter",
@@ -75,7 +75,7 @@
     "special": "golden_body", "shield_value": 200, "duration": 3,
     "unlock_condition": "完成支線「水野的念珠債」",
     "description": "護盾抵擋下次傷害（上限200），持續3回合。",
-    "animation": "anim_shield"
+    "animation": "anim_shield", "fx": "self_glow_gold"
   },
   "requiem": {
     "name": "超渡法事", "job": "chanter",
@@ -83,7 +83,7 @@
     "special": "heal_and_cleanse", "heal_value": 100,
     "unlock_condition": "首次在戰鬥中 HP 降至 20% 以下（瀕死觸發頓悟）",
     "description": "回復 HP100 並清除全部負面狀態。",
-    "animation": "anim_requiem"
+    "animation": "anim_requiem", "fx": "prayer_beads"
   },
   "karma_rebound": {
     "name": "業火反噬", "job": "chanter",
@@ -91,7 +91,7 @@
     "power_formula": "enemy_karma * 1.5", "target": "single",
     "unlock_condition": "業障值首次達到滿值（100）",
     "description": "傷害 = 目標業障值 × 1.5，對業障高敵人特效。",
-    "animation": "anim_rebound"
+    "animation": "anim_rebound", "fx": "gold_ripple"
   },
   "sutra_seal": {
     "name": "誦經結界", "job": "chanter",
@@ -99,7 +99,7 @@
     "special": "seal", "duration": 1,
     "unlock_condition": "櫻 好感度達到 50",
     "description": "全體封印 1 回合，無法使用技能。",
-    "animation": "anim_seal"
+    "animation": "anim_seal", "fx": "gold_ripple_wide"
   },
   "diamond_sutra": {
     "name": "金剛薩埵超渡大陣", "job": "chanter",
@@ -107,7 +107,7 @@
     "ignore_defense": true, "is_heat_action": true,
     "description": "【功德滿值】全體無視防禦，功德歸零。",
     "animation": "anim_heat_diamond",
-    "cutscene": "heat_diamond"
+    "cutscene": "heat_diamond", "fx": "gold_ripple_all"
   },
 
   "broken_bowl_beg": {
@@ -115,21 +115,21 @@
     "cost": {}, "damage_type": "physical", "power": 40, "target": "single",
     "special": "steal_gold", "steal_min": 50, "steal_max": 100,
     "unlock_condition": "累計擊倒 6 名敵人",
-    "description": "攻擊同時奪取 50~100 金幣。", "animation": "anim_beg"
+    "description": "攻擊同時奪取 50~100 金幣。", "animation": "anim_beg", "fx": "coin_scatter"
   },
   "lions_roar": {
     "name": "獅子吼", "job": "beggar",
     "cost": {"karma": 25}, "damage_type": "karma", "power": 90, "target": "all",
     "special": "chaos", "duration": 2,
     "unlock_condition": "完成支線「流浪漢源造的過去」",
-    "description": "全體傷害，附加混亂 2 回合。", "animation": "anim_roar"
+    "description": "全體傷害，附加混亂 2 回合。", "animation": "anim_roar", "fx": "ink_burst_wide"
   },
   "self_harm": {
     "name": "苦肉計", "job": "beggar",
     "cost": {"hp": 0.2}, "damage_type": "support", "target": "self",
     "special": "gain_karma", "karma_gain": 35,
     "unlock_condition": "弱點連擊累積 5 次",
-    "description": "自傷換業障 +35。", "animation": "anim_selfharm"
+    "description": "自傷換業障 +35。", "animation": "anim_selfharm", "fx": "self_glow_purple"
   },
   "underdog": {
     "name": "哀兵必勝", "job": "beggar",
@@ -137,7 +137,7 @@
     "passive": {"hp_threshold": 0.3, "atk_bonus": 0.8, "evade_bonus": 0.3},
     "unlock_condition": "完成支線「失業工程師大輔」（選擇認真傾聽）",
     "description": "【被動】HP<30% 時 ATK+80%，閃避+30%。",
-    "animation": null
+    "animation": null, "fx": ""
   },
   "rolling_taunt": {
     "name": "滿地打滾", "job": "beggar",
@@ -145,7 +145,7 @@
     "special": "taunt_and_evade", "evade_bonus": 0.5, "duration": 1,
     "unlock_condition": "使用業障技能累計 10 次",
     "description": "全體嘲諷，自身閃避+50%，持續 1 回合。",
-    "animation": "anim_rolling"
+    "animation": "anim_rolling", "fx": "karma_rings"
   },
   "alms_wave": {
     "name": "化緣大法", "job": "beggar",
@@ -153,7 +153,7 @@
     "special": "mass_steal_gold", "steal_ratio": 0.3,
     "unlock_condition": "完成支線「八重找孫子」",
     "description": "全體傷害，奪取所有敵人 30% 金幣。",
-    "animation": "anim_alms_wave"
+    "animation": "anim_alms_wave", "fx": "coin_scatter"
   },
   "thousand_hands": {
     "name": "千手化緣大法", "job": "beggar",
@@ -163,14 +163,14 @@
     "is_heat_action": true,
     "description": "【業障≥80+持有3000金】三連擊，每擊奪金500，上限1500。",
     "animation": "anim_heat_thousand",
-    "cutscene": "heat_thousand"
+    "cutscene": "heat_thousand", "fx": "ink_burst_all"
   },
   "vajra_fist_seal": {
     "name": "金剛拳印", "job": "ascetic",
     "cost": {"karma": 10}, "damage_type": "physical", "power": 150, "target": "single",
     "unlock_condition": "修行盤習得",
     "description": "修行盤所授拳法，凝勁一擊。",
-    "animation": "anim_arhat"
+    "animation": "anim_arhat", "fx": "punch_ring_red"
   },
   "sutra_of_stillness": {
     "name": "止觀經", "job": "chanter",
@@ -178,7 +178,7 @@
     "special": "heal_and_cleanse", "heal_value": 150,
     "unlock_condition": "修行盤習得",
     "description": "修行盤所授經文，療傷並清除異常狀態。",
-    "animation": "anim_chant"
+    "animation": "anim_chant", "fx": "prayer_beads"
   },
   "beggars_stride": {
     "name": "化緣疾步", "job": "beggar",
@@ -186,6 +186,6 @@
     "special": "steal_gold", "steal_min": 40, "steal_max": 80,
     "unlock_condition": "修行盤習得",
     "description": "修行盤所授身法，出手帶走些許香油錢。",
-    "animation": "anim_beg"
+    "animation": "anim_beg", "fx": "gold_ripple"
   }
 }

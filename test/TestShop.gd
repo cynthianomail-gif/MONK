@@ -117,13 +117,13 @@ func _test_battle_ui_items() -> void:
 	await get_tree().process_frame
 	_check(_find_button(ui.skill_buttons, "金瘡藥 ×2") == null, "空背包不列出道具")
 	_check(not ui._has_usable_items(), "空背包 _has_usable_items 為 false")
-	# 有道具：子選單列出該道具 + 返回指令
+	# 有道具：子選單列出該道具 + 返回
 	GameManager.player.inventory = { "heal_salve": 2 }
 	_check(ui._has_usable_items(), "有道具時 _has_usable_items 為 true")
 	ui.show_item_menu()
 	await get_tree().process_frame
 	_check(_find_button(ui.skill_buttons, "金瘡藥 ×2") != null, "子選單列出 金瘡藥 ×2")
-	_check(_find_button(ui.skill_buttons, "← 返回指令") != null, "子選單有返回指令鈕")
+	_check(_find_button(ui.skill_buttons, "← 返回") != null, "子選單有返回鈕（UI 去冗字後文案簡化為「← 返回」）")
 	battle.queue_free()
 	GameManager.player.inventory = {}
 	await get_tree().process_frame

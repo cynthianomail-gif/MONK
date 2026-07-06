@@ -136,7 +136,20 @@ func _end() -> void:
 	_phase = "done"
 	var result := build_result()
 	AudioManager.switch_bgm("victory_jingle" if result.win else "defeat_sting")
-	finish(result)
+	var rating := "功德圓滿" if result.win else "改日再來"
+	show_result_panel("香火投擲", rating, [
+		{"label": "命中", "value": "%d/%d" % [hits, THROWS]},
+		{"label": "正中投入口", "value": "%d" % perfects},
+		{"label": "功德", "value": "+%d" % result.merit},
+	], result)
+
+## 重開一局：歸零計數，重新開始擲香油錢。
+func restart() -> void:
+	throws_done = 0
+	hits = 0
+	perfects = 0
+	_finished = false
+	_new_throw()
 
 # --- 視覺（全程式幾何）---
 

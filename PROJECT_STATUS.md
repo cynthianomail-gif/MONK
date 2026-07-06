@@ -2,7 +2,7 @@
 
 > **🎯 範圍：DEMO 版＝只做第一章（阿瑞斯）（2026-06-15 定案）。** ch2–12 暫不實作；所有規劃以「ch1 完整可玩 demo」為目標。
 > 常駐進度文件 — 切帳號/換 session 先讀這份。最後更新 **2026-07-03**。
-> 企畫書＝[`monk_go_rogue_GDD_v5.md`](monk_go_rogue_GDD_v5.md)；主線設計＝[`docs/superpowers/specs/2026-06-14-main-story-design.md`](docs/superpowers/specs/2026-06-14-main-story-design.md)。
+> 企畫書 `monk_go_rogue_GDD_v5.md` 已散佚（repo 內查無此檔，連結失效）——**現行事實來源＝`docs/superpowers/specs/`**；主線設計＝[`docs/superpowers/specs/2026-06-14-main-story-design.md`](docs/superpowers/specs/2026-06-14-main-story-design.md)。
 
 > **🔄 2026-06-19/20 大轉向（最新，覆蓋下方舊向）：** 全遊戲改 **《大神 Ōkami》日式水墨風（去霓虹）**、舞台**反皮日本**（地名/視覺；**希臘四神財閥主線不變、不重寫劇情**）。**探索確認用回 3D（水墨 shader 版，非 2D 楓谷）**。美術分工＝**角色立繪→Codex**、**背景→Magnific（Freepik MCP / nano_banana，~33k credits）**；higgsfield 額度已乾。水墨 shader＋3D 神社街 look-dev 已驗證，正式化 spec/plan＝`docs/superpowers/{specs,plans}/2026-06-20-3d-shrine-street-scene*`。**（2026-07-03 再修正：3D 探索場景「去水墨」＝拿掉筆刷 toon/墨線描邊，改 `assets/shaders/stylized/*` 標準光照；2D 立繪/戰鬥美術維持 okami 水墨不變。）****下方所有 2D 楓谷／cyberpunk／霓虹／西門 等敘述＝轉向前歷史，系統程式不變、只反皮。**
 

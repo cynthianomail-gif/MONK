@@ -62,7 +62,8 @@ func _ready() -> void:
 	_build_prompt_ui()
 	_build_ambient(self)
 	_fix_player_deferred()
-	print("UNDERGROUND_PARLOR ready")
+	if OS.is_debug_build():
+		print("UNDERGROUND_PARLOR ready")
 
 # ── 互動（自理，不經 MapScreen）────────────────────────────
 func _input(event: InputEvent) -> void:

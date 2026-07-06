@@ -138,8 +138,66 @@ func _fade_cover(rect: ColorRect, alpha: float, dur: float) -> void:
 	tw.tween_property(rect, "color:a", alpha, dur)
 	await tw.finished
 
+## 小遊戲過場短片（規格 2026-07-04 minigame-overhaul-design.md §4）：
+## CanvasLayer(128) 疊加逐幀播放（CutsceneScreen 格式：frame_%04d.png 12fps + audio.ogg，
+## 沿用 play_battle_cutscene 的淡入淡出轉場）。
+## 素材目錄 res://assets/cutscenes/<clip_id>/ 不存在時立即回傳 null，不擋流程
+## （沿用鳥居缺檔的優雅跳過模式）。
+## 播完（或按任意鍵/滑鼠跳過，跳過也會先跳到最後一幀）停在最後一幀，
+## 回傳疊加用的 CanvasLayer，交給呼叫端決定何時用 dismiss_minigame_cutscene 移除
+## （開場：淡出後直接進入遊戲；結尾：結算面板出現前先移除，見 MinigameBase.show_result_panel）。
+func play_minigame_cutscene(clip_id: String) -> CanvasLayer:
+	var dir: String = "res://assets/cutscenes/%s/" % clip_id
+	if not ResourceLoader.exists(dir + "frame_0001.png"):
+		return null
+	if not ResourceLoader.exists(CUTSCENE_SCENE):
+		return null
+	var root := get_tree().current_scene
+	if root == null:
+		return null
+	var overlay := CanvasLayer.new()
+	overlay.layer = 128
+	root.add_child(overlay)
+	var cover := ColorRect.new()
+	cover.color = Color(0, 0, 0, 0)
+	cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cover.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(cover)
+	const FADE := 0.3
+	await _fade_cover(cover, 1.0, FADE)
+	var cs: Node = load(CUTSCENE_SCENE).instantiate()
+	overlay.add_child(cs)
+	overlay.move_child(cover, overlay.get_child_count() - 1)
+	# 先用 connect（而非等淡出結束才 await cs.finished）記下播放完成旗標：
+	# 玩家有可能在淡出轉場的 0.3s 窗口內就按鍵/點滑鼠跳過，若等到淡出結束才建立
+	# await 訂閱，中間這段時間發出的 finished 訊號會因為還沒人在聽而遺失，
+	# 導致下面的等待永遠等不到（已在 TestMinigameCutscene 實測到這個競態）。
+	var cs_done := {"v": false}
+	if cs.has_signal("finished"):
+		cs.finished.connect(func() -> void: cs_done.v = true, CONNECT_ONE_SHOT)
+	if cs.has_method("play"):
+		cs.play(clip_id, true)   # skip_to_last=true：小遊戲過場跳過也停在最後一幀
+	await _fade_cover(cover, 0.0, FADE)
+	while not cs_done.v:
+		await get_tree().process_frame
+	return overlay   # 仍在樹上，停在最後一幀；由呼叫端決定何時 dismiss
+
+## 淡出並移除 play_minigame_cutscene 回傳的 overlay。overlay 為 null（缺檔跳過）時安全不做事。
+func dismiss_minigame_cutscene(overlay: CanvasLayer) -> void:
+	if overlay == null or not is_instance_valid(overlay):
+		return
+	var cover := ColorRect.new()
+	cover.color = Color(0, 0, 0, 0)
+	cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cover.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(cover)
+	await _fade_cover(cover, 1.0, 0.3)
+	overlay.queue_free()
+
 ## 啟動小遊戲。context 可帶情境（如支線 win/lose 獎勵 dict），
 ## 結束時由 finish_minigame 依 result.win 套用。
+## 載入場景後、遊戲開始前播 minigame_<id>_intro（缺檔優雅跳過，不擋流程）；
+## 「再玩一次」重玩時不會再走這條路徑，所以開場片天然只播一次。
 func go_to_minigame(minigame_id: String, context: Dictionary = {}) -> void:
 	var path: String = "res://src/screens/Minigames/%s.tscn" % minigame_id.to_pascal_case()
 	if not ResourceLoader.exists(path):
@@ -150,6 +208,13 @@ func go_to_minigame(minigame_id: String, context: Dictionary = {}) -> void:
 	_minigame_context = context
 	_active_minigame = minigame_id
 	await _change_scene(path, Transition.NEON_FLASH)
+	var overlay := await play_minigame_cutscene("minigame_%s_intro" % minigame_id)
+	await dismiss_minigame_cutscene(overlay)
+
+## 目前這局小遊戲是否帶 quest context 啟動（供小遊戲自身區分「支線場」vs「常駐休閒場」
+## 的內建獎勵，如三僧木魚：支線 win merit=3、休閒重玩 win merit=1）。
+func has_minigame_quest_context() -> bool:
+	return not _minigame_context.is_empty()
 
 ## 由 MinigameBase.finish() 呼叫：套用獎勵、回報結果、返回地圖
 ## （或 context.return_scene 指定的原 3D 場景）。

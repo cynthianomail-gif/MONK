@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3]
-
-[ext_resource type="Script" path="res://test/TestHd2dStreet.gd" id="1"]
-
-[node name="TestHd2dStreet" type="Node"]
-script = ExtResource("1")

@@ -297,7 +297,35 @@ func _end() -> void:
 	_reticle.visible = false
 	var result := build_result()
 	AudioManager.switch_bgm("victory_jingle" if result.win else "defeat_sting")
-	finish(result)
+	var rating := "神射手" if result.win else "再練練"
+	var rows: Array = []
+	if mode == "301":
+		rows = [
+			{"label": "模式", "value": "301"},
+			{"label": "剩餘分數", "value": "%d" % score301},
+			{"label": "獲得金幣", "value": "%d" % result.gold},
+		]
+	else:
+		rows = [
+			{"label": "模式", "value": "COUNT-UP"},
+			{"label": "總得分", "value": "%d" % score},
+			{"label": "獲得金幣", "value": "%d" % result.gold},
+		]
+	show_result_panel("飛鏢", rating, rows, result)
+
+## 重開一局：清空盤上留鏢，回到模式選擇重新開始。
+func restart() -> void:
+	for pin in _stuck.get_children():
+		pin.queue_free()
+	mode = ""
+	score301 = 301
+	score = 0
+	darts_thrown = 0
+	_darts_in_turn = 0
+	_turn_start_score = 301
+	_finished = false
+	_dart.visible = false
+	_show_mode_select()
 
 # --- 視覺（Codex 資產＋程式 UI）---
 

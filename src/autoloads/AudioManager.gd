@@ -55,11 +55,13 @@ func fade_bgm_to(target_db: float, time: float = 1.0) -> void:
 	var tw := create_tween()
 	tw.tween_property(bgm_player, "volume_db", target_db, maxf(0.05, time))
 
-func play_sfx(id: String) -> void:
+## pitch 可選：同一顆音效做音高差分（如三僧木魚各自的「摳」聲）。
+func play_sfx(id: String, pitch: float = 1.0) -> void:
 	var path: String = _sfx_lib.get(id, "")
 	if path.is_empty() or not ResourceLoader.exists(path):
 		return
 	sfx_player.stream = load(path)
+	sfx_player.pitch_scale = pitch
 	sfx_player.play()
 
 ## 語音／人聲：走獨立聲道，與 SFX 同時播放不互相切斷（過場台詞配音用）。

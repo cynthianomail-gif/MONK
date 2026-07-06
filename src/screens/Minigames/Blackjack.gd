@@ -27,6 +27,8 @@ const RANK_LABELS: Array = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "
 var auto_start: bool = true
 var rounds_done: int = 0
 var net: int = 0
+var _wins: int = 0
+var _losses: int = 0
 var bet: int = 0                         # 本局注額（下注階段決定；DOUBLE DOWN 後 ×2）
 var player_cards: Array = []             # 元素 = rank int 1..13
 var dealer_cards: Array = []
@@ -367,16 +369,37 @@ func _settle(kind: String) -> void:
 			color = Color(0.80, 0.80, 0.85)
 			AudioManager.play_sfx("ui_cancel")
 	net += delta
+	if delta > 0:
+		_wins += 1
+	elif delta < 0:
+		_losses += 1
 	_update_hud()
 	_show_result_panel(title, color, delta)
 	await get_tree().create_timer(2.2).timeout
 	_new_round()
 
+## 三局打完＝離開賭桌前的整場統計面板（局內每局的 RESULT 橫幅不受影響）。
+## 「再玩一次」＝繼續留在賭桌（重置局數，不重複發獎勵）；
+## 「離開賭桌」才真正 finish() 套用獎勵。
 func _end() -> void:
 	_phase = "done"
 	var result := build_result()
 	AudioManager.switch_bgm("victory_jingle" if result.win else "defeat_sting")
-	finish(result)
+	var rating := "滿載而歸" if result.win else "小賭怡情"
+	show_result_panel("21點", rating, [
+		{"label": "局數", "value": "%d" % ROUNDS},
+		{"label": "贏／輸局數", "value": "%d／%d" % [_wins, _losses]},
+		{"label": "淨損益", "value": "%s%d 金" % ["+" if net >= 0 else "", net]},
+	], result, "離開賭桌")
+
+## 重開一局＝繼續留在賭桌：歸零局數統計，重新開始下注（net 累計不歸零，
+## 因為離開時才用最後狀態的 net 結算；連續玩多輪＝net 一路累加到最後離開那刻）。
+func restart() -> void:
+	rounds_done = 0
+	_wins = 0
+	_losses = 0
+	_finished = false
+	_new_round()
 
 # --- 發牌動畫（增量：只動新牌，舊牌平移讓位）---
 

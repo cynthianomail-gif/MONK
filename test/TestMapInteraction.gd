@@ -41,9 +41,9 @@ func _ready() -> void:
 	await get_tree().process_frame
 	if not FileAccess.file_exists(save_path): return _fail("menu_action:save 應 deferred 觸發存檔")
 
-	# 4) 走近單一動作 NPC → _current_actions 只 1 項（結構驗證，不實際 perform 以免連鎖換場）
+	# 4) 走近阿明（2026-07-04 起改 2 動作：支線＋常駐「再切磋一場木魚」，進 ah_ming_hub 對話分流）
 	ms._on_trigger_entered("npc_ah_ming")
-	if ms._current_actions.size() != 1: return _fail("阿明應單一動作，實 %d" % ms._current_actions.size())
+	if ms._current_actions.size() != 2: return _fail("阿明應 2 動作(支線+常駐木魚)，實 %d" % ms._current_actions.size())
 
 	# 5) 離開 → 清空提示與當前點
 	ms._on_trigger_exited("npc_ah_ming")

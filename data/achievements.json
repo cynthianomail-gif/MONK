@@ -1,5 +1,5 @@
 {
-  "_schema": "十二因緣成就，錨定主線 12 章：通過第 N 章（超渡對應神祇）即解鎖第 N 個因緣。unlock_flag=該章 complete_flag（見 main_quests.json）；chapter=章序。AchievementSystem（待實作）監看 flag 設定即解鎖。",
+  "_schema": "十二因緣成就，錨定主線 12 章：通過第 N 章（超渡對應神祇）即解鎖第 N 個因緣。unlock_flag=該章 complete_flag（見 main_quests.json）；chapter=章序。AchievementSystem（src/systems/AchievementSystem.gd，已實作並驗證）監看 GameManager.flag_changed，命中 unlock_flag 即解鎖並推播 toast。",
   "ignorance":    {"name": "無明", "chapter": 1,  "unlock_flag": "ares_purified",       "desc": "通關第一章 · 超渡戰神阿瑞斯"},
   "formation":    {"name": "行",   "chapter": 2,  "unlock_flag": "hermes_purified",     "desc": "通關第二章 · 超渡盜神荷米斯"},
   "consciousness":{"name": "識",   "chapter": 3,  "unlock_flag": "poseidon_purified",   "desc": "通關第三章 · 超渡海神波賽頓"},

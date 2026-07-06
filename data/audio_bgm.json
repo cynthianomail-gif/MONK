@@ -10,6 +10,7 @@
   "all_out_theme":  "res://assets/audio/bgm/all_out_theme.ogg",
   "boss_theme":     "res://assets/audio/bgm/boss_theme.ogg",
   "cherry_theme":   "res://assets/audio/bgm/cherry_theme.ogg",
+  "wooden_fish_loop": "res://assets/audio/bgm/wooden_fish_loop.ogg",
   "victory_jingle": "res://assets/audio/bgm/victory_jingle.ogg",
   "defeat_sting":   "res://assets/audio/bgm/defeat_sting.ogg"
 }

@@ -1,8 +1,8 @@
 extends Node
 
-## 12 種狀態異常（GDD 7.3）
+## 11 種狀態異常
 ## chaos / burn / stun / seal / slow / fear / poison / weaken
-## taunt / down / golden_body / brahma_resonance
+## taunt / down / golden_body
 
 signal status_applied(target_id: String, status_type: String)
 signal status_damage(target_id: String, amount: int, status_type: String)

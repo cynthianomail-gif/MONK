@@ -328,7 +328,22 @@ func _end() -> void:
 	_phase = "done"
 	var result := build_result()
 	AudioManager.switch_bgm("victory_jingle" if result.win else "defeat_sting")
-	finish(result)
+	var rating := "滿載而歸" if result.win else "小賭怡情"
+	show_result_panel("輪盤", rating, [
+		{"label": "局數", "value": "%d" % ROUNDS},
+		{"label": "淨額", "value": "%s%d 金" % ["+" if net >= 0 else "", net]},
+	], result)
+
+## 重開一局：歸零局數與淨額，清空押注重新開始。
+func restart() -> void:
+	rounds_done = 0
+	net = 0
+	bets.clear()
+	for root in _chip_roots.values():
+		(root as Node2D).queue_free()
+	_chip_roots.clear()
+	_finished = false
+	_new_round()
 
 # --- 視覺（Codex 資產＋最小 UI）---
 

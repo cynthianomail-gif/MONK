@@ -36,6 +36,7 @@ var _boss: Combatant = null      # 有階段的 Boss 參照（無則為 null）
 var _boss_phases: Array = []     # boss.json 的 phases 陣列
 var _boss_phase_idx: int = -1    # 目前階段索引（-1 = 非階段型 Boss）
 var _boss_hp_seen: int = 0        # 上次見到的 Boss HP（判斷掉血→受擊表情）
+var _boss_data: Dictionary = {}   # 目前 Boss 的 boss.json 原始資料（讀 defeat_cutscene 等欄位用）
 
 # ─── 護法召喚（第四期）───────────────────────────────────
 var _summons: Dictionary = {}      # summons.json 內容
@@ -66,7 +67,7 @@ func setup(enemy_id: String) -> void:
 	if _boss != null and not String(_boss.portrait_moods.get("hurt", "")).is_empty():
 		_boss_hp_seen = _boss.current_hp
 		_boss.hp_changed.connect(_on_boss_hp_changed)
-	battle_log.emit("遭遇 %s！" % data.get("name", enemy_id))
+	battle_log.emit("遭遇　%s" % data.get("name", enemy_id))
 	EventBus.battle_started.emit(data)
 	if data.get("is_boss", false):
 		AudioManager.switch_bgm("boss_theme")
@@ -155,7 +156,7 @@ func _begin_player_turn() -> void:
 	if state == State.END:
 		return
 	if not status.process_turn_start(player_combatant):
-		battle_log.emit("無戒動彈不得……")
+		battle_log.emit("動彈不得")
 		_pop_and_advance()
 		return
 	player_combatant.is_guarding = false  # 每次輪到玩家先清，選了防禦才設回
@@ -231,7 +232,7 @@ func player_use_defend() -> void:
 	if state != State.PLAYER_TURN:
 		return
 	player_combatant.is_guarding = true
-	battle_log.emit("無戒擺出防禦架式（減傷）")
+	battle_log.emit("防禦")
 	_hits = 0
 	EventBus.combo_count_changed.emit(0)
 	_pop_and_advance()
@@ -242,7 +243,7 @@ func player_use_summon(summon_id: String) -> void:
 	if state != State.PLAYER_TURN:
 		return
 	if not can_summon(summon_id):
-		battle_log.emit("此護法本場已請過，或香油錢不足……")
+		battle_log.emit("已請過或香油錢不足")
 		_begin_player_turn()
 		return
 	var data: Dictionary = _summons.get(summon_id, {})
@@ -251,7 +252,7 @@ func player_use_summon(summon_id: String) -> void:
 		return
 	_summons_used[summon_id] = true
 	_set_state(State.SKILL_ANIM)
-	battle_log.emit("請下　%s！" % data.get("name", summon_id))
+	battle_log.emit("請下　%s" % data.get("name", summon_id))
 	await ui.play_summon_effect(summon_id, data)
 	_apply_summon_effect(data)
 	_hits = 0
@@ -326,7 +327,7 @@ func player_use_skill(skill_id: String, target_idx: int) -> void:
 	var sk: Dictionary = executor.get_skill(skill_id)
 	var result: Dictionary = executor.execute(skill_id, player_combatant, target, enemy_combatants)
 	if result.has("error"):
-		battle_log.emit("使不出來……（資源不足）")
+		battle_log.emit("資源不足")
 		_begin_player_turn()
 		return
 	if sk.get("is_heat_action", false):
@@ -336,7 +337,7 @@ func player_use_skill(skill_id: String, target_idx: int) -> void:
 		if cut != "":
 			await SceneRouter.play_battle_cutscene(cut)
 	_record_weakness_intel(sk, target)
-	await ui.play_skill_effect(sk.get("name", skill_id), result.hit_weakness, result.is_crit)
+	await ui.play_skill_effect(sk, result.hit_weakness, result.is_crit, result.get("target_id", ""))
 	await _maybe_trigger_boss_phase2()
 	_process_result(result)
 
@@ -357,7 +358,7 @@ func _record_weakness_intel(sk: Dictionary, primary_target: Combatant) -> void:
 		if dtype in t.weaknesses:
 			var eid: String = t.base_id if t.base_id != "" else t.id
 			if GameManager.record_weakness_intel(eid, dtype):
-				battle_log.emit("看破 %s 的弱點！" % t.display_name)
+				battle_log.emit("看破弱點　%s" % t.display_name)
 	# 揭曉徽章
 	if ui.has_method("refresh_all_weakness_badges"):
 		ui.refresh_all_weakness_badges()
@@ -376,7 +377,7 @@ func _process_result(r: Dictionary) -> void:
 		enemy_weakpoint_hit.emit(r.get("target_id", ""))
 		EventBus.combo_count_changed.emit(_hits)
 		SkillUnlockManager.check_unlocks()
-		battle_log.emit("命中弱點！One More！")
+		battle_log.emit("弱點！One More")
 		if _all_downed():
 			_all_out_attack()
 			return
@@ -401,11 +402,11 @@ func _enemy_single_turn(e: Combatant) -> void:
 		return
 	if e.is_downed:
 		e.set_down(false)
-		battle_log.emit("%s 爬了起來" % e.display_name)
+		battle_log.emit("%s　起身" % e.display_name)
 		_pop_and_advance()
 		return
 	if not status.process_turn_start(e):
-		battle_log.emit("%s 無法行動" % e.display_name)
+		battle_log.emit("%s　動彈不得" % e.display_name)
 		_pop_and_advance()
 		return
 
@@ -415,7 +416,9 @@ func _enemy_single_turn(e: Combatant) -> void:
 	var act: Dictionary = executor.execute_enemy_action(e, player_combatant, enemy_combatants)
 	if not act.is_empty():
 		ui.enemy_lunge(e)
-		battle_log.emit("%s 使出「%s」" % [e.display_name, act.get("name", "?")])
+		battle_log.emit("%s「%s」" % [e.display_name, act.get("name", "?")])
+		if ui.has_method("play_enemy_skill_fx"):
+			ui.play_enemy_skill_fx(act)
 		if e == _boss:
 			ui.flash_enemy_mood(_boss, _boss_fig(String(_boss.portrait_moods.get("act", ""))), 0.8)
 			ui.boss_vfx(_boss, "attack")
@@ -468,7 +471,7 @@ func _summon(summon_id: String) -> void:
 	_turn_queue.append(c)
 	_full_queue.append(c)
 	_render_turn_order()
-	battle_log.emit("%s 的兄弟加入戰鬥！" % data.get("name", summon_id))
+	battle_log.emit("援軍　%s" % data.get("name", summon_id))
 
 # ─── 總攻擊 / Hold-up ──────────────────────────────────
 
@@ -492,16 +495,16 @@ func _hold_up() -> void:
 		"gold":
 			var amount: int = _enemy_level() * 50
 			GameManager.add_gold(amount)
-			battle_log.emit("奪得 %d 金幣！" % amount)
+			battle_log.emit("金幣 +%d" % amount)
 		"info":
 			GameManager.set_flag("knows_weakness_" + _current_enemy_type(), true)
-			battle_log.emit("得知了敵人的弱點情報")
+			battle_log.emit("弱點情報")
 		"item":
 			if randf() > 0.5:
 				GameManager.add_merit(10)
-				battle_log.emit("獲得了供品（功德 +10）")
+				battle_log.emit("功德 +10")
 			else:
-				battle_log.emit("什麼都沒搜到……")
+				battle_log.emit("無所獲")
 	_check_end()
 	if state != State.END:
 		_start_round()  # 總攻擊/Hold-up 後重開新回合（重排佇列）
@@ -531,6 +534,7 @@ func _check_end() -> void:
 		_defeat()
 
 func _victory() -> void:
+	await _maybe_play_defeat_cutscene()
 	var gold: int = 0
 	var kills: int = 0
 	var daoxing: int = 0
@@ -602,8 +606,10 @@ func _init_boss_phases(data: Dictionary) -> void:
 	_boss = null
 	_boss_phases = []
 	_boss_phase_idx = -1
+	_boss_data = {}
 	if not data.get("is_boss", false):
 		return
+	_boss_data = data
 	var phases: Array = data.get("phases", [])
 	if phases.is_empty() or enemy_combatants.is_empty():
 		return
@@ -619,6 +625,18 @@ func _apply_boss_phase(i: int) -> void:
 	_boss.skills = phase.get("skills", _boss.skills)
 	_boss.skill_defs = phase.get("skill_defs", _boss.skill_defs)
 	_boss.ai_pattern = phase.get("ai_pattern", _boss.ai_pattern)
+
+## 勝利結算前呼叫：Boss 戰若 boss.json 設有 defeat_cutscene 且素材目錄存在 → 播放戰後過場。
+## 素材缺（目錄下沒有 frame_0001.png，例如美術尚未生成）→ 無感跳過，不影響原本勝利流程。
+## 缺檔判斷抄自 SceneRouter.play_minigame_cutscene() 的同一模式。
+func _maybe_play_defeat_cutscene() -> void:
+	var cut: String = String(_boss_data.get("defeat_cutscene", ""))
+	if cut == "":
+		return
+	var dir: String = "res://assets/cutscenes/%s/" % cut
+	if not ResourceLoader.exists(dir + "frame_0001.png"):
+		return
+	await SceneRouter.play_battle_cutscene(cut)
 
 ## 玩家技能結算後呼叫：Boss 首次掉到下一階段門檻 → 播轉場過場、切換階段技能/AI。
 func _maybe_trigger_boss_phase2() -> void:
@@ -639,7 +657,7 @@ func _maybe_trigger_boss_phase2() -> void:
 	_apply_boss_phase(next_idx)
 	ui.set_enemy_base(_boss, _boss_fig(String(_boss.portrait_moods.get("phase2", ""))))
 	ui.boss_vfx(_boss, "phase2")
-	battle_log.emit("%s 進入第二階段！" % _boss.display_name)
+	battle_log.emit("%s　第二階段" % _boss.display_name)
 
 ## Boss 掉血 → 暫態受擊表情（pained）。回血/不變不觸發。
 func _on_boss_hp_changed(current: int, _mx: int) -> void:
@@ -667,7 +685,7 @@ func player_use_item(item_id: String) -> void:
 	if not GameManager.consume_item(item_id):
 		return
 	_apply_item_effect(data.get("effect", {}))
-	battle_log.emit("使用「%s」" % data.get("name", item_id))
+	battle_log.emit("「%s」" % data.get("name", item_id))
 	_hits = 0
 	EventBus.combo_count_changed.emit(0)
 	_check_end()

@@ -24,6 +24,7 @@ const EXPECTED_CHOICES := {
 
 const ALL_TIMELINES := [
 	"cherry_first_meeting",
+	"ah_ming_hub",
 	"quest_ah_ming_s1", "quest_ah_ming_s2",
 	"quest_rei_choice",
 	"quest_zheng_ma_s1", "quest_zheng_ma_s2",

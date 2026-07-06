@@ -14,6 +14,7 @@ const NPC_ENTRY_TIMELINE: Dictionary = {
 	"npc_liaochen": "liaochen_hub",
 	"npc_zheng_ma": "zheng_ma_hub",
 	"npc_cherry":   "cherry_hub",
+	"npc_ah_ming":  "ah_ming_hub",
 }
 
 @onready var world: Node3D = $World
@@ -261,6 +262,12 @@ func perform_action(action: String) -> void:
 			SceneRouter.go_to_minigame("beggar_challenge")
 		"offering_toss":
 			SceneRouter.go_to_minigame("offering_toss")
+		"wooden_fish_replay":
+			# 常駐入口：ah_ming 支線完成後才開放，無 quest context（休閒場，win merit+1）。
+			if not GameManager.get_flag("ah_ming_saved"):
+				hud.show_toast("翔太還在忙，等他闖過這關再說")
+			else:
+				SceneRouter.go_to_minigame("wooden_fish_rhythm")
 		"batting_minigame":
 			SceneRouter.go_to_minigame("batting")
 		"bowling_minigame":
