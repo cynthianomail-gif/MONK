@@ -19,6 +19,33 @@
 "offset": Vector2(0, 0),
 "scale": 1.0,
 "scene": ""
+},
+"stern": {
+"export_overrides": {
+"image": "\"res://assets/2d/portraits/npcs/bust/npc_liaochen_stern.png\""
+},
+"mirror": false,
+"offset": Vector2(0, 0),
+"scale": 1.0,
+"scene": ""
+},
+"smile": {
+"export_overrides": {
+"image": "\"res://assets/2d/portraits/npcs/bust/npc_liaochen_smile.png\""
+},
+"mirror": false,
+"offset": Vector2(0, 0),
+"scale": 1.0,
+"scene": ""
+},
+"surprised": {
+"export_overrides": {
+"image": "\"res://assets/2d/portraits/npcs/bust/npc_liaochen_surprised.png\""
+},
+"mirror": false,
+"offset": Vector2(0, 0),
+"scale": 1.0,
+"scene": ""
 }
 },
 &"scale": 1.0

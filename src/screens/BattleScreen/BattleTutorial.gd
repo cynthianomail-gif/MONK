@@ -9,6 +9,7 @@ extends Control
 ## show_point() 若非教學戰或該點已播過，立即回傳（不擋流程）。
 
 const PORTRAIT_PATH := "res://assets/2d/portraits/npcs/bust/npc_liaochen.png"
+const PORTRAIT_PATH_SMILE := "res://assets/2d/portraits/npcs/bust/npc_liaochen_smile.png"
 const GOLD := Color(0.788, 0.659, 0.38)
 const INK_RED := Color(0.82, 0.18, 0.13)
 const PANEL_BG := Color(0.07, 0.05, 0.04, 0.96)
@@ -76,15 +77,7 @@ func _build() -> void:
 	_portrait.custom_minimum_size = Vector2(84, 84)
 	_portrait.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 	_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	if ResourceLoader.exists(PORTRAIT_PATH):
-		var full: Texture2D = load(PORTRAIT_PATH)
-		var atlas := AtlasTexture.new()
-		atlas.atlas = full
-		# 只取上半身（頭肩）當小頭像：原圖 1383x1504，取頂部約 62% 高度置中裁切。
-		var w: float = full.get_width()
-		var h: float = full.get_height()
-		atlas.region = Rect2(0, 0, w, h * 0.62)
-		_portrait.texture = atlas
+	_set_portrait(PORTRAIT_PATH)
 	hbox.add_child(_portrait)
 
 	var vbox := VBoxContainer.new()
@@ -121,6 +114,19 @@ func _build() -> void:
 	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	vbox.add_child(_hint_label)
 
+## 依教學點切換小立繪（目前只有 victory 用 smile，其餘維持 default）。
+func _set_portrait(path: String) -> void:
+	if not ResourceLoader.exists(path):
+		return
+	var full: Texture2D = load(path)
+	var atlas := AtlasTexture.new()
+	atlas.atlas = full
+	# 只取上半身（頭肩）當小頭像：原圖 1383x1504，取頂部約 62% 高度置中裁切。
+	var w: float = full.get_width()
+	var h: float = full.get_height()
+	atlas.region = Rect2(0, 0, w, h * 0.62)
+	_portrait.texture = atlas
+
 ## 顯示指定教學點，await 直到玩家按確認鍵才回傳。非教學戰、未知 id、或已播過 → 立即回傳不擋流程。
 func show_point(point_id: String) -> void:
 	if not GameManager.get_flag("tutorial_battle"):
@@ -133,6 +139,7 @@ func show_point(point_id: String) -> void:
 	var data: Dictionary = POINTS[point_id]
 	_title_label.text = "－%s" % data.title
 	_text_label.text = String(data.text)
+	_set_portrait(PORTRAIT_PATH_SMILE if point_id == "victory" else PORTRAIT_PATH)
 	visible = true
 	modulate.a = 0.0
 	var tw := create_tween()

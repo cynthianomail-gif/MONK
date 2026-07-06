@@ -11,6 +11,7 @@ func _ready() -> void:
 
 	await _capture_point("intro", "res://_cap_tutorial_intro.png")
 	await _capture_point("weakness", "res://_cap_tutorial_weakness.png")
+	await _capture_point("victory", "res://_cap_tutorial_victory.png")
 
 	print("CAPTURE_BATTLE_TUTORIAL_DONE")
 	get_tree().quit(0)
