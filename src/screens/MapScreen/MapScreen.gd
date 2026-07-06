@@ -38,6 +38,7 @@ func _ready() -> void:
 	_current_area = String(GameManager.player.get("current_area", "shrine"))
 	GameManager.time_advanced.connect(_on_time_advanced)
 	EventBus.achievement_unlocked.connect(_on_achievement_unlocked)
+	EventBus.quest_location_blocked.connect(_on_quest_location_blocked)
 	Dialogic.signal_event.connect(_on_dialogic_signal)
 	_drain_pending_achievements()
 	_load_area(_current_area)
@@ -328,6 +329,11 @@ func _pick_enemy(dist: String) -> String:
 func _on_achievement_unlocked(id: String) -> void:
 	_toast_achievement(id)
 	AchievementSystem.pending_toasts.erase(id)
+
+## 主線 stage 要求人在對的地點才能繼續（見 MainQuestManager.stage_location_passed）；
+## 中止後玩家仍在地圖，用既有 toast 告知去哪裡，不新造 UI。
+func _on_quest_location_blocked(hint: String) -> void:
+	hud.show_toast(hint)
 
 func _drain_pending_achievements() -> void:
 	for id in AchievementSystem.pending_toasts:

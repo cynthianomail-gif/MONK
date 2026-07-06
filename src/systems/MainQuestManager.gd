@@ -11,6 +11,14 @@ signal main_quest_all_cleared()
 
 const DATA_PATH := "res://data/main_quests.json"
 
+## stage.location（劇情迷宮 id）→ 現行可達 district 的對照表。
+## 12 章目前只有 ch1 的 pantheon_security_hq 對應到已存在的 armory 區（阿瑞斯軍火庫，
+## 由 c1_intel 的 set_flag armory_unlocked 解鎖）；其餘 11 章的地下城尚未建成真正場景
+## （純敘事 stage，本來就無 dialogue/battle/boss 可執行），對不上就 fail-open 不擋。
+const STAGE_LOCATION_DISTRICT: Dictionary = {
+	"pantheon_security_hq": "armory",
+}
+
 var _chapters: Dictionary = {}   # id -> chapter data
 var _order: Array = []           # chapter ids，依 order 排序
 var _running: bool = false
@@ -124,8 +132,44 @@ func gate_passed(gate: Dictionary) -> bool:
 			return GameManager.player.skills_unlocked.size() >= int(gate.get("min", 0))
 	return true
 
+## stage.location 對應的現行 district（對不上 STAGE_LOCATION_DISTRICT 就回傳 ""＝未知/尚無場景）。
+## 純函式，供測試。
+func stage_location_district(location_id: String) -> String:
+	return String(STAGE_LOCATION_DISTRICT.get(location_id, ""))
+
+## 此 stage 的地點門檻是否通過：
+## - 無 location 欄位 → 一律通過（大多數 stage 沒有地點要求）。
+## - location 對不上任何現行 district（尚未建成的 11 章地下城）→ fail-open 通過，debug 印警告。
+## - location 對得上 district，但該 district 尚未解鎖（如 armory 需 armory_unlocked）→ fail-open 通過，
+##   避免與既有解鎖流程（c1_intel 才設 armory_unlocked）打架造成死鎖。
+## - 對得上且已解鎖 → 要求玩家目前就在該 district，不在則擋下。
+## 純函式，供測試。
+func stage_location_passed(stage: Dictionary) -> bool:
+	if not stage.has("location"):
+		return true
+	var loc_id := String(stage.location)
+	var district := stage_location_district(loc_id)
+	if district == "":
+		if OS.is_debug_build():
+			push_warning("MainQuest: stage location '%s' 對不上任何現行 district，fail-open 不擋" % loc_id)
+		return true
+	var area: Dictionary = _area_data(district)
+	if area.has("unlock_flag") and not GameManager.get_flag(String(area.unlock_flag)):
+		return true  # 該區自己尚未解鎖，交給既有解鎖流程處理，不在此重複擋
+	return String(GameManager.player.get("current_area", "")) == district
+
+## 讀 data/areas.json 單一 district 的資料（沒有 areas 快取就直接載，量小不快取也無妨）。
+func _area_data(district: String) -> Dictionary:
+	var areas: Dictionary = JsonLoader.load_json("res://data/areas.json")
+	return areas.get(district, {})
+
 ## 執行單一 stage：依鍵別依序播敘事/場景。回傳 false = 中止本章（保留 stage 進度可續推）。
 func _run_stage(stage: Dictionary) -> bool:
+	if stage.has("location") and not stage_location_passed(stage):
+		var district := stage_location_district(String(stage.location))
+		var area_name := String(_area_data(district).get("name", district))
+		EventBus.quest_location_blocked.emit("要先到%s才能繼續主線" % area_name)
+		return false  # 保留 stage 進度：玩家移動到對的地點後，「繼續主線」會從本 stage 重新檢查
 	if stage.has("gate"):
 		var gate: Dictionary = stage.gate
 		if not gate_passed(gate):

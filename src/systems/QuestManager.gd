@@ -1,9 +1,41 @@
 extends Node
 
 var _quests: Dictionary = {}
+var _npcs: Dictionary = {}       # map_npcs.json：現行 3D 互動點，供 location 門檻查 district
+var _locations: Dictionary = {}  # map_locations.json：quest.location 值查 district 用
 
 func _ready() -> void:
 	_quests = JsonLoader.load_json("res://data/quests.json")
+	_npcs = JsonLoader.load_json("res://data/map_npcs.json")
+	_locations = JsonLoader.load_json("res://data/map_locations.json")
+
+## quest.location（map_locations.json 的舊 2D 地點 id）所在的 district。
+## 對不上就回傳 ""（fail-open：不擋，因為那是資料尚未跟上的訊號，不該卡支線）。純函式，供測試。
+func quest_location_district(quest_id: String) -> String:
+	var q: Dictionary = _quests.get(quest_id, {})
+	var loc_id := String(q.get("location", ""))
+	if loc_id == "":
+		return ""
+	return String(_locations.get(loc_id, {}).get("district", ""))
+
+## 觸發支線的互動點（NPC id，如 npc_ah_ming）所在的 district。對不上就回傳 ""。純函式，供測試。
+func trigger_point_district(location: String) -> String:
+	return String(_npcs.get(location, {}).get("district", ""))
+
+## 支線的地點門檻是否通過：
+## - quest 沒填 location，或 location 對不上 map_locations.json（fail-open）→ 通過。
+## - 觸發點（NPC）對不上 map_npcs.json（如非地圖互動觸發、舊測試直呼）→ fail-open 通過。
+## - 兩邊都查得到 district → 要求兩個 district 相同（現行所有支線 NPC 都在 shrine，
+##   目前恆為 true；此檢查是為未來把某支線 NPC 放進其他 district 時提供真正防呆）。
+## 純函式，供測試。
+func quest_location_passed(quest_id: String, location: String) -> bool:
+	var quest_dist := quest_location_district(quest_id)
+	if quest_dist == "":
+		return true
+	var trigger_dist := trigger_point_district(location)
+	if trigger_dist == "":
+		return true
+	return trigger_dist == quest_dist
 
 func trigger_action(action: String, _location: String) -> void:
 	var quest_id: String = action.replace("quest_", "")
@@ -15,6 +47,9 @@ func trigger_action(action: String, _location: String) -> void:
 	if q.has("require_flag") and not GameManager.get_flag(q.require_flag):
 		return
 	if q.has("require_completed") and q.require_completed not in GameManager.player.completed_quests:
+		return
+	if not quest_location_passed(quest_id, _location):
+		EventBus.quest_location_blocked.emit("這件事不是在這裡辦的")
 		return
 	var stage: int = GameManager.player.active_quests.get(quest_id, 0)
 	if stage >= q.stages.size():

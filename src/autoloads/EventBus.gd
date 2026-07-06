@@ -21,3 +21,5 @@ signal dialogue_ended()
 signal skill_unlocked(skill_name: String)
 signal skill_learnable(skill_name: String)
 signal achievement_unlocked(achievement_id: String)
+## 主線 stage 或支線動作要求玩家在指定地點才能觸發，但目前不在該地點 → 中止，帶一句提示文字給 HUD toast。
+signal quest_location_blocked(hint: String)
