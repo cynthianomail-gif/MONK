@@ -51,6 +51,12 @@ func _save(c: Object, file_name: String) -> void:
 
 
 func _init() -> void:
+	# ⚠⚠ 警告（2026-07-06）：下方既有 12 角色（Cherry~Liaochen）的 display_name/description/
+	# 表情 portraits 是本檔建立當時的舊資料，已與 dialogue/*.dch 的實際內容脫節
+	# （例：Cherry 現為「櫻」、Liaochen 現有 stern/smile/surprised 表情，本檔都沒有）。
+	# 若整檔重跑，這 12 個 .dch 會被舊資料覆蓋＝退版。**要新增角色時，只保留你要新增的
+	# _make/_save，把既有 12 個註解掉再跑**；或先待 GenDch 既有區塊同步為現況（另有任務）。
+	# 下方 6 個新配角（Guard~Kenta_Father）是 2026-07-06 旁白改對話時新增，資料為現況。
 	var cherry := _make(
 		"Cherry",
 		Color(0.85, 0.32, 0.46, 1),
@@ -109,6 +115,62 @@ func _init() -> void:
 		{"default": _portrait("res://assets/2d/portraits/npcs/bust/npc_liaochen.png")}
 	)
 	_save(liaochen, "Liaochen.dch")
+
+	# ── 旁白改寫升級：原本無立繪的配角，升級為正式 Dialogic 說話者（2026-07-06）──
+	# 立繪暫用既有圖（不缺圖崩壞），真圖之後 Codex 補、同路徑覆蓋。
+	var guard := _make(
+		"警衛",
+		Color(0.35, 0.38, 0.42, 1),
+		"萬神殿保全集團總部門口的警衛，攔阻無戒。",
+		"default",
+		{"default": _portrait("res://assets/2d/portraits/enemies/enemy_guard.png")}
+	)
+	_save(guard, "Guard.dch")
+
+	var security_chief := _make(
+		"安保隊長",
+		Color(0.30, 0.32, 0.36, 1),
+		"城西軍火庫的重武裝安保隊長，阿瑞斯的爪牙。",
+		"default",
+		{"default": _portrait("res://assets/2d/portraits/enemies/enemy_guard.png")}
+	)
+	_save(security_chief, "SecurityChief.dch")
+
+	var debt_collector := _make(
+		"討債的",
+		Color(0.45, 0.30, 0.28, 1),
+		"萬年大樓佛具店門口的地下錢莊打手。",
+		"default",
+		{"default": _portrait("res://assets/2d/portraits/enemies/enemy_punk.png")}
+	)
+	_save(debt_collector, "DebtCollector.dch")
+
+	var hayashida := _make(
+		"林田",
+		Color(0.42, 0.40, 0.34, 1),
+		"源造(老王)昔日合夥人，二十年前偽造文書鵲巢鳩占，如今經營「林田投資」。",
+		"default",
+		{"default": _portrait("res://assets/2d/portraits/enemies/enemy_vendor.png")}
+	)
+	_save(hayashida, "Hayashida.dch")
+
+	var lao_zhang := _make(
+		"老張",
+		Color(0.50, 0.44, 0.36, 1),
+		"櫻木町賣了半世紀醬料的老攤主，與大村師傅有段陳年往事。",
+		"default",
+		{"default": _portrait("res://assets/2d/portraits/npcs/bust/npc_lao_wang.png")}
+	)
+	_save(lao_zhang, "LaoZhang.dch")
+
+	var kenta_father := _make(
+		"健太父",
+		Color(0.40, 0.46, 0.50, 1),
+		"健太的父親，離家在外地工作多年，終於回來與健太、婆婆團聚。",
+		"default",
+		{"default": _portrait("res://assets/2d/portraits/npcs/bust/npc_david.png")}
+	)
+	_save(kenta_father, "Kenta_Father.dch")
 
 	print("[GenDch] DONE")
 	quit()

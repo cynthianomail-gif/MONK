@@ -1,6 +1,5 @@
-佛具店的玻璃櫃映著佛像金身，水野一見無戒進門就直起腰。
 join ZhengMa (default)
-ZhengMa (default): 師父，今天是要幫我這老太婆看看店裡的事，還是想挑點東西？
+ZhengMa (default): （一見無戒進門就直起腰）師父，今天是要幫我這老太婆看看店裡的事，還是想挑點東西？
 - 水野的事（有事要說）
 	ZhengMa (default): 唉，說來話長，師父坐下聽我說。
 	[signal arg="menu_action:quest_zheng_ma"]

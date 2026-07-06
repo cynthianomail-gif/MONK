@@ -1,0 +1,25 @@
+{
+"@path": "res://addons/dialogic/Resources/character.gd",
+"@subpath": NodePath(""),
+&"_translation_id": "",
+&"color": Color(0.5, 0.44, 0.36, 1),
+&"custom_info": {},
+&"default_portrait": "default",
+&"description": "櫻木町賣了半世紀醬料的老攤主，與大村師傅有段陳年往事。",
+&"display_name": "老張",
+&"mirror": false,
+&"nicknames": [],
+&"offset": Vector2(0, 0),
+&"portraits": {
+"default": {
+"export_overrides": {
+"image": "\"res://assets/2d/portraits/npcs/bust/npc_lao_wang.png\""
+},
+"mirror": false,
+"offset": Vector2(0, 0),
+"scale": 1.0,
+"scene": ""
+}
+},
+&"scale": 1.0
+}

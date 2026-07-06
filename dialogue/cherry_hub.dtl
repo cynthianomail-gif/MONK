@@ -1,6 +1,5 @@
-巷口的燈把濕柏油染成一片糖色，櫻抬眼看見無戒，把菸按熄了些。
 join Cherry (neutral)
-Cherry (neutral): 又是你。和尚是每天都要來巡一次喔？說吧，這次是想聊天，還是又要提蝶子那筆債？
+Cherry (neutral): 又是你。（把菸按熄了些）和尚是每天都要來巡一次喔？說吧，這次是想聊天，還是又要提蝶子那筆債？
 - 就想跟妳說說話
 	Cherry (neutral): ……行吧，反正這裡也沒別的和尚會找我聊天。
 	[signal arg="menu_action:cherry_dialogue"]
