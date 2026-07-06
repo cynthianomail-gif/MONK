@@ -8,7 +8,7 @@
     "skill_defs": {
       "punk_punch": {"name": "街頭亂拳", "power": 30, "damage_type": "physical", "target": "single"},
       "provoke":    {"name": "尋釁滋事", "damage_type": "support", "special": "taunt_self_def", "def_bonus": 0.3, "duration": 1, "condition": "hp_below_50"},
-      "call_backup": {"name": "叫兄弟來", "damage_type": "support", "special": "summon", "summon_id": "street_punk", "max_once": true, "condition": "hp_below_30"}
+      "call_backup": {"name": "叫兄弟來", "damage_type": "support", "special": "summon", "summon_id": "street_punk", "max_once": true, "condition": "hp_below_30", "chance": 0.2}
     },
     "gold_reward": 80, "portrait": "enemy_punk.png",
     "description": "櫻木町晃蕩的小混混。"

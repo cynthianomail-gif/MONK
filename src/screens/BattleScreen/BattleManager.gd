@@ -465,6 +465,9 @@ func _summon(summon_id: String) -> void:
 	if data.is_empty():
 		return
 	var c := Combatant.from_enemy(summon_id, data, "_b%d" % enemy_combatants.size())
+	# 防鏈式無限增生根因修正：被召喚出來的援軍直接標記「已召喚過」，牠自己的 call_backup
+	# (max_once/summon 類技能)在 _condition_met 會被擋下，不能再召喚下一隻。
+	c.summoned_backup = true
 	enemy_combatants.append(c)
 	ui.add_enemy_panel(c)
 	# 援兵加入本回合佇列尾（本回合稍後行動），並更新順序條

@@ -1,97 +1,97 @@
 {
-  "_schema": "3D 探索的『個別互動點』：每個 NPC/店/功能各一點(取代舊 map_locations 打包選單)。走近顯提示、按互動鍵觸發；actions 只 1 項＝直接執行，多項＝跳該點小選單。ambient_break=走進即自動觸發破戒(食/財/色)。npc_facing_deg 讓路邊 NPC 面向街道中央。map_locations.json 仍供手機計程車目的地用，兩者分離。",
+  "_schema": "3D 探索的『個別互動點』：每個 NPC/店/功能各一點(取代舊 map_locations 打包選單)。走近顯提示、按互動鍵觸發；actions 只 1 項＝直接執行，多項＝跳該點小選單。ambient_break=走進即自動觸發破戒(食/財/色)。npc_facing_deg 讓路邊 NPC 面向街道中央（2026-07-06 修正朝向公式：主街 x>0 面向 270°/-X，x<0 面向 90°/+X；支街 z>JUNC_Z(-13) 面向 180°/-Z，z<JUNC_Z 面向 0°/+Z，皆朝向玩家行走的街心，不再面牆）。座標於 2026-07-06 全面重排避免地面圈圈重疊、沿 L 形街道均勻分布。",
 
   "npc_liaochen": {
     "name": "了塵", "district": "shrine",
-    "position_3d": {"x": 0.0, "y": 0.0, "z": -25.0}, "trigger_radius": 2.6,
-    "npc_model": "liaochen", "npc_facing_deg": 180.0,
+    "position_3d": {"x": 0.5, "y": 0.0, "z": -13.5}, "trigger_radius": 2.6,
+    "npc_model": "liaochen", "npc_facing_deg": 0.0,
     "actions": ["main_quest", "save", "job_switch", "rest"]
   },
   "npc_ah_ming": {
     "name": "街頭藝人阿明", "district": "shrine",
-    "position_3d": {"x": 4.5, "y": 0.0, "z": -5.0}, "trigger_radius": 2.2,
-    "npc_model": "ah_ming", "npc_facing_deg": 90.0,
+    "position_3d": {"x": 4.8, "y": 0.0, "z": -5.0}, "trigger_radius": 2.2,
+    "npc_model": "ah_ming", "npc_facing_deg": 270.0,
     "actions": ["quest_ah_ming", "wooden_fish_replay"]
   },
   "npc_rei": {
     "name": "迷路的背包客澪", "district": "shrine",
-    "position_3d": {"x": -4.5, "y": 0.0, "z": -6.0}, "trigger_radius": 2.2,
-    "npc_model": "rei", "npc_facing_deg": 270.0,
+    "position_3d": {"x": -4.8, "y": 0.0, "z": -6.0}, "trigger_radius": 2.2,
+    "npc_model": "rei", "npc_facing_deg": 90.0,
     "actions": ["quest_rei"]
   },
   "npc_zheng_ma": {
     "name": "佛具店鄭媽", "district": "shrine",
-    "position_3d": {"x": -11.0, "y": 0.0, "z": -9.5}, "trigger_radius": 2.4,
-    "npc_model": "zheng_ma", "npc_facing_deg": 0.0,
+    "position_3d": {"x": -9.5, "y": 0.0, "z": -9.5}, "trigger_radius": 2.4,
+    "npc_model": "zheng_ma", "npc_facing_deg": 180.0,
     "actions": ["quest_zheng_ma", "shop"], "ambient_break": "greed"
   },
   "npc_jie": {
     "name": "電玩少年小傑", "district": "shrine",
-    "position_3d": {"x": -15.0, "y": 0.0, "z": -16.5}, "trigger_radius": 2.2,
-    "npc_model": "jie", "npc_facing_deg": 180.0,
+    "position_3d": {"x": -14.5, "y": 0.0, "z": -16.5}, "trigger_radius": 2.2,
+    "npc_model": "jie", "npc_facing_deg": 0.0,
     "actions": ["quest_jie"]
   },
   "npc_ah_zhong": {
     "name": "老廚師阿忠師傅", "district": "shrine",
     "position_3d": {"x": -19.0, "y": 0.0, "z": -9.5}, "trigger_radius": 2.4,
-    "npc_model": "ah_zhong", "npc_facing_deg": 0.0,
+    "npc_model": "ah_zhong", "npc_facing_deg": 180.0,
     "actions": ["quest_ah_zhong"], "ambient_break": "food"
   },
   "npc_david": {
     "name": "失業工程師大衛", "district": "shrine",
-    "position_3d": {"x": -23.0, "y": 0.0, "z": -16.5}, "trigger_radius": 2.2,
-    "npc_model": "david", "npc_facing_deg": 180.0,
+    "position_3d": {"x": -25.5, "y": 0.0, "z": -16.5}, "trigger_radius": 2.2,
+    "npc_model": "david", "npc_facing_deg": 0.0,
     "actions": ["quest_david"]
   },
   "npc_cherry": {
     "name": "Cherry", "district": "shrine",
-    "position_3d": {"x": 5.0, "y": 0.0, "z": -16.0}, "trigger_radius": 2.4,
-    "npc_model": "cherry", "npc_facing_deg": 90.0,
+    "position_3d": {"x": 4.8, "y": 0.0, "z": -17.0}, "trigger_radius": 2.4,
+    "npc_model": "cherry", "npc_facing_deg": 270.0,
     "actions": ["cherry_dialogue", "quest_cherry_debt"], "ambient_break": "lust"
   },
   "npc_cai_ma": {
     "name": "媽媽桑蔡媽", "district": "shrine",
-    "position_3d": {"x": 5.0, "y": 0.0, "z": -20.0}, "trigger_radius": 2.2,
-    "npc_model": "cai_ma", "npc_facing_deg": 90.0,
+    "position_3d": {"x": 4.8, "y": 0.0, "z": -23.0}, "trigger_radius": 2.2,
+    "npc_model": "cai_ma", "npc_facing_deg": 270.0,
     "actions": ["quest_cai_ma"]
   },
   "npc_grandma": {
     "name": "老香客陳阿嬤", "district": "shrine",
-    "position_3d": {"x": 4.5, "y": 0.0, "z": -24.0}, "trigger_radius": 2.2,
+    "position_3d": {"x": -4.8, "y": 0.0, "z": -26.0}, "trigger_radius": 2.2,
     "npc_model": "grandma", "npc_facing_deg": 90.0,
     "actions": ["quest_grandma"]
   },
   "npc_lao_wang": {
     "name": "流浪漢老王", "district": "shrine",
-    "position_3d": {"x": -4.5, "y": 0.0, "z": -26.0}, "trigger_radius": 2.2,
-    "npc_model": "lao_wang", "npc_facing_deg": 270.0,
+    "position_3d": {"x": -4.8, "y": 0.0, "z": -20.0}, "trigger_radius": 2.2,
+    "npc_model": "lao_wang", "npc_facing_deg": 90.0,
     "actions": ["quest_lao_wang"]
   },
   "npc_alms": {
     "name": "化緣", "district": "shrine",
-    "position_3d": {"x": 3.0, "y": 0.0, "z": -2.0}, "trigger_radius": 2.0,
+    "position_3d": {"x": 2.0, "y": 0.0, "z": -1.0}, "trigger_radius": 2.0,
     "actions": ["beggar_minigame"]
   },
   "offering_box": {
     "name": "賽錢箱", "district": "shrine",
-    "position_3d": {"x": 1.8, "y": 0.0, "z": -26.5}, "trigger_radius": 2.2,
+    "position_3d": {"x": 0.0, "y": 0.0, "z": -27.0}, "trigger_radius": 2.2,
     "actions": ["offering_toss"]
   },
   "bowling_entrance": {
     "name": "保齡球館入口", "district": "shrine",
-    "position_3d": {"x": 5.0, "y": 0.0, "z": -9.0}, "trigger_radius": 2.2,
+    "position_3d": {"x": 5.0, "y": 0.0, "z": -11.0}, "trigger_radius": 2.2,
     "actions": ["bowling_minigame"]
   },
   "batting_entrance": {
     "name": "打擊場入口", "district": "shrine",
-    "position_3d": {"x": -5.0, "y": 0.0, "z": -21.0}, "trigger_radius": 2.2,
+    "position_3d": {"x": -4.8, "y": 0.0, "z": -14.0}, "trigger_radius": 2.2,
     "actions": ["batting_minigame"]
   },
 
   "npc_tie_shu": {
     "name": "鐵叔", "district": "armory",
     "position_3d": {"x": -4.0, "y": 0.0, "z": -16.0}, "trigger_radius": 2.5,
-    "npc_model": "tie_shu", "npc_facing_deg": 180.0, "unlock_flag": "armory_unlocked",
+    "npc_model": "tie_shu", "npc_facing_deg": 90.0, "unlock_flag": "armory_unlocked",
     "actions": ["armory_npc"]
   },
   "parlor_entrance": {

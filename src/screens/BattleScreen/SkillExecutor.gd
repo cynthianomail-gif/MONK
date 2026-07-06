@@ -326,17 +326,30 @@ func _pick_enemy_skill(e: Combatant, player: Combatant, allies: Array) -> String
 
 func _condition_met(e: Combatant, _player: Combatant, allies: Array, skill_id: String) -> bool:
 	var sk: Dictionary = e.skill_defs.get(skill_id, {})
+	# 召喚類技能防鏈式無限增生：(a) 被召喚出來的援軍不能再召喚(summoned_backup 由 _summon() 標記)；
+	# (b) max_once 技能每場僅 1 次(既有機制，用 summoned_backup 當旗標)。
 	if sk.get("max_once", false) and e.summoned_backup:
 		return false
+	if sk.get("special", "") == "summon" and e.summoned_backup:
+		return false
 	var hp_ratio: float = float(e.current_hp) / float(e.max_hp)
+	var cond_ok: bool
 	match sk.get("condition", ""):
-		"hp_below_50": return hp_ratio < 0.5
-		"hp_below_40": return hp_ratio < 0.4
-		"hp_below_30": return hp_ratio < 0.3
+		"hp_below_50": cond_ok = hp_ratio < 0.5
+		"hp_below_40": cond_ok = hp_ratio < 0.4
+		"hp_below_30": cond_ok = hp_ratio < 0.3
 		"partner_alive":
-			return allies.any(func(a): return a != e and a.is_alive())
+			cond_ok = allies.any(func(a): return a != e and a.is_alive())
 		"ally_hp_lowest":
-			return allies.any(func(a): return a != e and a.is_alive() and a.current_hp < e.current_hp)
+			cond_ok = allies.any(func(a): return a != e and a.is_alive() and a.current_hp < e.current_hp)
 		"player_karma_above_50":
-			return GameManager.player.karma > 50
+			cond_ok = GameManager.player.karma > 50
+		_:
+			cond_ok = true
+	if not cond_ok:
+		return false
+	# 機率型技能（如「叫兄弟來」20% 機率增援）：條件成立後再擲一次機率，未中不列入可用清單，
+	# 該回合會退而使用其他技能，不會每次觸發條件就必定召喚。
+	if sk.has("chance"):
+		return randf() < float(sk.chance)
 	return true
