@@ -14,6 +14,33 @@
     "description": "櫻木町晃蕩的小混混。"
   },
 
+  "tutorial_punk": {
+    "name": "鬧事的小混混", "district": "shrine",
+    "max_hp": 180, "attack": 12, "defense": 20, "level": 1, "speed": 10,
+    "weaknesses": ["physical"], "resistances": [],
+    "ai_pattern": "aggressive",
+    "skills": ["punk_punch"],
+    "skill_defs": {
+      "punk_punch": {"name": "街頭亂拳", "power": 25, "damage_type": "physical", "target": "single"}
+    },
+    "ally_id": "tutorial_punk_lookout",
+    "gold_reward": 50, "portrait": "enemy_punk.png",
+    "description": "茶攤鬧事的小混混，衝著無戒來的教學對手。弱物理，方便了塵講解 One More；同伙把風的不弱物理，確保打倒他之後還有敵人能出招，示範完美格擋。"
+  },
+
+  "tutorial_punk_lookout": {
+    "name": "把風的小混混", "district": "shrine",
+    "max_hp": 200, "attack": 12, "defense": 15, "level": 1, "speed": 6,
+    "weaknesses": [], "resistances": [],
+    "ai_pattern": "aggressive",
+    "skills": ["punk_punch"],
+    "skill_defs": {
+      "punk_punch": {"name": "街頭亂拳", "power": 25, "damage_type": "physical", "target": "single"}
+    },
+    "gold_reward": 50, "portrait": "enemy_punk.png",
+    "description": "教學戰同伙，不弱任何屬性——確保玩家打倒領頭的之後，這隻還能正常出招，讓了塵示範完美格擋。"
+  },
+
   "corrupt_vendor": {
     "name": "黑心攤販", "district": "shrine",
     "max_hp": 200, "attack": 20, "defense": 25, "level": 3, "speed": 16,

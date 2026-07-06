@@ -62,6 +62,7 @@ directories/dtl_directory={
 "main_ch1_gate_ready": "res://dialogue/main_ch1_gate_ready.dtl",
 "main_ch1_intel": "res://dialogue/main_ch1_intel.dtl",
 "main_ch1_not_ready": "res://dialogue/main_ch1_not_ready.dtl",
+"main_ch1_tutorial_brawl": "res://dialogue/main_ch1_tutorial_brawl.dtl",
 "quest_ah_ming_s1": "res://dialogue/quest_ah_ming_s1.dtl",
 "quest_ah_ming_s2": "res://dialogue/quest_ah_ming_s2.dtl",
 "quest_ah_zhong_final": "res://dialogue/quest_ah_zhong_final.dtl",

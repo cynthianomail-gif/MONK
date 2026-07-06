@@ -10,6 +10,7 @@
     "stages": [
       {"id": "c1_demolition", "desc": "破神社遭強拆、舍利塔被奪走。", "cutscene": "opening_temple_falls", "hold": true, "set_flag": "relic_stolen"},
       {"id": "c1_aftermath", "desc": "落魄進城，雨夜茶攤遇斷臂修練者了塵；他道破萬神殿，並一一引介十二主神。", "cutscene": "ch1_aftermath_wake", "hold": true, "dialogue": "main_ch1_aftermath"},
+      {"id": "c1_tutorial_brawl", "desc": "茶攤遭小混混鬧事，了塵讓無戒先試試身手——順道逐步講解戰鬥系統。", "dialogue": "main_ch1_tutorial_brawl", "battle": "tutorial_punk"},
       {"id": "c1_intel", "desc": "了塵聚焦阿瑞斯，指點幾位知情或需援手的人，傳無戒一招羅漢拳。", "dialogue": "main_ch1_intel", "set_flag": "armory_unlocked"},
       {"id": "c1_armory_gate", "desc": "了塵要先確認無戒的修為，夠了才肯帶他殺進阿瑞斯的軍火庫。", "gate": {"type": "skills", "min": 5, "pass_dialogue": "main_ch1_gate_ready", "fail_dialogue": "main_ch1_not_ready"}},
       {"id": "c1_confront", "desc": "了塵領路，無戒直闖萬神殿保全總部討回聖物。", "location": "pantheon_security_hq", "dialogue": "main_ares_lead"},

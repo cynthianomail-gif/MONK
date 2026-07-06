@@ -20,6 +20,7 @@ signal battle_log(text: String)
 @onready var executor: Node = $SkillExecutor
 @onready var status: Node = $SkillExecutor/StatusEffects
 @onready var ui: CanvasLayer = $BattleUI
+@onready var tutorial: BattleTutorial = $BattleUI/BattleTutorial
 
 var state: State = State.PLAYER_TURN
 var player_combatant: Combatant
@@ -60,6 +61,14 @@ func setup(enemy_id: String) -> void:
 	enemy_combatants = [Combatant.from_enemy(enemy_id, data)]
 	if data.get("spawn_pair", false):
 		enemy_combatants.append(Combatant.from_enemy(enemy_id, data, "_2"))
+	# 異質同場第二敵（ally_id，選用）：與 spawn_pair（同型複製）不同，用於需要「兩隻弱點不同」
+	# 的場合（如教學戰：一隻弱物理示範 One More，另一隻中立示範完整敵人回合/格擋，
+	# 避免玩家用單一屬性連續打倒全場、跳過敵人出招）。
+	var ally_id: String = String(data.get("ally_id", ""))
+	if ally_id != "":
+		var ally_data: Dictionary = _enemies_data.get(ally_id, {})
+		if not ally_data.is_empty():
+			enemy_combatants.append(Combatant.from_enemy(ally_id, ally_data))
 	_init_boss_phases(data)
 	status.reset()
 	ui.build(player_combatant, enemy_combatants)
@@ -71,6 +80,7 @@ func setup(enemy_id: String) -> void:
 	EventBus.battle_started.emit(data)
 	if data.get("is_boss", false):
 		AudioManager.switch_bgm("boss_theme")
+	await tutorial.show_point("intro")
 	_start_round()
 
 # ─── 行動佇列（第二期第 1 點）───────────────────────────────
@@ -161,6 +171,7 @@ func _begin_player_turn() -> void:
 		return
 	player_combatant.is_guarding = false  # 每次輪到玩家先清，選了防禦才設回
 	_set_state(State.PLAYER_TURN)
+	await tutorial.show_point("menu")
 	if ui.has_method("open_command_menu"):
 		ui.open_command_menu(_disabled_commands())
 	else:
@@ -339,7 +350,7 @@ func player_use_skill(skill_id: String, target_idx: int) -> void:
 	_record_weakness_intel(sk, target)
 	await ui.play_skill_effect(sk, result.hit_weakness, result.is_crit, result.get("target_id", ""))
 	await _maybe_trigger_boss_phase2()
-	_process_result(result)
+	await _process_result(result)
 
 ## 弱點探知（第一期）：命中屬性 = 敵人弱點 → 記錄並揭曉徽章（跨戰鬥保留、進存檔）。
 ## 傷害技才探知；命中的目標（單體或全體）逐一比對。
@@ -378,6 +389,7 @@ func _process_result(r: Dictionary) -> void:
 		EventBus.combo_count_changed.emit(_hits)
 		SkillUnlockManager.check_unlocks()
 		battle_log.emit("弱點！One More")
+		await tutorial.show_point("weakness")
 		if _all_downed():
 			_all_out_attack()
 			return
@@ -411,6 +423,7 @@ func _enemy_single_turn(e: Combatant) -> void:
 		return
 
 	# 完美格擋判定窗：出招前先開紅色警示窗，等玩家（或 AI 測試）反應
+	await tutorial.show_point("guard")
 	await _run_guard_window(e)
 
 	var act: Dictionary = executor.execute_enemy_action(e, player_combatant, enemy_combatants)
@@ -557,6 +570,7 @@ func _victory() -> void:
 	GameManager.player.current_hp = player_combatant.current_hp
 	SkillUnlockManager.check_unlocks()
 	_apply_battle_victory_hooks()
+	await tutorial.show_point("victory")
 	EventBus.battle_ended.emit("win")
 	await get_tree().create_timer(1.0).timeout
 	_return_from_battle()
@@ -569,6 +583,8 @@ func _defeat() -> void:
 	GameManager.player.current_hp = int(GameManager.player.max_hp / 2.0)
 	GameManager.player.last_position = {"x": -18.0, "y": 0.0, "z": 4.0}
 	_clear_battle_return_flags()  # 戰敗回古廟而非原場景，清掉暫存避免外洩到下一場
+	# 教學戰若中途戰敗：清掉旗標避免殘留影響下一場真實戰鬥（重推本 stage 時對話會重新設回）。
+	GameManager.set_flag("tutorial_battle", false)
 	await get_tree().create_timer(1.0).timeout
 	SceneRouter.go_to_map()
 

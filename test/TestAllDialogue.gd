@@ -6,7 +6,7 @@ extends Node
 ##  - 條件結局含 Condition 事件
 ##  - 所有 .dch 能透過 Dialogic loader 載入
 ## 以 main scene 跑，Dialogic autoload 在線。
-## 注意：一次 process() 26 個 timeline 後，Godot headless 在「關機清理」階段
+## 注意：一次 process() 全部 timeline（數量以下方 ALL_TIMELINES 陣列為準）後，Godot headless 在「關機清理」階段
 ## 會 segfault（退出碼 139），這是引擎 teardown bug，發生在所有檢查印出之後，
 ## 與內容正確性無關（執行期一次只 Dialogic.start 一條）。
 ## 判定通過的權威信號＝是否印出 "ALL_DIALOGUE_TEST: ALL PASS"。

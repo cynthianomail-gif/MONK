@@ -4,7 +4,9 @@ extends Node
 
 var ok := true
 
-const EXPECT_STAGE_IDS := ["c1_demolition", "c1_aftermath", "c1_intel", "c1_armory_gate",
+## 2026-07-06 新增 c1_tutorial_brawl（茶攤小混混亂入教學戰，介於 aftermath/intel 之間）：
+## 見 main_quests.json、BattleTutorial.gd。stage 數 9→10。
+const EXPECT_STAGE_IDS := ["c1_demolition", "c1_aftermath", "c1_tutorial_brawl", "c1_intel", "c1_armory_gate",
 	"c1_confront", "c1_armory_breach", "c1_armory_deep", "c1_ares_intro", "c1_ares"]
 const INTEL_FLAGS := ["intel_pantheon", "intel_ares", "intel_hermes", "intel_poseidon",
 	"intel_demeter", "intel_hephaestus", "intel_aphrodite", "intel_apollo", "intel_dionysus",
@@ -35,7 +37,7 @@ func _test_ch1_stages() -> void:
 	var c: Dictionary = raw.get("ch01_ares", {})
 	_check(not c.is_empty(), "ch01_ares 存在")
 	var stages: Array = c.get("stages", [])
-	_check(stages.size() == 9, "ch1 有 9 stage (got %d)" % stages.size())
+	_check(stages.size() == 10, "ch1 有 10 stage (got %d)" % stages.size())
 	var ids: Array = []
 	for s in stages:
 		ids.append(String(s.get("id", "")))

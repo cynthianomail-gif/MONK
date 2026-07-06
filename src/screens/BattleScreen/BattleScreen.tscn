@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://src/screens/BattleScreen/BattleManager.gd" id="1"]
 [ext_resource type="Script" path="res://src/screens/BattleScreen/SkillExecutor.gd" id="2"]
 [ext_resource type="Script" path="res://src/screens/BattleScreen/StatusEffects.gd" id="3"]
 [ext_resource type="Script" path="res://src/screens/BattleScreen/BattleUI.gd" id="4"]
 [ext_resource type="Script" path="res://src/screens/BattleScreen/breathing_figure.gd" id="5"]
+[ext_resource type="Script" path="res://src/screens/BattleScreen/BattleTutorial.gd" id="6"]
 
 [node name="BattleScreen" type="Control" groups=["battle_manager"]]
 layout_mode = 3
@@ -283,3 +284,11 @@ theme_override_font_sizes/font_size = 120
 text = "超　渡"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="BattleTutorial" type="Control" parent="BattleUI"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("6")

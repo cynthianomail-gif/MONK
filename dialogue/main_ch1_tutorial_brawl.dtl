@@ -1,0 +1,8 @@
+话還沒說完，巷口傳來一陣嬉鬧的腳步聲——三兩個混混晃了進來，看見茶攤上的碗筷，順手就想掀。
+Liaochen (default): ……來得正好。
+一個為首的混混踹翻了條凳，斜眼瞪向無戒。
+Wujie (calm): 施主，這攤子是老人家的營生，勞煩高抬貴手。
+Liaochen (default): 別跟他們講理。這種人，只聽得懂拳頭。
+Liaochen (default): 你也該試試身手了——別緊張，我在旁邊看著。
+[signal arg="flag:tutorial_battle"]
+Liaochen (default): 動手吧。
