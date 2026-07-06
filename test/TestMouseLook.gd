@@ -9,6 +9,8 @@ extends Node
 ## 3) 開 MenuShell → 滑鼠自動釋放；close() 後恢復捕捉
 ## 4) 軍火庫／地下遊藝場（後者是獨立場景樹，非 MapScreen 子節點）同樣接得到滑鼠視角
 ## 5) Esc（toggle_mouse_look）手動切換：關閉後注入滑鼠移動 yaw 應不再變動
+## 6) 視窗焦點：FOCUS_OUT 釋放捕捉且撐得過 _physics_process 的 _refresh_mouse_capture
+##    （2026-07-06 review finding：失焦釋放曾被下一個 physics tick 搶回）；FOCUS_IN 恢復
 
 func _ready() -> void:
 	GameManager.new_game()
@@ -29,7 +31,7 @@ func _ready() -> void:
 	var yaw_before: float = rig._yaw
 	var motion := InputEventMouseMotion.new()
 	motion.relative = Vector2(120.0, 0.0)
-	rig._unhandled_input(motion)
+	rig._input(motion)
 	if is_equal_approx(rig._yaw, yaw_before):
 		return _fail("注入滑鼠移動後 yaw 沒有變化（before=%.4f after=%.4f）" % [yaw_before, rig._yaw])
 	print("MOUSELOOK: yaw %.4f -> %.4f（神社街，滑鼠水平移動 120px）" % [yaw_before, rig._yaw])
@@ -38,13 +40,13 @@ func _ready() -> void:
 	var pitch_motion := InputEventMouseMotion.new()
 	pitch_motion.relative = Vector2(0.0, -100000.0)
 	for i in 20:
-		rig._unhandled_input(pitch_motion)
+		rig._input(pitch_motion)
 	if rig._pitch_offset_deg > 15.01:
 		return _fail("pitch clamp 上界失效：%.2f" % rig._pitch_offset_deg)
 	var pitch_motion_down := InputEventMouseMotion.new()
 	pitch_motion_down.relative = Vector2(0.0, 100000.0)
 	for i in 40:
-		rig._unhandled_input(pitch_motion_down)
+		rig._input(pitch_motion_down)
 	if rig._pitch_offset_deg < -35.01:
 		return _fail("pitch clamp 下界失效：%.2f" % rig._pitch_offset_deg)
 	print("MOUSELOOK: pitch clamp OK（%.2f 度）" % rig._pitch_offset_deg)
@@ -60,7 +62,7 @@ func _ready() -> void:
 	if rig._captured:
 		return _fail("MenuShell 開啟時應釋放滑鼠捕捉，實際 _captured=true")
 	var yaw_locked: float = rig._yaw
-	rig._unhandled_input(motion)
+	rig._input(motion)
 	if not is_equal_approx(rig._yaw, yaw_locked):
 		return _fail("MenuShell 開啟時滑鼠移動不該再轉 yaw")
 	print("MOUSELOOK: MenuShell 開啟時滑鼠自動釋放＋yaw 鎖住 OK")
@@ -90,13 +92,30 @@ func _ready() -> void:
 	if rig._captured:
 		return _fail("Esc 手動關閉後應釋放捕捉，實際 _captured=true")
 	var yaw_after_toggle_off: float = rig._yaw
-	rig._unhandled_input(motion)
+	rig._input(motion)
 	if not is_equal_approx(rig._yaw, yaw_after_toggle_off):
 		return _fail("Esc 關閉滑鼠視角後，滑鼠移動不該再轉 yaw")
 	rig._unhandled_input(toggle_ev)   # 切回開啟，避免影響後續場景
 	if not rig._captured:
 		return _fail("Esc 再按一次應恢復捕捉，實際 _captured=false")
 	print("MOUSELOOK: Esc 手動切換 OK")
+
+	# --- 6) 視窗焦點：失焦釋放、physics tick 不搶回、回焦恢復 ---
+	rig.notification(NOTIFICATION_APPLICATION_FOCUS_OUT)
+	if rig._captured:
+		return _fail("失焦後應釋放捕捉，實際 _captured=true")
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	if rig._captured:
+		return _fail("失焦釋放被 _physics_process 的 _refresh_mouse_capture 搶回（焦點沒進 _mouse_look_active 判斷）")
+	var yaw_unfocused: float = rig._yaw
+	rig._input(motion)
+	if not is_equal_approx(rig._yaw, yaw_unfocused):
+		return _fail("失焦時滑鼠移動不該再轉 yaw")
+	rig.notification(NOTIFICATION_APPLICATION_FOCUS_IN)
+	if not rig._captured:
+		return _fail("回焦後應恢復捕捉，實際 _captured=false")
+	print("MOUSELOOK: 失焦釋放（physics tick 不搶回）＋回焦恢復 OK")
 
 	ms.queue_free()
 	await get_tree().process_frame
@@ -115,7 +134,7 @@ func _ready() -> void:
 	if not rig2._captured:
 		return _fail("軍火庫探索中應自動捕捉滑鼠")
 	var yaw2_before: float = rig2._yaw
-	rig2._unhandled_input(motion)
+	rig2._input(motion)
 	if is_equal_approx(rig2._yaw, yaw2_before):
 		return _fail("軍火庫：注入滑鼠移動後 yaw 沒有變化")
 	print("MOUSELOOK: 軍火庫 yaw %.4f -> %.4f OK" % [yaw2_before, rig2._yaw])
@@ -134,14 +153,14 @@ func _ready() -> void:
 	if not rig3._captured:
 		return _fail("地下遊藝場探索中應自動捕捉滑鼠")
 	var yaw3_before: float = rig3._yaw
-	rig3._unhandled_input(motion)
+	rig3._input(motion)
 	if is_equal_approx(rig3._yaw, yaw3_before):
 		return _fail("地下遊藝場：注入滑鼠移動後 yaw 沒有變化")
 	print("MOUSELOOK: 地下遊藝場 yaw %.4f -> %.4f OK" % [yaw3_before, rig3._yaw])
 
 	parlor.queue_free()
 	await get_tree().process_frame
-	print("TEST PASS: 滑鼠自由視角（捕捉/UI自動釋放/pitch clamp/Esc切換/三場景）OK")
+	print("TEST PASS: 滑鼠自由視角（捕捉/UI自動釋放/pitch clamp/Esc切換/焦點釋放恢復/三場景）OK")
 	get_tree().quit(0)
 
 func _find_rig(root: Node) -> Node:

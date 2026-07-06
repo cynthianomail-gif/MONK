@@ -31,10 +31,20 @@ var _mouse_look_enabled: bool = true   # Esc 手動開關
 ## 判斷依據，headless 測試永遠驗不到「捕捉時滑鼠移動即轉視角」這件事。改成自己
 ## 記錄「上一次要求的捕捉意圖」，GPU 真機與 headless 測試都能一致依此判斷。
 var _captured: bool = false
+## 視窗焦點狀態——headless 測試沒有焦點通知，預設 true 讓既有測試路徑不變。
+## 失焦時它是 _mouse_look_active() 的一票否決：沒有它，_physics_process 每 tick 的
+## _refresh_mouse_capture() 會在失焦後下一個 tick 就把游標搶回 CAPTURED，
+## 「失焦釋放游標」形同虛設。
+var _window_focused: bool = true
 
 func _ready() -> void:
 	camera.position = camera_offset
 	camera.rotation_degrees.x = camera_pitch_deg
+	# 不要累積滑鼠移動事件——累積模式下每個 physics tick 只送一個「合併」的
+	# InputEventMouseMotion，若引擎/宿主（例如編輯器內嵌遊戲視窗）在合併時
+	# 把位移歸零或漏送，FPS 視角就會「滑鼠一直動卻不轉」。關掉累積讓每筆
+	# OS 位移各自成一個事件，捕捉模式下的自由視角最穩。
+	Input.set_use_accumulated_input(false)
 	_register_rotate_actions()
 	_register_toggle_look_action()
 	_acquire_target()
@@ -44,6 +54,22 @@ func _exit_tree() -> void:
 	# 場景被 change_scene_to_file 整個換掉時，mouse_mode 是全域狀態，不隨場景樹釋放——
 	# 沒有這行，切去戰鬥/小遊戲/過場後滑鼠會繼續卡在 captured。
 	_set_mouse_captured(false)
+
+## 視窗重新取得焦點時（Alt-Tab 回來、或編輯器內嵌遊戲視窗被點回來）重新套用
+## 捕捉意圖——OS 在失焦時會自行把 mouse_mode 放回 VISIBLE，若不在回焦時補回
+## CAPTURED，玩家切出去再切回來滑鼠視角就死掉。失焦時明確釋放，避免游標被鎖在
+## 別的視窗上。
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		_window_focused = true
+		if is_inside_tree():
+			_refresh_mouse_capture()
+	elif what == NOTIFICATION_WM_MOUSE_ENTER:
+		if is_inside_tree():
+			_refresh_mouse_capture()
+	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		_window_focused = false
+		_set_mouse_captured(false)
 
 ## 解析 target；成功時直接貼齊（避免相機從原點慢慢飄過去）。
 ## target_path 的 NodePath export 在某些載入時序會掉值，故以 "player" group 為備援。
@@ -77,8 +103,8 @@ func _resolve_cam_collision() -> void:
 		frac = clampf((hit.position - from).length() / (to - from).length() - 0.16, CAM_MIN_FRAC, 1.0)
 	camera.position = camera.position.lerp(camera_offset * frac, 0.25)
 
-## 滑鼠移動：捕捉模式下（FPS 式，不用按鍵）或右鍵按住拖曳（未捕捉時的備援），
-## 直接轉 yaw／pitch。UI 擋著或手動關閉時 _mouse_look_active() 會擋掉。
+## Esc 手動開關留在 _unhandled_input（維持原本「UI 先吃、rig 後收」的順序，
+## 不搶 MenuShell 的 Esc）。
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_mouse_look"):
 		# 只在真正探索中（無 UI 擋著）才切手動開關——否則玩家用 Esc 關手機選單時
@@ -88,7 +114,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		if not _blocking_ui_present():
 			_mouse_look_enabled = not _mouse_look_enabled
 			_refresh_mouse_capture()
-		return
+
+## 滑鼠移動：捕捉模式下（FPS 式，不用按鍵）或右鍵按住拖曳（未捕捉時的備援），
+## 直接轉 yaw／pitch。UI 擋著或手動關閉時 _mouse_look_active() 會擋掉。
+## ⚠改在 _input 而非 _unhandled_input：捕捉模式下 HUD 等 Control 節點會先把
+## InputEventMouseMotion 吃掉，事件到不了 _unhandled_input，視角就不轉——這正是
+## 真機「只能按右鍵才能轉」的成因（右鍵拖曳走另一條 OS 事件較不受影響）。_input
+## 先於 GUI 收事件，攔不掉；且這裡不呼叫 set_input_as_handled，UI 照常運作。
+func _input(event: InputEvent) -> void:
 	if not (event is InputEventMouseMotion):
 		return
 	if not _mouse_look_active():
@@ -110,6 +143,8 @@ func _unhandled_input(event: InputEvent) -> void:
 ## 後者在巢狀/測試場景（rig 不是掛在 root 正下方）會找錯層級，MenuShell 開關偵測不到。
 func _mouse_look_active() -> bool:
 	if not _mouse_look_enabled:
+		return false
+	if not _window_focused:
 		return false
 	return not _blocking_ui_present()
 
