@@ -285,6 +285,11 @@ func _play_transition(transition: Transition) -> void:
 func _show_loading() -> void:
 	if not ResourceLoader.exists(LOADING_SCENE):
 		return
+	# 防呆：正常流程 _hide_loading 會把 _loading_screen 清為 null，此處應為 null。
+	# 但萬一兩次換場並發（前一個讀取畫面還沒 hide 就被新的一次覆寫參照），舊 CanvasLayer
+	# 會失去參照變孤兒、永不隱藏＝卡讀取。開新的之前先移除殘留，確保同時只有一個。
+	if _loading_screen != null and is_instance_valid(_loading_screen):
+		_loading_screen.queue_free()
 	_loading_screen = load(LOADING_SCENE).instantiate() as CanvasLayer
 	get_tree().root.add_child(_loading_screen)
 

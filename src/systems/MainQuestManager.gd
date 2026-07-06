@@ -192,6 +192,14 @@ func _run_stage(stage: Dictionary) -> bool:
 			return false
 	if stage.has("set_flag"):
 		GameManager.set_flag(String(stage.set_flag), true)
+	# 戰鬥/Boss stage：BattleManager 打完會自行返回地圖（_return_from_battle），
+	# 此時 held 的 cinematic 背景已被戰鬥場景取代、玩家已在地圖上。若這個戰鬥 stage 又
+	# 夾在 held 鏈中（_on_cinematic_backdrop 仍為 true，如教學戰夾在雨夜茶攤與 intel 之間），
+	# 底下的 should_return_to_map_after 會再呼叫一次 go_to_map，和 BattleManager 那次並發
+	# 搶 _change_scene → LoadingScreen 的單一參照被覆寫、其中一個 CanvasLayer 變孤兒永不
+	# 隱藏＝卡在讀取畫面。既然戰後已在地圖，直接清掉 backdrop 旗標、不重複返回。
+	if stage.has("battle") or stage.has("boss"):
+		_on_cinematic_backdrop = false
 	# 整段 cinematic 鏈落幕：第一個非 held 的 stage（如 c1_intel）收尾，把 held 茶攤換回地圖。
 	if should_return_to_map_after(stage, _on_cinematic_backdrop):
 		await SceneRouter.go_to_map()

@@ -166,7 +166,10 @@ func _test_opening_wakeup() -> void:
 	_check(bool(by_id.get("c1_demolition", {}).get("hold", false)), "c1_demolition 帶 hold")
 	var aft: Dictionary = by_id.get("c1_aftermath", {})
 	_check(bool(aft.get("hold", false)), "c1_aftermath 帶 hold")
-	_check(String(aft.get("cutscene", "")) == "ch1_aftermath_wake", "c1_aftermath cutscene=ch1_aftermath_wake")
+	# 2026-07-06 設計變更：移除 c1_aftermath 的純字幕過場 ch1_aftermath_wake（與後面 main_ch1_aftermath
+	# 對話框的開頭旁白重覆＝使用者反映「有對話框了就不用沒立繪的純文字」，且該段字幕會卡跳過）。
+	# 茶攤背景改由 main_ch1_aftermath.dtl 的 [background] 承載，故 c1_aftermath 不再帶 cutscene 欄。
+	_check(not aft.has("cutscene"), "c1_aftermath 已移除純字幕過場（改由對話框背景承載）")
 	_check(String(aft.get("dialogue", "")) == "main_ch1_aftermath", "c1_aftermath 仍有 main_ch1_aftermath 對話")
 	_check(not by_id.get("c1_intel", {}).has("hold"), "c1_intel 無 hold")
 	# --- 回地圖決策表（純函式，無副作用） ---

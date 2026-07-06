@@ -1,3 +1,4 @@
+[background arg="res://assets/cutscenes/ch1_aftermath_wake/ok_tea_stall.png" fade="0.6"]
 雨沒有要停的意思。無戒沿著新梵京的燈火走了一夜——神社沒了，舍利沒了，連個落腳處都沒有。舊城區的巷子深處，一盞昏黃的燈下，支著一座沒有招牌的茶攤。
 攤後坐著一個獨臂的老者，空蕩的左袖在風裡晃。他替無戒斟了一碗熱茶，像是早就等著他來。
 Liaochen (default): 坐。淋成這樣，是從門前町一路走來的吧——那座被怪手推平的破神社。
@@ -46,7 +47,7 @@ Liaochen (default): 天后，赫拉。權勢之網的織者，宙斯之后，集
 [background arg="res://assets/2d/gods/zeus.jpg" fade="0.4"]
 Liaochen (default): 而坐在奧林帕斯大廈頂樓的那位——眾神之王，宙斯。掌著全城電網，是這一切的源頭。
 [signal arg="flag:intel_zeus"]
-[background arg="" fade="0.5"]
+[background arg="res://assets/cutscenes/ch1_aftermath_wake/ok_tea_stall.png" fade="0.5"]
 雨聲重新漫了回來。十二張臉，像十二盞不滅的燈，烙在無戒心裡。
 Liaochen (default): 記住這些臉。你要走的路，會一一遇上他們。而眼下，先過得了第一關——阿瑞斯。
 Wujie (calm): 貧僧不懂這許多神。貧僧只知道，那座塔鎮著百年香火，也鎮著一些不該醒來的東西。它被搬出來，是把禍事一起搬出來了。
