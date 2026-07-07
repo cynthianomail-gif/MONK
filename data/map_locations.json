@@ -10,7 +10,7 @@
   "wannian_mall": {
     "name": "櫻木会館", "district": "shrine",
     "scene_pos": {"x": 0.66, "y": 0.80}, "interior_2d": "res://assets/2d/map/interiors/wannian_mall.png",
-    "actions": ["shop", "greed_break_trigger", "quest_zheng_ma", "quest_jie"],
+    "actions": ["shop", "quest_zheng_ma", "quest_jie"],
     "available_periods": [0, 1, 2], "bgm": "ximen_day",
     "position_3d": {"x": -5.0, "y": 0.0, "z": -8.0}, "trigger_radius": 3.0,
     "npc_model": "zheng_ma"
@@ -18,7 +18,7 @@
   "zen_bbq": {
     "name": "禪味燒肉", "district": "shrine",
     "scene_pos": {"x": 0.35, "y": 0.80}, "interior_2d": "res://assets/2d/map/interiors/zen_bbq.png",
-    "actions": ["food_break_trigger", "rest", "quest_ah_zhong", "quest_david"],
+    "actions": ["rest", "quest_ah_zhong", "quest_david"],
     "available_periods": [2, 3], "bgm": "wanhua_night",
     "position_3d": {"x": -5.0, "y": 0.0, "z": -18.0}, "trigger_radius": 2.0,
     "npc_model": "ah_zhong"
@@ -26,7 +26,7 @@
   "zuijin_club": {
     "name": "醉金閣", "district": "shrine",
     "scene_pos": {"x": 0.55, "y": 0.80}, "interior_2d": "res://assets/2d/map/interiors/zuijin_club.png",
-    "actions": ["cherry_dialogue", "lust_break_trigger", "quest_cherry_debt", "quest_cai_ma"],
+    "actions": ["cherry_dialogue", "quest_cherry_debt", "quest_cai_ma"],
     "available_periods": [3], "bgm": "linsen_night",
     "position_3d": {"x": 5.0, "y": 0.0, "z": -16.0}, "trigger_radius": 2.5,
     "npc_model": "cherry"
