@@ -1,18 +1,20 @@
-# Codex 生圖 handoff — 具名配角立繪（3 張）
+# Codex 生圖 handoff — 具名配角立繪（3 張）＋無名路人水墨黑影（1 張）
 
 日期：2026-07-06。背景：全劇情旁白改成有立繪的人物對話後，原本「無立繪、只在旁白裡用引號講話」
-的配角，全部升級成正式 Dialogic 說話者。其中「打手型」配角直接沿用既有敵人立繪即可
-（無須生圖，見文末），但以下 3 個**具名、有戲份**的配角目前暫借了身分不符的立繪佔位，需生正式圖。
+的配角，全部升級成正式 Dialogic 說話者。3 個**具名、有戲份**的配角目前暫借了身分不符的
+立繪佔位，需生正式圖；另外無名路人共用的黑影立繪目前是程式畫的純色剪影（太假），
+需重生成水墨質感版。
 
 ## 落點與檔名（交回後由 Claude 接線：去背→放檔→改 .dch image 路徑→--import）
 
 `MONK/assets/2d/portraits/npcs/bust/`（與其他 NPC 胸像同目錄）
 
-| 檔名 | 角色 | 目前暫借（要換掉） |
+| 檔名 | 角色 | 目前佔位（要換掉） |
 |---|---|---|
 | `npc_hayashida.png` | 林田 | 暫借 enemy_vendor.png |
 | `npc_lao_zhang.png` | 老張 | 暫借 npc_lao_wang.png |
 | `npc_kenta_father.png` | 健太父 | 暫借 npc_david.png |
+| `npc_anon_silhouette.png` | 無名路人共用黑影 | 程式畫的純色剪影（同檔名覆蓋＝零改碼） |
 
 ## 輸出格式（與現有 NPC 胸像一致）
 
@@ -28,13 +30,20 @@
 | **老張**（`npc_lao_zhang`） | 櫻木町巷子裡賣了半世紀醬料的老攤主，滿臉風霜、渾濁的眼。與另一支線的老廚師大村是舊識，念舊重情。 | 溫厚、憨直、帶點市井老攤販的江湖氣，笑起來眼睛瞇成一條縫 |
 | **健太父**（`npc_kenta_father`） | 中年男人，風塵僕僕，為生計長年在外地工作、丟下兒子健太與老母（婆婆）。辭了工作回來相認，手裡提著水果。 | 侷促、愧疚、想彌補卻不知如何開口的中年父親，眼眶泛紅 |
 
-## 無名路人（不用生圖）
+## 第 4 張：無名路人水墨黑影（`npc_anon_silhouette.png`）
 
-警衛（Guard）／安保隊長（SecurityChief）／討債的（DebtCollector）＝使用者拍板
-統一用一張通用黑影剪影立繪 `assets/2d/portraits/npcs/bust/npc_anon_silhouette.png`
-（程式生成的匿名胸像剪影），**不需 Codex 生圖**。
+用途：警衛（Guard）／安保隊長（SecurityChief）／討債的（DebtCollector）等所有
+「沒有名字的路人」對話時共用的一張立繪。畫面上會配「警衛」「討債的」等名牌顯示。
+
+- **一個無面目的人形黑影胸像**（頭＋肩上半身），不要五官、不要可辨識的服裝細節——
+  它要能同時當警衛、打手、任何路人
+- **水墨質感**：濃墨剪影＋筆刷邊緣（邊緣有乾筆飛白/暈染，不是幾何硬邊）、
+  剪影內部可有淡淡的墨色濃淡變化，底部可往下淡出如墨暈開
+- 整體像「一團站成人形的墨」，神秘但不猙獰（不是鬼怪，就是匿名者）
+- 透明底 PNG、直式胸像構圖，畫風與其他立繪同一畫師（帶無戒基準鎖風格）
 
 ## 交回後我（Claude）會做
 
-1. 去背/裁切一致性檢查 → 放入 `npcs/bust/` → 改對應 .dch（Hayashida/LaoZhang/Kenta_Father）的 image 路徑 → `--headless --import`。
+1. 去背/裁切一致性檢查 → 放入 `npcs/bust/` → 具名 3 張改對應 .dch（Hayashida/LaoZhang/Kenta_Father）
+   的 image 路徑；黑影同檔名覆蓋零改碼 → `--headless --import`。
 2. 跑 TestAllDialogue／TestDialogueSlice 回歸，確認角色載入正常。
