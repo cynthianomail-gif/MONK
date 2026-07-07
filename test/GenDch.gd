@@ -117,13 +117,14 @@ func _init() -> void:
 	_save(liaochen, "Liaochen.dch")
 
 	# ── 旁白改寫升級：原本無立繪的配角，升級為正式 Dialogic 說話者（2026-07-06）──
-	# 立繪暫用既有圖（不缺圖崩壞），真圖之後 Codex 補、同路徑覆蓋。
+	# 無名路人（警衛/安保隊長/討債的）＝使用者拍板統一用通用黑影剪影立繪（2026-07-06）。
+	const ANON := "res://assets/2d/portraits/npcs/bust/npc_anon_silhouette.png"
 	var guard := _make(
 		"警衛",
 		Color(0.35, 0.38, 0.42, 1),
 		"萬神殿保全集團總部門口的警衛，攔阻無戒。",
 		"default",
-		{"default": _portrait("res://assets/2d/portraits/enemies/enemy_guard.png")}
+		{"default": _portrait(ANON)}
 	)
 	_save(guard, "Guard.dch")
 
@@ -132,7 +133,7 @@ func _init() -> void:
 		Color(0.30, 0.32, 0.36, 1),
 		"城西軍火庫的重武裝安保隊長，阿瑞斯的爪牙。",
 		"default",
-		{"default": _portrait("res://assets/2d/portraits/enemies/enemy_guard.png")}
+		{"default": _portrait(ANON)}
 	)
 	_save(security_chief, "SecurityChief.dch")
 
@@ -141,7 +142,7 @@ func _init() -> void:
 		Color(0.45, 0.30, 0.28, 1),
 		"萬年大樓佛具店門口的地下錢莊打手。",
 		"default",
-		{"default": _portrait("res://assets/2d/portraits/enemies/enemy_punk.png")}
+		{"default": _portrait(ANON)}
 	)
 	_save(debt_collector, "DebtCollector.dch")
 

@@ -13,7 +13,7 @@
 &"portraits": {
 "default": {
 "export_overrides": {
-"image": "\"res://assets/2d/portraits/enemies/enemy_guard.png\""
+"image": "\"res://assets/2d/portraits/npcs/bust/npc_anon_silhouette.png\""
 },
 "mirror": false,
 "offset": Vector2(0, 0),

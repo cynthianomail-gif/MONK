@@ -28,11 +28,11 @@
 | **老張**（`npc_lao_zhang`） | 櫻木町巷子裡賣了半世紀醬料的老攤主，滿臉風霜、渾濁的眼。與另一支線的老廚師大村是舊識，念舊重情。 | 溫厚、憨直、帶點市井老攤販的江湖氣，笑起來眼睛瞇成一條縫 |
 | **健太父**（`npc_kenta_father`） | 中年男人，風塵僕僕，為生計長年在外地工作、丟下兒子健太與老母（婆婆）。辭了工作回來相認，手裡提著水果。 | 侷促、愧疚、想彌補卻不知如何開口的中年父親，眼眶泛紅 |
 
-## 打手型配角（無須生圖，已沿用敵人立繪，供參考）
+## 無名路人（不用生圖）
 
-以下 3 個已直接指向既有敵人立繪，貼題（本就是保全／混混），**除非你想要專屬圖，否則不用生**：
-- 警衛（Guard）／安保隊長（SecurityChief）→ `assets/2d/portraits/enemies/enemy_guard.png`
-- 討債的（DebtCollector）→ `assets/2d/portraits/enemies/enemy_punk.png`
+警衛（Guard）／安保隊長（SecurityChief）／討債的（DebtCollector）＝使用者拍板
+統一用一張通用黑影剪影立繪 `assets/2d/portraits/npcs/bust/npc_anon_silhouette.png`
+（程式生成的匿名胸像剪影），**不需 Codex 生圖**。
 
 ## 交回後我（Claude）會做
 
