@@ -19,20 +19,22 @@ func apply(status_type: String, target: Combatant, duration: int) -> void:
 	_active[target.id].append({"type": status_type, "duration": duration})
 	status_applied.emit(target.id, status_type)
 
-## 回傳 false 表示本回合跳過行動
+## 回傳 false 表示本回合跳過行動。
+## stun/slow 的 duration 只在這裡消耗（跳過幾次行動就持續幾點）——
+## 不能在 process_turn_end 再扣：受害者若在中狀態前已行動，回合結算會把
+## duration 1 直接清成 0，暈眩/遲緩對「比施術者快的目標」永遠不生效。
 func process_turn_start(combatant: Combatant) -> bool:
 	var effects: Array = _active.get(combatant.id, [])
-	for eff in effects:
+	for eff in effects.duplicate():
 		match eff.type:
-			"stun":
+			"stun", "slow":
 				eff.duration -= 1
+				if eff.duration <= 0:
+					effects.erase(eff)
 				return false
 			"fear":
 				if randf() < 0.5:
 					return false
-			"slow":
-				eff.duration -= 1
-				return false
 			"chaos":
 				combatant.chaos_target = null  # BattleManager 決定亂打對象
 	return true
@@ -48,6 +50,8 @@ func process_turn_end(combatant: Combatant) -> void:
 				var stacks: int = effects.filter(func(e): return e.type == "poison").size()
 				combatant.take_damage(10 * stacks)
 				status_damage.emit(combatant.id, 10 * stacks, "poison")
+		if eff.type in ["stun", "slow"]:
+			continue  # 由 process_turn_start 消耗
 		eff.duration -= 1
 		if eff.duration <= 0:
 			effects.erase(eff)
