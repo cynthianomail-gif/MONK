@@ -62,7 +62,7 @@
         "merit": 10
       }
     ],
-    "cross_effect": "解鎖水野商店特殊道具（護身符、業障結晶）"
+    "cross_effect": "解鎖水野商店特殊道具（護身符、業障結晶）；收尾自動破貪戒（BreakVowSystem）"
   },
 
   "jie": {
@@ -109,7 +109,7 @@
         "hp_max_up": 100
       }
     ],
-    "cross_effect": "解鎖無戒師父的背景故事，影響結局演出"
+    "cross_effect": "解鎖無戒師父的背景故事，影響結局演出；收尾自動破飲食戒（BreakVowSystem）"
   },
 
   "david": {
@@ -144,11 +144,11 @@
       },
       {
         "dialogue": "quest_cherry_debt_choice",
-        "desc": "三選一：借錢/談判（需業障≥60）/幫她逃跑（觸發色戒）",
+        "desc": "三選一：借錢/談判（需業障≥60）/幫她逃跑（此路收尾後自動破色戒）",
         "branches": {
           "lend":      {"gold": -5000, "merit": 30, "flag": "cherry_debt_lend"},
           "negotiate": {"require_karma": 60, "karma": -30, "flag": "cherry_debt_negotiated"},
-          "escape":    {"trigger_vow": "lust", "flag": "cherry_escape"}
+          "escape":    {"flag": "cherry_escape"}
         }
       },
       {
@@ -157,7 +157,7 @@
         "flag": "cherry_debt_resolved"
       }
     ],
-    "cross_effect": "櫻 解鎖為戰鬥後援（破色戒後），影響 櫻 個人結局"
+    "cross_effect": "escape 收尾自動破色戒（BreakVowSystem 成就式觸發），影響 櫻 個人結局"
   },
 
   "cai_ma": {

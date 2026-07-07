@@ -215,6 +215,8 @@ func _spawn_chip(idx: int, x_off: float = 0.0) -> void:
 	var chip := _make_chip()
 	chip.position = BET_SPOT + Vector2(x_off + _rng.randf_range(-3.0, 3.0), -idx * 6.0)
 	chip.modulate.a = 0.0
+	# 佈局工具 v3：動態下注籌碼，標樣板不可拖（位置由 BET_SPOT 常數＋堆疊 idx 決定）。
+	chip.set_meta("layout_template", "minigame/blackjack/chip")
 	_chip_root.add_child(chip)
 	_bet_chips.append(chip)
 	var tw := create_tween()
@@ -416,6 +418,9 @@ func _deal_animated(to_player: bool, face_up: bool) -> void:
 	card.position = SHOE_POS
 	card.rotation_degrees = -18.0
 	card.set_meta("rank", rank)
+	# 佈局工具 v3：發牌動畫每張牌都是新節點、position 由 tween 逐幀控制（C 類），
+	# 標樣板不可拖。
+	card.set_meta("layout_template", "minigame/blackjack/card")
 	_card_root.add_child(card)
 	nodes.append(card)
 	AudioManager.play_sfx("ui_select")
@@ -468,6 +473,9 @@ func _build_scene() -> void:
 	bg.centered = false
 	bg.scale = Vector2(1920.0 / 1672.0, 1080.0 / 941.0)
 	add_child(bg)
+	# 佈局工具 v3：背景整塊登記（A 靜態，父節點是本場景根節點，非 Container，
+	# is_free()==true）。
+	LayoutStore.register(bg, "minigame/blackjack/bg")
 	_chip_root = Node2D.new()
 	add_child(_chip_root)
 	_card_root = Node2D.new()
@@ -499,6 +507,9 @@ func _build_hud() -> void:
 	sub_ls.outline_color = Color(0.05, 0.04, 0.05, 0.9)
 	_sub.label_settings = sub_ls
 	layer.add_child(_sub)
+	# 佈局工具 v3：第二行點數文字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_sub, "minigame/blackjack/sub_label")
 	_build_chip_zone(layer)
 	_build_result_panel(layer)
 	_tip = Label.new()

@@ -1,0 +1,94 @@
+{
+	"battle/enemy_area": {
+		"group": "",
+		"kind": "control",
+		"offsets": [
+			-553.0,
+			13.0,
+			847.0,
+			858.0
+		]
+	},
+	"battle/player_figure": {
+		"group": "",
+		"kind": "control",
+		"offsets": [
+			74.9241485595703,
+			-617.403747558594,
+			514.924194335938,
+			-17.403564453125
+		]
+	},
+	"battle/player_panel": {
+		"group": "",
+		"kind": "control",
+		"offsets": [
+			1406.49987792969,
+			-232.5,
+			1886.49987792969,
+			-23.5
+		]
+	},
+	"battle/skill_menu": {
+		"group": "",
+		"kind": "control",
+		"offsets": [
+			-1407.5,
+			-549.5,
+			-887.498779296875,
+			-29.5
+		]
+	},
+	"dialogue/portrait": {
+		"group": "",
+		"kind": "control",
+		"offsets": [
+			102.0,
+			189.000030517578,
+			102.0,
+			189.0
+		]
+	},
+	"minigame/beggarchallenge/monk_sprite": {
+		"group": "",
+		"kind": "node2d",
+		"pos": [
+			45.6400146484375,
+			-39.8699951171875
+		]
+	},
+	"minigame/woodenfishrhythm/judge_popup": {
+		"group": "",
+		"kind": "control",
+		"offsets": [
+			1278.5,
+			731.0,
+			1531.5,
+			792.0
+		]
+	},
+	"minigame/woodenfishrhythm/monk_a": {
+		"group": "",
+		"kind": "node2d",
+		"pos": [
+			560.0,
+			648.5
+		]
+	},
+	"minigame/woodenfishrhythm/monk_b": {
+		"group": "",
+		"kind": "node2d",
+		"pos": [
+			964.5,
+			654.5
+		]
+	},
+	"minigame/woodenfishrhythm/player": {
+		"group": "",
+		"kind": "node2d",
+		"pos": [
+			1406.0,
+			651.5
+		]
+	}
+}

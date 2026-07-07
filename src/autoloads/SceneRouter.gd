@@ -146,7 +146,10 @@ func _fade_cover(rect: ColorRect, alpha: float, dur: float) -> void:
 ## 播完（或按任意鍵/滑鼠跳過，跳過也會先跳到最後一幀）停在最後一幀，
 ## 回傳疊加用的 CanvasLayer，交給呼叫端決定何時用 dismiss_minigame_cutscene 移除
 ## （開場：淡出後直接進入遊戲；結尾：結算面板出現前先移除，見 MinigameBase.show_result_panel）。
-func play_minigame_cutscene(clip_id: String) -> CanvasLayer:
+## instant_cover=true（開場片用）：overlay 立刻不透明蓋住（不從遊戲畫面淡入）＝杜絕閃現，
+## 且 overlay 標 PROCESS_MODE_ALWAYS，讓小遊戲場景被凍結（go_to_minigame DISABLED）時短片照播。
+## 預設 false 供結尾片沿用舊行為（從遊戲畫面淡到黑再顯示過場）。
+func play_minigame_cutscene(clip_id: String, instant_cover: bool = false) -> CanvasLayer:
 	var dir: String = "res://assets/cutscenes/%s/" % clip_id
 	if not ResourceLoader.exists(dir + "frame_0001.png"):
 		return null
@@ -157,14 +160,17 @@ func play_minigame_cutscene(clip_id: String) -> CanvasLayer:
 		return null
 	var overlay := CanvasLayer.new()
 	overlay.layer = 128
+	if instant_cover:
+		overlay.process_mode = Node.PROCESS_MODE_ALWAYS
 	root.add_child(overlay)
 	var cover := ColorRect.new()
-	cover.color = Color(0, 0, 0, 0)
+	cover.color = Color(0, 0, 0, 1.0 if instant_cover else 0.0)
 	cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	cover.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.add_child(cover)
 	const FADE := 0.3
-	await _fade_cover(cover, 1.0, FADE)
+	if not instant_cover:
+		await _fade_cover(cover, 1.0, FADE)
 	var cs: Node = load(CUTSCENE_SCENE).instantiate()
 	overlay.add_child(cs)
 	overlay.move_child(cover, overlay.get_child_count() - 1)
@@ -208,8 +214,35 @@ func go_to_minigame(minigame_id: String, context: Dictionary = {}) -> void:
 	_minigame_context = context
 	_active_minigame = minigame_id
 	await _change_scene(path, Transition.NEON_FLASH)
-	var overlay := await play_minigame_cutscene("minigame_%s_intro" % minigame_id)
+	# change_scene_to_file 是延遲換場：換場後這一幀 current_scene 仍可能是 null
+	# （同 play_cutscene/play_story_cutscene/go_to_battle 的等待迴圈）。play_minigame_cutscene
+	# 需要 current_scene 當開場 overlay 的掛載點，null 會讓它直接回傳 null＝整段 intro 被跳過，
+	# 這正是「所有小遊戲都看不到開場動畫」的成因（2026-07-07 實測 cur=<null>）。先等場景落定再播。
+	# 換場結束到開場片接手前，先用一層不透明黑幕蓋住畫面（layer 127＝壓在讀取畫面 128
+	# 之下、小遊戲畫面 0 之上），杜絕小遊戲畫面「閃現一下」（2026-07-07 使用者回報）。
+	var guard := CanvasLayer.new()
+	guard.layer = 127
+	var guard_rect := ColorRect.new()
+	guard_rect.color = Color(0, 0, 0, 1)
+	guard_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	guard_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	guard.add_child(guard_rect)
+	get_tree().root.add_child(guard)
+	while get_tree().current_scene == null:
+		await get_tree().process_frame
+	# 開場片要「整段播完才開始玩」，不能疊在已開跑的遊戲上（否則棒球早就投出去、
+	# 玩家看完片才發現沒揮到棒——2026-07-07 使用者回報）。把小遊戲場景整個凍結
+	# （PROCESS_MODE_DISABLED：連 _process/tween/timer 全停），開場 overlay 自標 ALWAYS 照播。
+	# 用「場景層級 DISABLED」而非 get_tree().paused，才不會一起凍到還在淡出的讀取畫面
+	# （LoadingScreen 是 root 的子節點、用 tween 淡出，被 paused 凍住會卡在畫面上）。
+	var game_scene := get_tree().current_scene
+	game_scene.process_mode = Node.PROCESS_MODE_DISABLED
+	var overlay := await play_minigame_cutscene("minigame_%s_intro" % minigame_id, true)
+	guard.queue_free()   # 開場 overlay（或缺檔時的凍結遊戲）已接手畫面，撤黑幕
 	await dismiss_minigame_cutscene(overlay)
+	# 開場片播完、淡出結束，才解凍讓小遊戲真正開始（第一球/第一手從這一刻才動）。
+	if is_instance_valid(game_scene):
+		game_scene.process_mode = Node.PROCESS_MODE_INHERIT
 
 ## 目前這局小遊戲是否帶 quest context 啟動（供小遊戲自身區分「支線場」vs「常駐休閒場」
 ## 的內建獎勵，如三僧木魚：支線 win merit=3、休閒重玩 win merit=1）。

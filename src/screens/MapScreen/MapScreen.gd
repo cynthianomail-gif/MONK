@@ -27,7 +27,6 @@ var _enemies_data: Dictionary = {}  # 各區路上漫遊敵人（人中之龍式
 var _current_area: String = ""
 var _current_loc: String = ""
 var _current_actions: Array = []
-var _broken_zones: Dictionary = {}  # 本次進區已觸發過的破戒氛圍點（防重彈）
 
 func _ready() -> void:
 	_areas = JsonLoader.load_json("res://data/areas.json")
@@ -57,7 +56,6 @@ func _load_area(area_id: String) -> void:
 		env_path = "res://src/screens/MapScreen/environments/ShrineStreet.tscn"
 	var env: Node = load(env_path).instantiate()
 	world.add_child(env)
-	_broken_zones.clear()
 	_spawn_triggers(env, area_id)
 	_spawn_enemies(env, area_id)
 	_place_player(area)
@@ -149,16 +147,14 @@ func _prompt_verb(loc: Dictionary) -> String:
 		return "對話"
 	return "互動"
 
-## 走近某互動點：顯示提示（不直接跳選單），並在破戒場所自動觸發一次誘惑。
+## 走近某互動點：顯示提示（不直接跳選單）。
+## 破戒不再由走近觸發——2026-07-07 改為支線完成自動觸發（見 BreakVowSystem）。
 func _on_trigger_entered(id: String) -> void:
 	_current_loc = id
 	var loc: Dictionary = _npcs.get(id, {})
 	_current_actions = loc.get("actions", [])
 	var verb := _prompt_verb(loc)
 	hud.show_prompt("%s%s" % [verb, String(loc.get("name", id))])
-	if loc.has("ambient_break") and not _broken_zones.has(id):
-		_broken_zones[id] = true
-		BreakVowSystem.try_trigger(String(loc.ambient_break))
 
 func _on_trigger_exited(id: String) -> void:
 	if _current_loc == id:
@@ -215,7 +211,21 @@ func _on_dialogic_signal(arg: Variant) -> void:
 		return
 	var action := s.substr("menu_action:".length()).strip_edges()
 	if action != "":
-		call_deferred("perform_action", action)
+		call_deferred("_run_menu_action", action)
+
+## 選單分流動作要等「發訊號的這條 hub 對話」完全結束才執行。
+## 為何：hub 對話（如 liaochen_hub）選項送出 menu_action 訊號時，這條對話還沒拆完
+## （Dialogic 收尾要跑內部 ending timeline 的 [clear]＋queue_free 舊 layout）。若此刻
+## perform_action 立刻 Dialogic.start 新對話（主線 continue_story→_play_dialogue），新對話會
+## 疊在還沒拆乾淨的舊 layout 上，在第一次「換說話者」時卡死＝current_timeline 永不歸零
+## ＝立繪不關、E 全地圖失效（2026-07-07 使用者回報＋實機探針重現）。等 timeline_ended
+## （Dialogic 跑完 ending timeline、current_timeline 歸 null 時才發）再多等一幀讓 layout 的
+## queue_free flush，才是乾淨起點。無對話進行中（測試直接餵訊號）時走原本的即時路徑。
+func _run_menu_action(action: String) -> void:
+	if Dialogic.current_timeline != null:
+		await Dialogic.timeline_ended
+		await get_tree().process_frame
+	perform_action(action)
 
 ## 執行期註冊「interact」動作（E 鍵），避免動 project.godot 的 InputEvent 序列化格式。
 func _register_interact_action() -> void:
@@ -245,7 +255,7 @@ func perform_action(action: String) -> void:
 			if ResourceLoader.exists("res://dialogue/cherry_first_meeting.dtl"):
 				Dialogic.start("cherry_first_meeting")
 			else:
-				hud.show_toast("Cherry 對話尚未製作")
+				hud.show_toast("櫻 的對話尚未製作")
 		"armory_npc":
 			var tl := armory_npc_timeline()
 			if tl == "armory_worker_freed" and not GameManager.get_flag("armory_worker_thanked"):
@@ -253,12 +263,6 @@ func perform_action(action: String) -> void:
 				GameManager.set_flag("armory_worker_thanked", true)
 			if ResourceLoader.exists("res://dialogue/%s.dtl" % tl):
 				Dialogic.start(tl)
-		"food_break_trigger":
-			BreakVowSystem.try_trigger("food")
-		"greed_break_trigger":
-			BreakVowSystem.try_trigger("greed")
-		"lust_break_trigger":
-			BreakVowSystem.try_trigger("lust")
 		"beggar_minigame":
 			SceneRouter.go_to_minigame("beggar_challenge")
 		"offering_toss":
@@ -290,7 +294,7 @@ func perform_action(action: String) -> void:
 			hud.show_toast("休息片刻，恢復了體力")
 		"shop":
 			if not GameManager.get_flag("zheng_ma_shop_unlocked"):
-				hud.show_toast("鄭媽的店還沒開")
+				hud.show_toast("水野的店還沒開")
 			else:
 				if get_node_or_null("ShopScreen") == null:
 					var shop_overlay: CanvasLayer = SHOP_SCREEN.new()

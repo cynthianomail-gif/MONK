@@ -252,6 +252,9 @@ func _build_scene() -> void:
 	bg.centered = false
 	bg.scale = Vector2(1920.0 / 1672.0, 1080.0 / 941.0)
 	add_child(bg)
+	# 佈局工具 v3：背景整塊登記（A 靜態，父節點是本場景根節點，非 Container，
+	# is_free()==true）。
+	LayoutStore.register(bg, "minigame/bowling/bg")
 	_pin_root = Node2D.new()
 	add_child(_pin_root)
 	_preview = Line2D.new()
@@ -263,6 +266,9 @@ func _build_scene() -> void:
 	_ball.texture = load(ART + "bowling_ball_game_ready.png")
 	_ball.position = Vector2(LANE_CENTER_X, BALL_START_Y)
 	_ball.scale = Vector2(0.16, 0.16)
+	# 佈局工具 v3：球＝B2（_new_roll() 每球重設 position）/C（_roll() 逐幀更新），
+	# 標樣板不可拖（拖了會被下一球重設蓋掉，靜默失效）。
+	_ball.set_meta("layout_template", "minigame/bowling/ball")
 	add_child(_ball)
 	_build_hud()
 
@@ -283,6 +289,8 @@ func _setup_pins() -> void:
 			pin.texture = tex
 			pin.position = Vector2(x0 + gap * i, y)
 			pin.scale = Vector2.ONE * (0.042 - r * 0.003)
+			# 佈局工具 v3：瓶陣＝B2（每局 _setup_pins() 重設），標樣板不可拖。
+			pin.set_meta("layout_template", "minigame/bowling/pin")
 			_pin_root.add_child(pin)
 			_pins.append(pin)
 
@@ -300,6 +308,8 @@ func _attach_trail() -> void:
 	var m := CanvasItemMaterial.new()
 	m.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
 	s.material = m
+	# 佈局工具 v3：速度尾焰＝動態生成、跟隨球移動，標樣板不可拖。
+	s.set_meta("layout_template", "minigame/bowling/trail")
 	_ball.add_child(s)
 
 ## 虛線預測軌跡：取樣 14 點畫折線（曲球看得出向左勾）。
@@ -365,6 +375,9 @@ func _build_hud() -> void:
 	tip_ls.outline_color = Color(0.05, 0.04, 0.05, 0.9)
 	tip.label_settings = tip_ls
 	layer.add_child(tip)
+	# 佈局工具 v2（P4）：底部提示文字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(tip, "minigame/bowling/tip_label")
 	_update_hud()
 	_update_type_label()
 

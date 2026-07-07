@@ -208,6 +208,8 @@ func _add_chip(id: String) -> void:
 	chip.position = Vector2(idx * 3.0, -idx * 3.0)
 	chip.modulate.a = 0.0
 	chip.scale = Vector2(1.4, 1.4)
+	# 佈局工具 v3：押注籌碼＝動態生成，位置由押注格中心決定，標樣板不可拖。
+	chip.set_meta("layout_template", "minigame/roulette/chip")
 	root.add_child(chip)
 	var tw := create_tween()
 	tw.tween_property(chip, "modulate:a", 1.0, 0.15)
@@ -353,6 +355,9 @@ func _build_scene() -> void:
 	bg.centered = false
 	bg.scale = Vector2(SX, SY)
 	add_child(bg)
+	# 佈局工具 v3：背景整塊登記（A 靜態，父節點是本場景根節點，非 Container，
+	# is_free()==true）。
+	LayoutStore.register(bg, "minigame/roulette/bg")
 	# 發光特效在輪盤下、球尾焰在輪盤上（球本體最上）
 	_glow = Sprite2D.new()
 	_glow.texture = load(ART + "roulette_spin_glow_fx_game_ready.png")
@@ -361,21 +366,31 @@ func _build_scene() -> void:
 	_glow.modulate.a = 0.0
 	_glow.material = _additive_material()
 	add_child(_glow)
+	# 佈局工具 v3：發光特效＝B1（position 只在 build 時設一次，之後只改 modulate.a），
+	# 疊在輪盤上純視覺，登記為可拖綠框（校正光暈對位）。
+	LayoutStore.register(_glow, "minigame/roulette/glow")
 	_wheel = Sprite2D.new()
 	_wheel.texture = load(ART + "roulette_wheel_top_game_ready.png")
 	_wheel.position = WHEEL_CENTER
 	_wheel.scale = Vector2.ONE * (WHEEL_RADIUS * 2.0 / 1254.0)
+	# 佈局工具 v3：⚠WHEEL_CENTER 同時驅動滾珠軌跡計算（sector_angle/_spin()），
+	# 拖圖會與珠路徑脫鉤——標樣板不可拖，只能改 WHEEL_CENTER 常數調整。
+	_wheel.set_meta("layout_template", "minigame/roulette/wheel")
 	add_child(_wheel)
 	_trail = Sprite2D.new()
 	_trail.texture = load(ART + "roulette_ball_trail_fx_game_ready.png")
 	_trail.scale = Vector2.ONE * 0.10
 	_trail.modulate.a = 0.0
 	_trail.material = _additive_material()
+	# 佈局工具 v3：球尾焰＝C 類（_spin() 逐幀更新 position/rotation），標樣板不可拖。
+	_trail.set_meta("layout_template", "minigame/roulette/trail")
 	add_child(_trail)
 	_ball = Sprite2D.new()
 	_ball.texture = load(ART + "roulette_ball_game_ready.png")
 	_ball.scale = Vector2(0.045, 0.045)
 	_ball.position = WHEEL_CENTER + Vector2(WHEEL_RADIUS * 0.94, 0)
+	# 佈局工具 v3：滾珠＝C 類（_spin() 逐幀沿圓周更新 position），標樣板不可拖。
+	_ball.set_meta("layout_template", "minigame/roulette/ball")
 	add_child(_ball)
 	_build_ui()
 
@@ -402,6 +417,9 @@ func _build_ui() -> void:
 	_hover_panel.add_theme_stylebox_override("panel", hb)
 	_hover_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hover_panel.visible = false
+	# 佈局工具 v3：hover 亮框＝C 類（_update_hover() 依滑鼠位置改 position/size），
+	# 標樣板不可拖。
+	_hover_panel.set_meta("layout_template", "minigame/roulette/hover_panel")
 	layer.add_child(_hover_panel)
 	# 確認下注按鈕
 	_confirm_btn = Button.new()
@@ -477,6 +495,9 @@ func _build_ui() -> void:
 	_banner.add_theme_font_size_override("font_size", 42)
 	_banner.visible = false
 	layer.add_child(_banner)
+	# 佈局工具 v3：結算文字整塊登記（跟 _banner_back 同位置同步移動，各自登記
+	# 讓使用者也能單獨微調文字與背板的相對位置）。
+	LayoutStore.register(_banner, "minigame/roulette/result_banner_text")
 	# 底部提示
 	var tip := Label.new()
 	tip.text = "點押注格放籌碼（右鍵收回）｜每枚 %d 金" % CHIP
@@ -490,6 +511,9 @@ func _build_ui() -> void:
 	tip_ls.outline_color = Color(0.05, 0.04, 0.05, 0.9)
 	tip.label_settings = tip_ls
 	layer.add_child(tip)
+	# 佈局工具 v3：底部提示文字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(tip, "minigame/roulette/tip_label")
 	_update_hud()
 
 func _update_hud() -> void:

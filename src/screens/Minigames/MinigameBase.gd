@@ -50,7 +50,9 @@ func restart() -> void:
 	pass
 
 ## 依 result.win 播 minigame_<id>_win / minigame_<id>_lose 過場短片，
-## 停最後一幀後淡出移除（見 SceneRouter.play_minigame_cutscene/dismiss_minigame_cutscene）。
+## 停最後一幀後「留在畫面上當結算底圖」（2026-07-07 使用者拍板：不淡出、不露出
+## 小遊戲本身的畫面）；overlay 存進 _end_cutscene_overlay，「再玩一次」時才淡出移除、
+## 「離開」時隨場景切換一起釋放（overlay 是 current_scene 的子節點）。
 ## 找不到素材（缺檔）或沒有 SceneRouter autoload（測試情境）時安全跳過，不擋結算面板。
 func _play_end_cutscene(result: Dictionary) -> void:
 	var id := minigame_id()
@@ -59,8 +61,13 @@ func _play_end_cutscene(result: Dictionary) -> void:
 	if not (Engine.has_singleton("SceneRouter") or get_node_or_null("/root/SceneRouter") != null):
 		return
 	var suffix := "win" if bool(result.get("win", false)) else "lose"
-	var overlay: CanvasLayer = await SceneRouter.play_minigame_cutscene("minigame_%s_%s" % [id, suffix])
-	await SceneRouter.dismiss_minigame_cutscene(overlay)
+	_end_cutscene_overlay = await SceneRouter.play_minigame_cutscene("minigame_%s_%s" % [id, suffix])
+
+## 淡出移除停在最後一幀的結尾過場（fire-and-forget；「再玩一次」重開新局時呼叫）。
+func _dismiss_end_cutscene() -> void:
+	if _end_cutscene_overlay != null:
+		SceneRouter.dismiss_minigame_cutscene(_end_cutscene_overlay)
+		_end_cutscene_overlay = null
 
 # ════════════════════════════════════════════════════════════════
 # 共用結算面板：遊戲結束不直接 finish()，先停在這裡讓玩家選
@@ -74,6 +81,7 @@ const PANEL_GOLD := Color(0.941, 0.753, 0.290)     # #f0c04a
 const PANEL_TEXT := Color(0.909, 0.863, 0.761)     # #e8dcc2
 
 var _result_layer: CanvasLayer
+var _end_cutscene_overlay: CanvasLayer = null   # 停在最後一幀的結尾過場（結算底圖）
 var _result_pending: Dictionary = {}
 var _result_btn_idx: int = 0
 var _result_buttons: Array[Button] = []
@@ -91,10 +99,10 @@ signal result_panel_restart()
 ## rows=[{label, value}] 明細列；result=最終 result dict（離開時才真正 finish）。
 ## leave_label 可覆寫「離開」鈕文字（21 點用「離開賭桌」）。
 ##
-## 規格第 4 節（2026-07-04 minigame-overhaul-design.md）：結尾流程＝依 result.win
-## 播 minigame_<id>_win / _lose 過場 → 停最後一幀 → 結算面板疊上。此處採「過場在
-## 面板出現時移除」（二選一的後者）：cutscene 淡出移除後才建面板，不與過場疊層。
-## 9 個小遊戲的 _end() 都只呼叫這個函式，所以掛在這裡就等於全部接好，不必逐一改寫。
+## 結尾流程（2026-07-07 定版，取代 2026-07-04 規格第 4 節的「面板出現時移除過場」）：
+## 依 result.win 播 minigame_<id>_win / _lose 過場 → 停最後一幀「留著當底」→
+## 結算面板疊在其上（不再露出小遊戲畫面）→「再玩一次」才淡出過場回到遊戲、
+## 「離開」隨場景切換帶走。9 個小遊戲的 _end() 都只呼叫這個函式，掛在這裡＝全部接好。
 func show_result_panel(title: String, rating: String, rows: Array, result: Dictionary, leave_label: String = "離開") -> void:
 	if not suppress_end_cutscene:
 		await _play_end_cutscene(result)
@@ -105,11 +113,15 @@ func show_result_panel(title: String, rating: String, rows: Array, result: Dicti
 	_result_buttons.clear()
 
 	_result_layer = CanvasLayer.new()
-	_result_layer.layer = 100
+	# 過場 overlay 在 layer 128（SceneRouter.play_minigame_cutscene）；結算面板要
+	# 疊在停格的最後一幀之上，layer 必須更高（舊值 100 會被過場整層蓋住）。
+	_result_layer.layer = 200
 	add_child(_result_layer)
 
 	var dim := ColorRect.new()
-	dim.color = Color(0, 0, 0, 0.72)
+	# 底下是 win/lose 過場停格時，壓暗調淡讓最後一幀看得見；沒過場（缺檔/測試）時
+	# 底下是小遊戲畫面，維持原本較深的壓暗。
+	dim.color = Color(0, 0, 0, 0.45 if _end_cutscene_overlay != null else 0.72)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	_result_layer.add_child(dim)
@@ -186,6 +198,9 @@ func show_result_panel(title: String, rating: String, rows: Array, result: Dicti
 	_result_refresh_selection()
 	result_panel_shown.emit(rating, rows)
 
+## 結算/暫停共用按鈕。兩種樣式存在 meta（sb_normal/sb_selected），刷新時從 meta 取——
+## ⚠不能用 get_theme_stylebox("normal") 讀回：那會讀到上一輪刷新蓋上去的 override，
+## 按鈕被選過一次後就永遠長得像選中（2026-07-07 使用者回報「兩顆都亮」的根因）。
 func _make_result_button(text: String, pos: Vector2, size: Vector2) -> Button:
 	var b := Button.new()
 	b.text = text
@@ -195,13 +210,15 @@ func _make_result_button(text: String, pos: Vector2, size: Vector2) -> Button:
 	b.add_theme_font_size_override("font_size", 26)
 	var normal := StyleBoxFlat.new()
 	normal.bg_color = Color(0.08, 0.06, 0.05, 0.95)
-	normal.border_color = PANEL_BORDER
+	normal.border_color = PANEL_BORDER.darkened(0.35)
 	normal.set_border_width_all(2)
 	normal.set_corner_radius_all(8)
 	var sel := normal.duplicate() as StyleBoxFlat
 	sel.bg_color = Color(0.24, 0.16, 0.07, 0.98)
 	sel.border_color = PANEL_GOLD
 	sel.set_border_width_all(3)
+	b.set_meta("sb_normal", normal)
+	b.set_meta("sb_selected", sel)
 	b.add_theme_stylebox_override("normal", normal)
 	b.add_theme_stylebox_override("hover", sel)
 	b.add_theme_stylebox_override("pressed", sel)
@@ -209,18 +226,31 @@ func _make_result_button(text: String, pos: Vector2, size: Vector2) -> Button:
 	b.add_theme_color_override("font_color", PANEL_TEXT)
 	b.add_theme_color_override("font_hover_color", PANEL_GOLD)
 	b.add_theme_color_override("font_pressed_color", PANEL_GOLD)
+	# 滑鼠移到哪顆，鍵盤選取就跟到哪顆（結算面板與暫停頁各自的清單都查）。
 	b.mouse_entered.connect(func() -> void:
-		var idx := _result_buttons.find(b)
-		if idx >= 0:
-			_result_btn_idx = idx
-			_result_refresh_selection())
+		var ridx := _result_buttons.find(b)
+		if ridx >= 0:
+			if ridx != _result_btn_idx:
+				_result_btn_idx = ridx
+				_result_refresh_selection()
+			return
+		var pidx := _pause_buttons.find(b)
+		if pidx >= 0 and pidx != _pause_btn_idx:
+			_pause_btn_idx = pidx
+			_pause_refresh_selection())
 	return b
 
+## 依選取索引刷新一組按鈕：選中＝金框金字亮底，未選＝暗框暖字。結算/暫停共用。
+func _refresh_button_selection(buttons: Array[Button], sel_idx: int) -> void:
+	for i in buttons.size():
+		var b := buttons[i]
+		var selected: bool = i == sel_idx
+		b.add_theme_stylebox_override("normal",
+			b.get_meta("sb_selected") if selected else b.get_meta("sb_normal"))
+		b.add_theme_color_override("font_color", PANEL_GOLD if selected else PANEL_TEXT)
+
 func _result_refresh_selection() -> void:
-	for i in _result_buttons.size():
-		var b := _result_buttons[i]
-		var box := (b.get_theme_stylebox("hover") if i == _result_btn_idx else b.get_theme_stylebox("normal")) as StyleBoxFlat
-		b.add_theme_stylebox_override("normal", box)
+	_refresh_button_selection(_result_buttons, _result_btn_idx)
 
 func is_result_panel_open() -> bool:
 	return _result_layer != null and is_instance_valid(_result_layer)
@@ -271,6 +301,7 @@ func _pause_activate_selected() -> void:
 
 func _on_result_restart() -> void:
 	_close_result_panel()
+	_dismiss_end_cutscene()   # 淡出停格的結尾過場，露出重開的新局
 	result_panel_restart.emit()
 	restart()
 
@@ -515,10 +546,7 @@ func _close_pause_menu() -> void:
 	get_tree().paused = false
 
 func _pause_refresh_selection() -> void:
-	for i in _pause_buttons.size():
-		var b := _pause_buttons[i]
-		var box := (b.get_theme_stylebox("hover") if i == _pause_btn_idx else b.get_theme_stylebox("normal")) as StyleBoxFlat
-		b.add_theme_stylebox_override("normal", box)
+	_refresh_button_selection(_pause_buttons, _pause_btn_idx)
 
 func _on_pause_resume() -> void:
 	_close_pause_menu()

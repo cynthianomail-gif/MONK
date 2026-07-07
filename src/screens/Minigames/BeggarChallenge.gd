@@ -281,6 +281,8 @@ func _add_drop(type: String, pos: Vector2) -> void:
 	var info: Dictionary = DROP_TYPES[type]
 	var node := Node2D.new()
 	node.position = pos
+	# 佈局工具 v3：動態落物＝每次生成新節點＋每幀下落(C 類)，標樣板不可拖。
+	node.set_meta("layout_template", "minigame/beggarchallenge/drop")
 	var art_path: String = String(DROP_ART_PATHS.get(type, ""))
 	var art_tex: Texture2D = _try_load(art_path)
 	if art_tex:
@@ -424,6 +426,9 @@ func _build_scene() -> void:
 func _build_bowl() -> void:
 	_bowl_node = Node2D.new()
 	_bowl_node.position = Vector2(_bowl_x, BOWL_Y)
+	# 佈局工具 v3：缽/玩家容器＝C 類（_move_bowl() 每幀依輸入更新 position.x），
+	# 標樣板不可拖。
+	_bowl_node.set_meta("layout_template", "minigame/beggarchallenge/bowl_node")
 	var monk := Sprite2D.new()
 	# 正式美術優先序：player_bowl.png（2026-07-04 Codex 交回，683x1024 側身朝左捧缽）
 	# → 舊 art_direction 佔位路徑（begging_sprite_path，目前無檔）→ 程式繪製佔位。
@@ -437,6 +442,11 @@ func _build_bowl() -> void:
 		monk.position = Vector2(48.64, -18.87)
 		_bowl_node.add_child(monk)
 		_monk_sprite = monk
+		# 佈局工具 v3：玩家捧缽立繪＝B2/相對位置固定（掛在 _bowl_node 底下，
+		# _bowl_node 每局重置 position.x，_monk_sprite 的 local 相對位置 build 後
+		# 不再被程式改寫）。登記為可拖綠框＝校正立繪 vs 缽的對位；因為是巢狀子節點，
+		# 需要 LayoutTuner v3 的巢狀座標修正才能正確拖曳（見 LayoutTuner._set_pos）。
+		LayoutStore.register(_monk_sprite, "minigame/beggarchallenge/monk_sprite")
 		var hint := Polygon2D.new()
 		hint.polygon = _ellipse_points(BOWL_HALF_W, 22.0)
 		hint.color = Color(0.95, 0.85, 0.5, 0.16)
@@ -450,6 +460,9 @@ func _build_bowl() -> void:
 		monk.scale = Vector2(0.31, 0.31)
 		_bowl_node.add_child(monk)
 		_monk_sprite = monk
+		# 佈局工具 v3：同上（player_bowl.png 缺檔時的舊佔位路徑，同樣掛在
+		# _bowl_node 底下），登記同一個 key 方便日後不論哪個分支都能調。
+		LayoutStore.register(_monk_sprite, "minigame/beggarchallenge/monk_sprite")
 		var hint := Polygon2D.new()
 		hint.polygon = _ellipse_points(BOWL_HALF_W, 22.0)
 		hint.color = Color(0.95, 0.85, 0.5, 0.16)
@@ -538,11 +551,15 @@ func _add_background(path: String, fallback: Color) -> void:
 		var sz: Vector2 = tex.get_size()
 		sp.scale = Vector2(1920.0 / sz.x, 1080.0 / sz.y)
 		add_child(sp)
+		# 佈局工具 v3：背景整塊登記（A 靜態，父節點是本場景根節點，非 Container，
+		# is_free()==true）。不論走哪個 fallback 分支，建出來的節點都登記同一個 key。
+		LayoutStore.register(sp, "minigame/beggarchallenge/bg")
 	else:
 		var bg := ColorRect.new()
 		bg.size = Vector2(1920, 1080)
 		bg.color = fallback
 		add_child(bg)
+		LayoutStore.register(bg, "minigame/beggarchallenge/bg")
 
 func _try_load(path: String) -> Texture2D:
 	if path != "" and ResourceLoader.exists(path):

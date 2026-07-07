@@ -247,6 +247,8 @@ func _on_landed(land: Vector2, res: Dictionary) -> void:
 	pin.position = land
 	pin.rotation_degrees = _rng.randf_range(-14.0, 14.0)
 	pin.scale = Vector2(0.076, 0.076)
+	# 佈局工具 v3：動態生成的落靶鏢，標樣板不可拖（每擲都是新節點，位置即落點）。
+	pin.set_meta("layout_template", "minigame/darts/pin")
 	_stuck.add_child(pin)
 	_dart.visible = false
 	var pts := int(res.points)
@@ -338,15 +340,23 @@ func _build_scene() -> void:
 	bg.centered = false
 	bg.scale = Vector2(1920.0 / 1672.0, 1080.0 / 941.0)
 	add_child(bg)
+	# 佈局工具 v3：背景整塊登記（A 靜態，父節點是本場景根節點，非 Container，
+	# is_free()==true）。
+	LayoutStore.register(bg, "minigame/darts/bg")
 	_stuck = Node2D.new()
 	add_child(_stuck)
 	_dart = Sprite2D.new()
 	_dart.texture = load(ART + "darts_dart_game_ready.png")
 	_dart.offset = DART_TIP_OFFSET
 	_dart.visible = false
+	# 佈局工具 v3：飛行中的鏢＝C 類（_throw()/_on_landed() 每擲都改 position），
+	# 標樣板不可拖，避免拖曳被下一擲的 tween 立刻蓋掉。
+	_dart.set_meta("layout_template", "minigame/darts/dart")
 	add_child(_dart)
 	_reticle = Reticle.new()
 	_reticle.visible = false
+	# 佈局工具 v3：瞄準圈＝C 類（_process() 每幀依滑鼠更新 position），標樣板不可拖。
+	_reticle.set_meta("layout_template", "minigame/darts/reticle")
 	add_child(_reticle)
 	_build_hud()
 

@@ -88,9 +88,6 @@ func _on_dialogic_signal(arg: Variant) -> void:
 		"hp_max":
 			player.max_hp += int(val)
 			stat_changed.emit("max_hp", player.max_hp)
-		"vow":
-			# 由對話分支觸發破戒（例：Cherry 逃跑→色戒）。
-			BreakVowSystem.try_trigger(val)
 		"menu_action":
 			pass  # 街景多功能 NPC 對話內選單分流，由 MapScreen._on_dialogic_signal 處理，這裡不重複警告。
 		_:

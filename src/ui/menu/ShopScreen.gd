@@ -1,5 +1,5 @@
 extends CanvasLayer
-## 鄭媽佛具店：消耗道具商店 overlay（只買不賣，DEMO）。
+## 水野佛具店：消耗道具商店 overlay（只買不賣，DEMO）。
 ## 仿 MenuShell：layer=100、process_mode ALWAYS、暫停地圖、cancel 關閉、暗金×黑框。
 ## 由 MapScreen 的 shop 動作開啟（已 gate zheng_ma_shop_unlocked）。時段推進由
 ## MapScreen.perform_action 開頭統一處理，本檔不碰時間。
@@ -60,7 +60,7 @@ func _build() -> void:
 	var header := HBoxContainer.new()
 	root.add_child(header)
 	var title := Label.new()
-	title.text = "鄭媽佛具店"
+	title.text = "水野佛具店"
 	title.add_theme_font_size_override("font_size", 34)
 	title.add_theme_color_override("font_color", GOLD)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL

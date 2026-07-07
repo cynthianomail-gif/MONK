@@ -123,7 +123,8 @@ func _test_dismiss_null_is_noop() -> void:
 
 # ── 7) MinigameBase.show_result_panel 接上結尾過場：
 ##      Darts 的 win/lose 兩支過場都已存在素材，win=true 時面板不會立即出現，
-##      跳過過場（模擬滑鼠點擊）後面板才疊上；驗證「過場在面板出現時移除」。 ──
+##      跳過過場（模擬滑鼠點擊）後面板疊在「停格的最後一幀」上（2026-07-07 定版：
+##      過場留著當底不移除）；按「再玩一次」才淡出移除停格過場。 ──
 func _test_result_panel_waits_for_end_cutscene() -> void:
 	var gs = load("res://src/screens/Minigames/Darts.gd")
 	var g = gs.new()
@@ -149,8 +150,8 @@ func _test_result_panel_waits_for_end_cutscene() -> void:
 		ev.pressed = true
 		cs._input(ev)   # 模擬滑鼠點擊跳過
 
-	# 面板要等 dismiss_minigame_cutscene 自己的 0.3s 淡出跑完才會出現；用真實時間
-	# 上限（而非固定幀數）等待，避免 headless 幀率快慢造成誤判。
+	# 跳過後停在最後一幀、面板隨即疊上；用真實時間上限（而非固定幀數）等待，
+	# 避免 headless 幀率快慢造成誤判。
 	var opened := false
 	var t_wait0 := Time.get_ticks_msec()
 	while Time.get_ticks_msec() - t_wait0 < 3000:
@@ -160,9 +161,22 @@ func _test_result_panel_waits_for_end_cutscene() -> void:
 			break
 	_check(opened, "panel opens shortly after the ending cutscene is skipped/finished")
 
-	# 過場在面板出現時移除：面板打開的當下，場上不應再殘留播放中的 CutsceneScreen overlay
-	var leftover := _find_cutscene_screen(get_tree().current_scene)
-	_check(leftover == null, "ending cutscene overlay is removed by the time the result panel shows")
+	# 2026-07-07 定版：面板打開時，結尾過場「停在最後一幀留著當底」不移除
+	# （結算視窗疊在 win/lose 停格上，不露出小遊戲畫面）。
+	var backdrop := _find_cutscene_screen(get_tree().current_scene)
+	_check(backdrop != null, "ending cutscene overlay STAYS as backdrop while the result panel shows")
+
+	# 按「再玩一次」：面板關閉、停格過場淡出移除（0.3s fade），露出重開的新局。
+	g._on_result_restart()
+	var overlay_gone := false
+	var t_wait1 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t_wait1 < 3000:
+		await get_tree().process_frame
+		if _find_cutscene_screen(get_tree().current_scene) == null:
+			overlay_gone = true
+			break
+	_check(overlay_gone, "restart dismisses the frozen ending cutscene overlay")
+	_check(not g.is_result_panel_open(), "restart closes the result panel")
 
 	g.queue_free()
 	await get_tree().process_frame

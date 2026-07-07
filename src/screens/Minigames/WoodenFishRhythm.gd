@@ -387,12 +387,24 @@ func _build_scene() -> void:
 	_monk_a = _make_char_sprite(monk_a_idle_path, MONK_A_POS, "師", Color(0.5, 0.42, 0.3))
 	_monk_b = _make_char_sprite(monk_b_idle_path, MONK_B_POS, "師", Color(0.45, 0.5, 0.35))
 	_player_sprite = _make_char_sprite(player_idle_path, PLAYER_POS, "我", Color(0.35, 0.4, 0.55))
+	# 佈局工具 v3：三立繪＝B1（position 只在 _make_char_sprite 建立時設一次，之後
+	# 只換 texture/rotation），登記為可拖綠框。
+	LayoutStore.register(_monk_a, "minigame/woodenfishrhythm/monk_a")
+	LayoutStore.register(_monk_b, "minigame/woodenfishrhythm/monk_b")
+	LayoutStore.register(_player_sprite, "minigame/woodenfishrhythm/player")
 	_tex_a = _load_tex_set(monk_a_idle_path, monk_a_raise_path, monk_a_hit_path)
 	_tex_b = _load_tex_set(monk_b_idle_path, monk_b_raise_path, monk_b_hit_path)
 	_tex_p = _load_tex_set(player_idle_path, player_raise_path, player_hit_path)
 	_fish_a = _make_fish(FISH_A_POS)
 	_fish_b = _make_fish(FISH_B_POS)
 	_fish_player = _make_fish(FISH_PLAYER_POS)
+	# 佈局工具 v3：三個木魚錨點＝B1（position 只在 _make_fish 建立時設一次，敲擊
+	# 只做 scale tween，不改 position；fx/判定彈出字都讀節點目前 position，
+	# 例如 spawn_fx_sparkle(_fish_player.position, ...)，非獨立常數，拖曳安全），
+	# 登記為可拖綠框（校正木魚 vs 立繪的對位）。
+	LayoutStore.register(_fish_a, "minigame/woodenfishrhythm/fish_a")
+	LayoutStore.register(_fish_b, "minigame/woodenfishrhythm/fish_b")
+	LayoutStore.register(_fish_player, "minigame/woodenfishrhythm/fish_player")
 	_distract_layer = Node2D.new()
 	add_child(_distract_layer)
 	_build_hud()
@@ -408,12 +420,16 @@ func _add_background() -> void:
 		var sz: Vector2 = tex.get_size()
 		sp.scale = Vector2(1920.0 / sz.x, 1080.0 / sz.y)
 		add_child(sp)
+		# 佈局工具 v3：背景整塊登記（A 靜態，父節點是本場景根節點，非 Container，
+		# is_free()==true）。不論走哪個 fallback 分支，建出來的節點都登記同一個 key。
+		LayoutStore.register(sp, "minigame/woodenfishrhythm/bg")
 	else:
 		# 程式占位：黃昏漸層街景（純色塊，缺美術時的防呆）。
 		var bg := ColorRect.new()
 		bg.size = Vector2(1920, 1080)
 		bg.color = Color(0.62, 0.45, 0.32)
 		add_child(bg)
+		LayoutStore.register(bg, "minigame/woodenfishrhythm/bg")
 		var ground := ColorRect.new()
 		ground.position = Vector2(0, 760)
 		ground.size = Vector2(1920, 320)
@@ -554,6 +570,8 @@ func _set_distraction(active: bool) -> void:
 	passerby.color = Color(0.15, 0.13, 0.12, 0.55)
 	passerby.size = Vector2(40, 140)
 	passerby.position = Vector2(-60, 780)
+	# 佈局工具 v3：背景干擾路人＝C 類（loop tween 橫向掃過整個畫面），標樣板不可拖。
+	passerby.set_meta("layout_template", "minigame/woodenfishrhythm/passerby")
 	_distract_layer.add_child(passerby)
 	var tw := create_tween()
 	tw.set_loops()

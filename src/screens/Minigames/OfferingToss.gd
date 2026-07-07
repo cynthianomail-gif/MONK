@@ -170,9 +170,17 @@ func _build_scene() -> void:
 	bg.size = Vector2(1920, 1080)
 	bg.color = Color(0.10, 0.10, 0.13)
 	add_child(bg)
+	# 佈局工具 v3：背景整塊登記（A 靜態，父節點是本場景根節點，非 Container，
+	# is_free()==true）。純幾何(ColorRect)照樣登記，不限貼圖。
+	LayoutStore.register(bg, "minigame/offeringtoss/bg")
 	# 賽錢箱：箱體+直櫺投入口+紅緣
 	var box := Node2D.new()
 	box.position = Vector2(960, 430)
+	# 佈局工具 v3（耦合查證結論）：_throw()/landing_point()/judge_landing() 全部用
+	# START_POS/BOX_MOUTH_Y/BOX_HALF_W/MOUTH_HALF_H 常數計算銅錢落點與判定，
+	# 完全不讀 box 節點的實際 position——拖 box 只會讓箱體圖與判定窗脫鉤，
+	# 標樣板不可拖（要調整判定窗要同時改常數，不是拖節點）。
+	box.set_meta("layout_template", "minigame/offeringtoss/box")
 	add_child(box)
 	var body := ColorRect.new()
 	body.size = Vector2(360, 190)
@@ -206,6 +214,9 @@ func _build_scene() -> void:
 	hole.color = Color(0.10, 0.10, 0.13)
 	_coin.add_child(hole)
 	_coin.position = START_POS
+	# 佈局工具 v3：銅錢＝C 類（_throw() tween_method 沿拋物線每幀更新 position），
+	# 標樣板不可拖。
+	_coin.set_meta("layout_template", "minigame/offeringtoss/coin")
 	add_child(_coin)
 	# 力度計
 	var gauge_bg := ColorRect.new()
@@ -227,6 +238,9 @@ func _build_scene() -> void:
 	sweet.position = Vector2(1514, 760.0 - 300.0 * POWER_SWEET)
 	sweet.color = Color(0.95, 0.3, 0.3)
 	add_child(sweet)
+	# 佈局工具 v3：甜蜜點刻度＝B1（position 由 POWER_SWEET 常數換算，build 後不動），
+	# 登記為可拖綠框。
+	LayoutStore.register(sweet, "minigame/offeringtoss/sweet_mark")
 	_build_hud()
 
 func _build_hud() -> void:
@@ -261,6 +275,9 @@ func _build_hud() -> void:
 	tip.add_theme_font_size_override("font_size", 30)
 	tip.add_theme_color_override("font_color", Color(0.7, 0.7, 0.75))
 	layer.add_child(tip)
+	# 佈局工具 v3：底部提示文字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(tip, "minigame/offeringtoss/tip_label")
 	_update_hud()
 
 func _update_hud() -> void:

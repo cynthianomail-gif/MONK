@@ -87,7 +87,10 @@ func _build() -> void:
 	left.add_child(head)
 
 	_board_holder = Control.new()
-	_board_holder.custom_minimum_size = Vector2(560, 600)
+	# 高度下限 420（原 600 會把左欄撐到 674 高、超過選單框內容區 ~570 而戳出框底，
+	# 2026-07-07 使用者回報超框）；EXPAND_FILL 會自動填滿實際可用高度，盤面依 holder.size
+	# 縮放置中（見 _layout_nodes），所以下限只要「不強迫超高」即可。
+	_board_holder.custom_minimum_size = Vector2(520, 420)
 	_board_holder.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_board_holder.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_board_holder.clip_contents = false
@@ -111,9 +114,16 @@ func _build() -> void:
 	right.add_theme_stylebox_override("panel", sb)
 	hb.add_child(right)
 
+	# 詳情內容包一層 ScrollContainer：選到「習得技能＋前置多項＋長描述」的節點時，
+	# VBox 內容可能比面板高，沒這層會把面板整個撐高、戳出選單框（2026-07-07 使用者回報）。
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	right.add_child(scroll)
+
 	_info_panel = VBoxContainer.new()
+	_info_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_info_panel.add_theme_constant_override("separation", 8)
-	right.add_child(_info_panel)
+	scroll.add_child(_info_panel)
 
 func _on_holder_resized() -> void:
 	_layout_nodes()
@@ -130,7 +140,17 @@ func _layout_nodes() -> void:
 		holder_size = _board_holder.custom_minimum_size
 	_center = holder_size * 0.5
 	var half_extent: float = minf(holder_size.x, holder_size.y) * 0.5
-	_layout_scale = 1.0 if DESIGN_HALF_EXTENT <= 0.0 else (half_extent / DESIGN_HALF_EXTENT)
+	# 最外圈節點（半徑 MASTER_RING_RADIUS=380）要落在「holder 半徑 − 標籤邊距」上，
+	# 讓外圈節點的名字標籤（往節點外延伸文字半寬／字高，屬螢幕固定像素、不隨盤等比縮小）
+	# 有固定空間，不會畫出 holder（clip_contents=false 會一路溢到選單框外）。
+	# 舊版 half_extent/DESIGN_HALF_EXTENT 把邊距當成 design 空間固定比例，盤一小邊距就不足，
+	# 外圈標籤（了塵傳·柔/迅/剛…）就穿出金框（2026-07-07 使用者回報）。
+	var rough_s: float = half_extent / DESIGN_HALF_EXTENT
+	# 邊距＝最外圈橫脈節點名字的半寬（中文約 1 字寬/字，最長名 ~5 字）＋描邊／間距餘裕。
+	var fs_est: int = _label_font_size(rough_s)
+	var label_margin: float = 3.4 * float(fs_est) + 18.0
+	var usable: float = maxf(half_extent - label_margin, 60.0)
+	_layout_scale = usable / MASTER_RING_RADIUS
 
 	var ring_radius: Dictionary = {}
 	for r in CultivationBoard.get_rings():

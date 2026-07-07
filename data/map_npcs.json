@@ -1,5 +1,5 @@
 {
-  "_schema": "3D 探索的『個別互動點』：每個 NPC/店/功能各一點(取代舊 map_locations 打包選單)。走近顯提示、按互動鍵觸發；actions 只 1 項＝直接執行，多項＝跳該點小選單。ambient_break=走進即自動觸發破戒(食/財/色)。npc_facing_deg 讓路邊 NPC 面向街道中央（2026-07-06 修正朝向公式：主街 x>0 面向 270°/-X，x<0 面向 90°/+X；支街 z>JUNC_Z(-13) 面向 180°/-Z，z<JUNC_Z 面向 0°/+Z，皆朝向玩家行走的街心，不再面牆）。座標於 2026-07-06 全面重排避免地面圈圈重疊、沿 L 形街道均勻分布。",
+  "_schema": "3D 探索的『個別互動點』：每個 NPC/店/功能各一點(取代舊 map_locations 打包選單)。走近顯提示、按互動鍵觸發；actions 只 1 項＝直接執行，多項＝跳該點小選單。（ambient_break 欄位已於 2026-07-07 移除：破戒改為支線完成自動觸發，見 BreakVowSystem。）npc_facing_deg 讓路邊 NPC 面向街道中央（2026-07-06 修正朝向公式：主街 x>0 面向 270°/-X，x<0 面向 90°/+X；支街 z>JUNC_Z(-13) 面向 180°/-Z，z<JUNC_Z 面向 0°/+Z，皆朝向玩家行走的街心，不再面牆）。座標於 2026-07-06 全面重排避免地面圈圈重疊、沿 L 形街道均勻分布。",
 
   "npc_liaochen": {
     "name": "了塵", "district": "shrine",
@@ -20,10 +20,10 @@
     "actions": ["quest_rei"]
   },
   "npc_zheng_ma": {
-    "name": "佛具店鄭媽", "district": "shrine",
+    "name": "佛具店水野", "district": "shrine",
     "position_3d": {"x": -9.5, "y": 0.0, "z": -9.5}, "trigger_radius": 2.4,
     "npc_model": "zheng_ma", "npc_facing_deg": 180.0,
-    "actions": ["quest_zheng_ma", "shop"], "ambient_break": "greed"
+    "actions": ["quest_zheng_ma", "shop"]
   },
   "npc_jie": {
     "name": "電玩少年小傑", "district": "shrine",
@@ -35,7 +35,7 @@
     "name": "老廚師阿忠師傅", "district": "shrine",
     "position_3d": {"x": -19.0, "y": 0.0, "z": -9.5}, "trigger_radius": 2.4,
     "npc_model": "ah_zhong", "npc_facing_deg": 180.0,
-    "actions": ["quest_ah_zhong"], "ambient_break": "food"
+    "actions": ["quest_ah_zhong"]
   },
   "npc_david": {
     "name": "失業工程師大衛", "district": "shrine",
@@ -44,10 +44,10 @@
     "actions": ["quest_david"]
   },
   "npc_cherry": {
-    "name": "Cherry", "district": "shrine",
+    "name": "櫻", "district": "shrine",
     "position_3d": {"x": 4.8, "y": 0.0, "z": -17.0}, "trigger_radius": 2.4,
     "npc_model": "cherry", "npc_facing_deg": 270.0,
-    "actions": ["cherry_dialogue", "quest_cherry_debt"], "ambient_break": "lust"
+    "actions": ["cherry_dialogue", "quest_cherry_debt"]
   },
   "npc_cai_ma": {
     "name": "媽媽桑蔡媽", "district": "shrine",

@@ -26,12 +26,25 @@ var _phase: String = "idle"              # idle / windup / fly / done
 var _t: float = 0.0
 var _pitch_time: float = 1.1             # 這球的飛行秒數（會隨機快慢球）
 var _ball: Sprite2D
+var _target_ring: _TargetRing
 var _hands: Sprite2D
 var _machine: Sprite2D
 var _machine_idle_tween: Tween
 var _hud: Label
 var _judge_popup: Label
 var _rng := RandomNumberGenerator.new()
+
+## 揮棒最佳點提示圈：畫在本壘板（PITCH_TO），大小＝球到達時的視覺尺寸。
+## 球飛進圈內剛好貼齊＝offset≈0＝全壘打時機。用 _draw 畫圓環，免外部素材。
+class _TargetRing extends Node2D:
+	var radius: float = 90.0
+	const GOLD := Color(0.96, 0.82, 0.36)
+
+	func _draw() -> void:
+		# 外環（實心金圈）＋外圈微光＋內圈細環，中心留空讓球看得見。
+		draw_arc(Vector2.ZERO, radius + 8.0, 0.0, TAU, 80, Color(GOLD, 0.20), 3.0, true)
+		draw_arc(Vector2.ZERO, radius, 0.0, TAU, 80, Color(GOLD, 0.80), 5.0, true)
+		draw_arc(Vector2.ZERO, radius * 0.62, 0.0, TAU, 64, Color(GOLD, 0.30), 2.0, true)
 
 func minigame_id() -> String:
 	return "batting"
@@ -192,21 +205,45 @@ func _build_scene() -> void:
 	bg.centered = false
 	bg.scale = Vector2(1920.0 / 1672.0, 1080.0 / 941.0)
 	add_child(bg)
+	# 佈局工具 v3：背景整塊登記（A 靜態，父節點是本場景根節點，非 Container，
+	# is_free()==true）。
+	LayoutStore.register(bg, "minigame/batting/bg")
 	_machine = Sprite2D.new()
 	_machine.texture = load(SHRINE_ART + "pitching_machine_shrine_game_ready.png")
 	_machine.position = MACHINE_POS
 	_machine.scale = Vector2(0.40, 0.40)
 	add_child(_machine)
+	# 佈局工具 v3：投球機＝B1（position 只在 build 時設一次，之後只改
+	# rotation/scale），登記為可拖綠框。⚠球的出發點 PITCH_FROM 是獨立常數，
+	# 拖機台圖只校正圖 vs 球出點的對位，不會連動改變球的實際起飛點。
+	LayoutStore.register(_machine, "minigame/batting/machine")
 	_start_machine_idle_sway()
+	# 揮棒最佳點提示圈：立在本壘板（PITCH_TO），半徑＝球到達時的視覺半徑再放大一點，
+	# 讓「球飛進圈裡貼齊」對應到揮棒最準的瞬間。加在球之前＝球飛到時疊在圈上（球在前）。
+	var ball_tex: Texture2D = load(ART + "baseball_ball_game_ready.png")
+	var contact_r: float = maxf(ball_tex.get_width(), ball_tex.get_height()) * 0.5 * SCALE_TO
+	_target_ring = _TargetRing.new()
+	_target_ring.position = PITCH_TO
+	_target_ring.radius = maxf(contact_r * 1.12, 70.0)
+	add_child(_target_ring)
+	_start_ring_pulse()
+	# 佈局工具 v3：提示圈＝B1（position/scale 只在 build 時設，之後脈動只改 scale），
+	# 登記為可拖綠框，方便跟本壘板對位微調。
+	LayoutStore.register(_target_ring, "minigame/batting/target_ring")
 	_ball = Sprite2D.new()
 	_ball.texture = load(ART + "baseball_ball_game_ready.png")
 	_ball.visible = false
+	# 佈局工具 v3：球＝C 類（_place_ball() 每幀依進度 lerp position），標樣板不可拖。
+	_ball.set_meta("layout_template", "minigame/batting/ball")
 	add_child(_ball)
 	_hands = Sprite2D.new()
 	_hands.texture = load(ART + "batting_hands_game_ready.png")
 	_hands.position = Vector2(1450, 1010)
 	_hands.scale = Vector2(0.62, 0.62)
 	add_child(_hands)
+	# 佈局工具 v3：打者手＝B1（position 只在 build 時設一次，揮棒只改
+	# rotation_degrees），登記為可拖綠框。
+	LayoutStore.register(_hands, "minigame/batting/hands")
 	_build_hud()
 
 ## 待機微動：機身左右輕搖，暗示機械運轉中（走 rotation，跟蓄力動畫的 scale
@@ -216,6 +253,14 @@ func _start_machine_idle_sway() -> void:
 	_machine_idle_tween.set_loops()
 	_machine_idle_tween.tween_property(_machine, "rotation_degrees", 1.2, 1.4).set_trans(Tween.TRANS_SINE)
 	_machine_idle_tween.tween_property(_machine, "rotation_degrees", -1.2, 1.4).set_trans(Tween.TRANS_SINE)
+
+## 提示圈脈動：緩慢一縮一放，吸引注意又不干擾判讀（走 scale，跟拖曳定位的
+## position 不衝突；被 LayoutStore 覆寫的是 position，scale 由這裡的 tween 管）。
+func _start_ring_pulse() -> void:
+	var tw := create_tween()
+	tw.set_loops()
+	tw.tween_property(_target_ring, "scale", Vector2(1.06, 1.06), 0.7).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(_target_ring, "scale", Vector2(0.94, 0.94), 0.7).set_trans(Tween.TRANS_SINE)
 
 func _build_hud() -> void:
 	var layer := CanvasLayer.new()
@@ -256,6 +301,9 @@ func _build_hud() -> void:
 	tip_ls.outline_color = Color(0.05, 0.04, 0.05, 0.9)
 	tip.label_settings = tip_ls
 	layer.add_child(tip)
+	# 佈局工具 v3：底部提示文字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(tip, "minigame/batting/tip_label")
 	_update_hud()
 
 func _update_hud() -> void:

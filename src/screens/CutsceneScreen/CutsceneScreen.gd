@@ -37,24 +37,19 @@ var _done: bool = false
 var _skip_jumps_to_last: bool = false
 
 
+var _skip_hint: Label
+
 func _ready() -> void:
-	# 右下角半透明「ESC 跳過」提示（可按 confirm/cancel/ESC 跳過本過場；不擋輸入）。
-	var l := Label.new()
-	l.text = "ESC 跳過"
-	l.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	l.offset_left = -200.0; l.offset_top = -54.0
-	l.offset_right = -28.0; l.offset_bottom = -20.0
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	l.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
-	l.add_theme_font_size_override("font_size", 22)
-	l.add_theme_color_override("font_color", Color(0.92, 0.89, 0.82))
-	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
-	l.add_theme_constant_override("shadow_offset_x", 1)
-	l.add_theme_constant_override("shadow_offset_y", 1)
-	l.add_theme_constant_override("shadow_outline_size", 4)
-	l.modulate = Color(1, 1, 1, 0.5)
-	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(l)
+	# 右下角半透明跳過提示：沿用場景檔裡的 SkipHint 節點統一呈現（先前程式另外
+	# 動態疊建一顆「ESC 跳過」，跟場景的「空白鍵跳過 ▶」重疊成兩行，已合併）；
+	# 播畢由 _finish() 隱藏——小遊戲結尾過場會停在最後一幀當結算底圖，提示不能殘留。
+	_skip_hint = $SkipHint
+	_skip_hint.text = "空白鍵／ESC 跳過 ▶"
+	_skip_hint.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
+	_skip_hint.add_theme_constant_override("shadow_offset_x", 1)
+	_skip_hint.add_theme_constant_override("shadow_offset_y", 1)
+	_skip_hint.add_theme_constant_override("shadow_outline_size", 4)
+	_skip_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 ## skip_to_last：true 時「跳過」會先跳到最後一幀再結束（小遊戲過場用，
@@ -150,6 +145,10 @@ func _finish() -> void:
 		return
 	_done = true
 	_playing = false
+	# 播畢即收提示字：小遊戲結尾過場會「停在最後一幀留著當結算底圖」
+	# （MinigameBase 2026-07-07 定版流程），提示殘留在停格上很突兀。
+	if _skip_hint != null and is_instance_valid(_skip_hint):
+		_skip_hint.visible = false
 	if cutscene_audio.playing:
 		cutscene_audio.stop()
 	finished.emit()

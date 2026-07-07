@@ -290,7 +290,7 @@ func _refresh_info_card() -> void:
 		lines.append("已選中：%s @ %s" % [String(_selected.get_path()), _get_pos(_selected)])
 		if not _selected_entry.is_empty() and not _selected_entry.get("free", true):
 			var key: String = _selected_entry.get("key", "")
-			lines.append("⚠樣板/容器元件：%s，改樣板調整（告訴 Claude 你要的位置）" % key)
+			lines.append("⚠程式控制位置（樣板/動態/會動元件）：%s——要調整請告訴 Claude" % key)
 		elif not _selected_entry.is_empty():
 			lines.append("已登記：%s（可拖曳，S 存檔永久生效）" % _selected_entry.get("key", ""))
 		elif _is_in_container(_selected):
@@ -359,7 +359,10 @@ func _try_select(mouse_pos: Vector2) -> void:
 		_selected_entry = _lookup_entry(_selected)
 		_selected_start_pos = _get_pos(_selected)
 		_dragging = _can_drag_selection()
-		_drag_offset = _get_pos(_selected) - mouse_pos
+		# v3：_drag_offset 是 viewport 座標系下的偏移（節點螢幕原點 − 滑鼠位置），
+		# 拖曳時 mouse_pos + _drag_offset 才能還原「節點應該在的螢幕位置」，
+		# 再交給 _set_pos 換算回巢狀節點的 local 座標。
+		_drag_offset = _get_screen_pos(_selected) - mouse_pos
 	_refresh_highlight()
 	_refresh_info_card()
 	_refresh_entry_box_selection()
@@ -397,6 +400,8 @@ func _cycle_select(mouse_pos: Vector2) -> void:
 	_selected_entry = _lookup_entry(_selected)
 	_selected_start_pos = _get_pos(_selected)
 	_dragging = _can_drag_selection() and _dragging
+	# v3：切換選取候選後 drag_offset 也要用 viewport 座標系重算（見 _try_select 註解）。
+	_drag_offset = _get_screen_pos(_selected) - mouse_pos
 	_refresh_highlight()
 	_refresh_info_card()
 	_refresh_entry_box_selection()
@@ -474,11 +479,41 @@ func _get_pos(node: CanvasItem) -> Vector2:
 		return (node as Node2D).position
 	return Vector2.ZERO
 
+## 2026-07-07（v3）：節點原點在 viewport(螢幕) 座標系下的位置。用於算滑鼠拖曳
+## offset 與傳給 _set_pos 的目標座標——跟 local position 不同，巢狀節點
+## （父節點不在原點/有旋轉縮放）兩者會不一樣，混用就是巢狀拖曳跳位的根因。
+func _get_screen_pos(node: CanvasItem) -> Vector2:
+	if node is Control:
+		return (node as Control).get_global_rect().position
+	if node is Node2D:
+		return (node as Node2D).get_global_transform_with_canvas() * Vector2.ZERO
+	return Vector2.ZERO
+
+## 2026-07-07 修正（v3）：拖曳目標一律以「viewport(螢幕)座標」傳入（滑鼠位置＋
+## _drag_offset，或方向鍵微調的 _get_pos 結果＋位移——後者本來就是 local，見下方
+## 特別處理）。巢狀節點（父節點不在原點/有旋轉縮放，例如化緣 _monk_sprite 掛在
+## _bowl_node 底下）不能把 viewport 座標直接塞進 local position，否則會跳位。
+## 做法：把 viewport 座標換算到父節點座標系（Node2D 用
+## get_global_transform_with_canvas().affine_inverse()；Control 用父層的
+## get_global_transform_with_canvas() 反變換，Control.position 是相對父 rect 左上角
+## 的 local 座標，用同一套變換換算等效）。
 func _set_pos(node: CanvasItem, pos: Vector2) -> void:
 	if node is Control:
-		(node as Control).position = pos
+		var c := node as Control
+		var parent := c.get_parent()
+		if parent is CanvasItem and (parent as CanvasItem).is_inside_tree():
+			var inv := (parent as CanvasItem).get_global_transform_with_canvas().affine_inverse()
+			c.position = inv * pos
+		else:
+			c.position = pos
 	elif node is Node2D:
-		(node as Node2D).position = pos
+		var n2d := node as Node2D
+		var parent2 := n2d.get_parent()
+		if parent2 is CanvasItem and (parent2 as CanvasItem).is_inside_tree():
+			var inv2 := (parent2 as CanvasItem).get_global_transform_with_canvas().affine_inverse()
+			n2d.position = inv2 * pos
+		else:
+			n2d.position = pos
 	_record_move(node)
 	_capture_if_registered(node)
 
@@ -498,8 +533,15 @@ func _capture_if_registered(node: CanvasItem) -> void:
 	if group != "":
 		LayoutStore.apply_group(group)
 
+## 方向鍵微調：維持 local 位移（v3 spec 明定，不必換算到 viewport 座標系，
+## 巢狀節點的相對位置本來就該用 local delta 移動，直接設 local position 即可）。
 func _apply_move(node: CanvasItem, delta: Vector2) -> void:
-	_set_pos(node, _get_pos(node) + delta)
+	if node is Control:
+		(node as Control).position += delta
+	elif node is Node2D:
+		(node as Node2D).position += delta
+	_record_move(node)
+	_capture_if_registered(node)
 	_refresh_highlight()
 	_refresh_info_card()
 
