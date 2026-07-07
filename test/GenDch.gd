@@ -151,7 +151,7 @@ func _init() -> void:
 		Color(0.42, 0.40, 0.34, 1),
 		"源造(老王)昔日合夥人，二十年前偽造文書鵲巢鳩占，如今經營「林田投資」。",
 		"default",
-		{"default": _portrait("res://assets/2d/portraits/enemies/enemy_vendor.png")}
+		{"default": _portrait("res://assets/2d/portraits/npcs/bust/npc_hayashida.png")}
 	)
 	_save(hayashida, "Hayashida.dch")
 
@@ -160,7 +160,7 @@ func _init() -> void:
 		Color(0.50, 0.44, 0.36, 1),
 		"櫻木町賣了半世紀醬料的老攤主，與大村師傅有段陳年往事。",
 		"default",
-		{"default": _portrait("res://assets/2d/portraits/npcs/bust/npc_lao_wang.png")}
+		{"default": _portrait("res://assets/2d/portraits/npcs/bust/npc_lao_zhang.png")}
 	)
 	_save(lao_zhang, "LaoZhang.dch")
 
@@ -169,7 +169,7 @@ func _init() -> void:
 		Color(0.40, 0.46, 0.50, 1),
 		"健太的父親，離家在外地工作多年，終於回來與健太、婆婆團聚。",
 		"default",
-		{"default": _portrait("res://assets/2d/portraits/npcs/bust/npc_david.png")}
+		{"default": _portrait("res://assets/2d/portraits/npcs/bust/npc_kenta_father.png")}
 	)
 	_save(kenta_father, "Kenta_Father.dch")
 
