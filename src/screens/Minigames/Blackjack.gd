@@ -486,6 +486,9 @@ func _build_hud() -> void:
 	hud_ls.outline_color = Color(0.05, 0.04, 0.05, 0.9)
 	_hud.label_settings = hud_ls
 	layer.add_child(_hud)
+	# 佈局工具 v2（P4）：左上 HUD 文字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_hud, "minigame/blackjack/hud_label")
 	# 左上第二行：你/莊點數（描邊字，不下桌面中央）
 	_sub = Label.new()
 	_sub.position = Vector2(48, 92)
@@ -509,6 +512,9 @@ func _build_hud() -> void:
 	tip_ls.outline_color = Color(0.05, 0.04, 0.05, 0.9)
 	_tip.label_settings = tip_ls
 	layer.add_child(_tip)
+	# 佈局工具 v2（P4）：底部提示文字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_tip, "minigame/blackjack/tip_label")
 	_update_hud()
 
 ## 下注籌碼堆：點左鍵 +100（籌碼淡入下注圈）。
@@ -522,6 +528,9 @@ func _build_chip_zone(layer: CanvasLayer) -> void:
 				and event.button_index == MOUSE_BUTTON_LEFT:
 			_add_bet_chip())
 	layer.add_child(_chip_zone)
+	# 佈局工具 v2（P4）：籌碼下注區整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_chip_zone, "minigame/blackjack/chip_zone")
 	for i in 3:
 		var chip := _make_chip()
 		chip.position = Vector2(70.0 + (i - 1) * 3.0, 62.0 - i * 8.0)
@@ -552,6 +561,9 @@ func _build_result_panel(layer: CanvasLayer) -> void:
 	_panel.add_theme_stylebox_override("panel", sb)
 	_panel.visible = false
 	layer.add_child(_panel)
+	# 佈局工具 v2（P4）：RESULT 結算橫幅整塊登記（父節點 layer 是 CanvasLayer，
+	# 非 Container，is_free()==true）。
+	LayoutStore.register(_panel, "minigame/blackjack/result_banner")
 	_panel_title = Label.new()
 	_panel_title.position = Vector2(0, 10)
 	_panel_title.size = Vector2(700, 56)
@@ -622,6 +634,9 @@ func _build_menu(items: Array) -> void:
 					_menu_idx = idx
 					_menu_refresh())
 		b.pressed.connect(_menu_do.bind(String(it.id)))
+		# 佈局工具 v2（P4）：純標註，不影響遊戲行為。按鈕在 HUD layer 下逐項動態生成，
+		# 視為重複樣板元件，改樣板（MENU_POS/MENU_ITEM_SIZE 常數）調整，不個別拖曳。
+		b.set_meta("layout_template", "minigame/blackjack/menu_item")
 		_hud.get_parent().add_child(b)
 		_menu_items.append({"id": it.id, "label": it.label, "enabled": enabled, "btn": b})
 	# 預設選第一個可用項

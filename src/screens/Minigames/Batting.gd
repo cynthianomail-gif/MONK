@@ -229,6 +229,9 @@ func _build_hud() -> void:
 	hud_ls.outline_color = Color(0.05, 0.04, 0.05, 0.9)
 	_hud.label_settings = hud_ls
 	layer.add_child(_hud)
+	# 佈局工具 v2（P4）：左上 HUD 文字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_hud, "minigame/batting/hud_label")
 	_judge_popup = Label.new()
 	_judge_popup.position = Vector2(0, 430)
 	_judge_popup.size = Vector2(1920, 90)
@@ -240,6 +243,9 @@ func _build_hud() -> void:
 	_judge_popup.label_settings = jp_ls
 	_judge_popup.modulate.a = 0.0
 	layer.add_child(_judge_popup)
+	# 佈局工具 v2（P4）：判定彈出字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_judge_popup, "minigame/batting/judge_popup")
 	var tip := Label.new()
 	tip.text = "球到眼前按〔空白鍵〕揮棒（%d 支安打過關）" % WIN_HITS
 	tip.position = Vector2(620, 990)

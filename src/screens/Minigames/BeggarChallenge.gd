@@ -495,16 +495,25 @@ func _build_hud() -> void:
 	_hud_score.position = Vector2(48, 36)
 	_hud_score.label_settings = _hud_label_settings(40, Color(0.95, 0.80, 0.42))
 	layer.add_child(_hud_score)
+	# 佈局工具 v2（P4）：功德金 HUD 整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_hud_score, "minigame/beggarchallenge/hud_score")
 	_hud_combo = Label.new()
 	_hud_combo.text = "連擊 x1.0"
 	_hud_combo.position = Vector2(48, 90)
 	_hud_combo.label_settings = _hud_label_settings(28, Color(0.92, 0.88, 0.80))
 	layer.add_child(_hud_combo)
+	# 佈局工具 v2（P4）：連擊 HUD 整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_hud_combo, "minigame/beggarchallenge/hud_combo")
 	_hud_time = Label.new()
 	_hud_time.text = "%02d" % int(DURATION)
 	_hud_time.position = Vector2(1820, 36)
 	_hud_time.label_settings = _hud_label_settings(48, Color(0.97, 0.94, 0.88))
 	layer.add_child(_hud_time)
+	# 佈局工具 v2（P4）：倒數計時 HUD 整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_hud_time, "minigame/beggarchallenge/hud_time")
 
 func _hud_label_settings(size: int, color: Color) -> LabelSettings:
 	var ls := LabelSettings.new()

@@ -178,6 +178,9 @@ func _show_mode_select() -> void:
 		b.add_theme_stylebox_override("hover", bh)
 		b.add_theme_stylebox_override("pressed", bh)
 		b.pressed.connect(_start_mode.bind(String(sp[0])))
+		# 佈局工具 v2（P4）：純標註，不影響遊戲行為。模式按鈕動態逐項生成，視為
+		# 重複樣板元件，改樣板（specs 常數）調整，不個別拖曳。
+		b.set_meta("layout_template", "minigame/darts/mode_button")
 		layer.add_child(b)
 		_mode_btns.append(b)
 
@@ -381,6 +384,9 @@ func _build_hud() -> void:
 	_gauge.position = Vector2(230, 300)
 	_gauge.size = Vector2(30, 400)
 	layer.add_child(_gauge)
+	# 佈局工具 v2（P4）：力度條整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_gauge, "minigame/darts/gauge")
 	_hud = Label.new()
 	_hud.position = Vector2(48, 36)
 	var hud_ls := LabelSettings.new()
@@ -390,6 +396,9 @@ func _build_hud() -> void:
 	hud_ls.outline_color = Color(0.05, 0.04, 0.05, 0.9)
 	_hud.label_settings = hud_ls
 	layer.add_child(_hud)
+	# 佈局工具 v2（P4）：左上 HUD 文字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_hud, "minigame/darts/hud_label")
 	_judge_popup = Label.new()
 	_judge_popup.position = Vector2(1240, 440)
 	var jp_ls := LabelSettings.new()
@@ -399,6 +408,9 @@ func _build_hud() -> void:
 	_judge_popup.label_settings = jp_ls
 	_judge_popup.modulate.a = 0.0
 	layer.add_child(_judge_popup)
+	# 佈局工具 v2（P4）：判定彈出字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_judge_popup, "minigame/darts/judge_popup")
 	_tip = Label.new()
 	_tip.position = Vector2(0, 1020)
 	_tip.size = Vector2(1920, 50)
@@ -410,6 +422,9 @@ func _build_hud() -> void:
 	tip_ls.outline_color = Color(0.05, 0.04, 0.05, 0.9)
 	_tip.label_settings = tip_ls
 	layer.add_child(_tip)
+	# 佈局工具 v2（P4）：底部提示文字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_tip, "minigame/darts/tip_label")
 	_update_hud()
 
 func _update_hud() -> void:

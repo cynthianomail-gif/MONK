@@ -126,6 +126,10 @@ func show_result_panel(title: String, rating: String, rows: Array, result: Dicti
 	sb.set_corner_radius_all(10)
 	panel.add_theme_stylebox_override("panel", sb)
 	_result_layer.add_child(panel)
+	# 佈局工具 v2（P4）：結算面板整塊登記為自由定位塊（父節點 _result_layer 是
+	# CanvasLayer，非 Container，is_free()==true）。9 款小遊戲共用同一支
+	# show_result_panel，掛在這裡就等於全部接好。
+	LayoutStore.register(panel, "minigame/common/result_panel")
 
 	var title_l := Label.new()
 	title_l.text = title
@@ -469,6 +473,9 @@ func _open_pause_menu() -> void:
 	sb.set_corner_radius_all(10)
 	panel.add_theme_stylebox_override("panel", sb)
 	_pause_layer.add_child(panel)
+	# 佈局工具 v2（P4）：暫停面板整塊登記為自由定位塊（父節點 _pause_layer 是
+	# CanvasLayer，非 Container，is_free()==true）。9 款小遊戲共用，掛這裡全部接好。
+	LayoutStore.register(panel, "minigame/common/pause_panel")
 
 	var title_l := Label.new()
 	title_l.text = "暫停"

@@ -826,11 +826,21 @@ func _build_hud() -> void:
 	_hud_streak = _label(Vector2(48, 192), 26, Color(0.9, 0.6, 0.4))
 	_prompt = _label(Vector2(700, 900), 34, Color(1.0, 0.95, 0.8))
 	_prompt.visible = false
+	# 佈局工具 v2（P4）：HUD 文字塊登記（父節點 _hud 是 Control，非 Container，
+	# is_free()==true）。時間/收入/狀態/提示各自可獨立定位；連段文字次要不重複標。
+	LayoutStore.register(_hud_time, "minigame/soupcarry/hud_time")
+	LayoutStore.register(_hud_income, "minigame/soupcarry/hud_income")
+	LayoutStore.register(_hud_state, "minigame/soupcarry/hud_state")
+	LayoutStore.register(_prompt, "minigame/soupcarry/prompt_label")
 	# 平衡計(晃動 meter)：亮邊框墊底＋近不透明深底，避免疊在暖棕牆面上融掉。
 	var mframe := ColorRect.new()
 	mframe.position = Vector2(1496, 36); mframe.size = Vector2(348, 44)
 	mframe.color = Color(0.95, 0.9, 0.75, 0.9)
 	_hud.add_child(mframe)
+	# 佈局工具 v2（P4）：平衡計整塊登記代表框（mbg/_meter_fill 疊在同位置，
+	# 隨此框視覺同步，不重複登記）。父節點 _hud 是 Control，非 Container，
+	# is_free()==true。
+	LayoutStore.register(mframe, "minigame/soupcarry/balance_meter")
 	var mbg := ColorRect.new()
 	mbg.position = Vector2(1500, 40); mbg.size = Vector2(340, 36)
 	mbg.color = Color(0.06, 0.05, 0.04, 0.92)

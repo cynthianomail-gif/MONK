@@ -79,6 +79,21 @@ func _ready() -> void:
 	focus_dim.visible = false
 	_setup_command_menu()
 	_update_daoxing()
+	_register_layout_tunables()
+
+## 佈局工具 v2（P1）：7 個自由定位大塊登記進 LayoutStore（父節點皆為 BattleUI 這個
+## CanvasLayer，非 Container，is_free() 皆為 true，可被 tuner 自由拖曳＋永久存檔）。
+## 見 docs/superpowers/specs/2026-07-07-layout-tuner-v2-design.md 第 2 節登記清單。
+## 注意：PlayerPanel 節點本身沒有 unique_name_in_owner（scene 裡沒設），不能用 %PlayerPanel，
+## 改用 get_node 相對路徑（BattleUI 是本節點 self，PlayerPanel 是它的直接子節點）。
+func _register_layout_tunables() -> void:
+	LayoutStore.register(player_figure, "battle/player_figure")
+	LayoutStore.register(get_node("PlayerPanel"), "battle/player_panel")
+	LayoutStore.register(enemy_area, "battle/enemy_area")
+	LayoutStore.register(command_host, "battle/command_host")
+	LayoutStore.register(skill_menu, "battle/skill_menu")
+	LayoutStore.register(combo_label, "battle/combo_label")
+	LayoutStore.register(log_label, "battle/log_label")
 
 ## 主指令選單（第一期）：掛在 CommandHost 下。
 func _setup_command_menu() -> void:

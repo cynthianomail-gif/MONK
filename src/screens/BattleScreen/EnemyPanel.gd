@@ -43,6 +43,9 @@ func _init(c: Combatant, idx: int) -> void:
 	_figure = BreathingFigure.new()
 	_figure.custom_minimum_size = Vector2(265, 455) if big else Vector2(300, 440)
 	_figure.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	# 佈局工具 v2（P1）：純標註，不影響遊戲行為。立繪在容器(VBoxContainer)內排版，
+	# 拖不動，tuner 掃到 layout_template meta 時顯示琥珀框＋此 key，提示「改樣板調整」。
+	_figure.set_meta("layout_template", "enemy/portrait")
 	_base_portrait = BattleArt.resolve_figure_path(_group_dir(c), _portrait_file(c))
 	if _base_portrait != "" and ResourceLoader.exists(_base_portrait):
 		_figure.texture = load(_base_portrait)
@@ -76,6 +79,9 @@ func _init(c: Combatant, idx: int) -> void:
 	_hp_bar.value = c.current_hp
 	_hp_bar.show_percentage = false
 	_hp_bar.custom_minimum_size = Vector2(180, 12)
+	# 佈局工具 v2（P1）：純標註，不影響遊戲行為。血條在容器(VBoxContainer)內排版，
+	# 拖不動，tuner 掃到 layout_template meta 時顯示琥珀框＋此 key，提示「改樣板調整」。
+	_hp_bar.set_meta("layout_template", "enemy/hp_bar")
 	pv.add_child(_hp_bar)
 
 	_hp_text = Label.new()

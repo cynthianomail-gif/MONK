@@ -568,17 +568,26 @@ func _build_hud() -> void:
 	_round_label.add_theme_font_size_override("font_size", 30)
 	_round_label.add_theme_color_override("font_color", Color(0.9, 0.85, 0.75))
 	layer.add_child(_round_label)
+	# 佈局工具 v2（P4）：回合標籤整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_round_label, "minigame/woodenfishrhythm/round_label")
 	_hud = Label.new()
 	_hud.text = "分數 0"
 	_hud.position = Vector2(48, 76)
 	_hud.add_theme_font_size_override("font_size", 40)
 	_hud.add_theme_color_override("font_color", Color(0.788, 0.659, 0.38))
 	layer.add_child(_hud)
+	# 佈局工具 v2（P4）：分數 HUD 整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_hud, "minigame/woodenfishrhythm/hud_label")
 	_judge_popup = Label.new()
 	_judge_popup.position = Vector2(FISH_PLAYER_POS.x - 120, FISH_PLAYER_POS.y - 160)
 	_judge_popup.add_theme_font_size_override("font_size", 44)
 	_judge_popup.modulate.a = 0.0
 	layer.add_child(_judge_popup)
+	# 佈局工具 v2（P4）：判定彈出字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_judge_popup, "minigame/woodenfishrhythm/judge_popup")
 	var t := Timer.new()
 	t.wait_time = 0.1
 	t.autostart = true

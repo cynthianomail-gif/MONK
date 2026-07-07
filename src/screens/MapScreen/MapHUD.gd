@@ -50,6 +50,7 @@ const TEXT_COLOR: String = "#f5f2e8"     # 近白：提示文字
 
 var _toast_tween: Tween = null
 var _prompt_tween: Tween = null
+var _minimap: Control = null
 
 func _ready() -> void:
 	prompt.visible = false
@@ -62,6 +63,20 @@ func _ready() -> void:
 	EventBus.skill_unlocked.connect(func(n): show_toast("新技能解鎖：%s" % n))
 	EventBus.skill_learnable.connect(func(n): show_toast("可學新招：%s（去經書習得）" % n))
 	update_stats()
+	_register_layout_tunables()
+
+## 佈局工具 v2（P2）：地圖 HUD 上可自由定位的塊登記進 LayoutStore（父節點皆為
+## MapHUD 這個 CanvasLayer，非 Container，is_free() 皆為 true）。
+## 見 docs/superpowers/specs/2026-07-07-layout-tuner-v2-design.md（P2 擴充）。
+## 注意：小地圖是 _add_minimap() 在本函式之前動態 add_child 進來的，此時已存在。
+func _register_layout_tunables() -> void:
+	LayoutStore.register(time_label, "map/time_label")
+	LayoutStore.register(stats_label, "map/stats_label")
+	LayoutStore.register(prompt, "map/interaction_prompt")
+	LayoutStore.register(action_menu, "map/action_menu")
+	LayoutStore.register(toast_label, "map/toast")
+	if _minimap != null:
+		LayoutStore.register(_minimap, "map/minimap")
 
 func set_time(day: int, period_name: String) -> void:
 	time_label.text = "第 %d 天 ｜ %s" % [day, period_name]
@@ -153,3 +168,4 @@ func _add_minimap() -> void:
 	mm.offset_left = -164.0; mm.offset_top = 60.0
 	mm.offset_right = -16.0; mm.offset_bottom = 208.0
 	add_child(mm)
+	_minimap = mm

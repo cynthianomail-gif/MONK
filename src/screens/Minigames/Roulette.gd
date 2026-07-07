@@ -425,6 +425,9 @@ func _build_ui() -> void:
 	bd.border_color = Color(0.4, 0.36, 0.30)
 	_confirm_btn.add_theme_stylebox_override("disabled", bd)
 	_confirm_btn.pressed.connect(_confirm_bets)
+	# 佈局工具 v2（P4）：確認下注按鈕整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_confirm_btn, "minigame/roulette/confirm_button")
 	layer.add_child(_confirm_btn)
 	# HUD 左上兩行
 	_hud = Label.new()
@@ -436,6 +439,9 @@ func _build_ui() -> void:
 	hud_ls.outline_color = Color(0.05, 0.04, 0.05, 0.9)
 	_hud.label_settings = hud_ls
 	layer.add_child(_hud)
+	# 佈局工具 v2（P4）：左上 HUD 文字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_hud, "minigame/roulette/hud_label")
 	_sub = Label.new()
 	_sub.position = Vector2(48, 84)
 	var sub_ls := LabelSettings.new()
@@ -445,6 +451,9 @@ func _build_ui() -> void:
 	sub_ls.outline_color = Color(0.05, 0.04, 0.05, 0.9)
 	_sub.label_settings = sub_ls
 	layer.add_child(_sub)
+	# 佈局工具 v2（P4）：第二行文字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_sub, "minigame/roulette/sub_label")
 	# 結算訊息（中央偏上、深色底板）
 	_banner_back = Panel.new()
 	_banner_back.position = Vector2(660, 30)
@@ -457,6 +466,9 @@ func _build_ui() -> void:
 	_banner_back.add_theme_stylebox_override("panel", sb)
 	_banner_back.visible = false
 	layer.add_child(_banner_back)
+	# 佈局工具 v2（P4）：結算橫幅背板整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。_banner 文字與此同位置同步移動，不重複登記。
+	LayoutStore.register(_banner_back, "minigame/roulette/result_banner")
 	_banner = Label.new()
 	_banner.position = Vector2(660, 30)
 	_banner.size = Vector2(600, 74)

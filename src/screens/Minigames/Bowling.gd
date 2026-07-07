@@ -324,6 +324,9 @@ func _build_hud() -> void:
 	hud_ls.outline_color = Color(0.05, 0.04, 0.05, 0.9)
 	_hud.label_settings = hud_ls
 	layer.add_child(_hud)
+	# 佈局工具 v2（P4）：左上 HUD 文字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_hud, "minigame/bowling/hud_label")
 	_type_label = Label.new()
 	_type_label.position = Vector2(48, 92)
 	var tl_ls := LabelSettings.new()
@@ -333,6 +336,9 @@ func _build_hud() -> void:
 	tl_ls.outline_color = Color(0.05, 0.04, 0.05, 0.9)
 	_type_label.label_settings = tl_ls
 	layer.add_child(_type_label)
+	# 佈局工具 v2（P4）：球種標籤整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_type_label, "minigame/bowling/type_label")
 	_judge_popup = Label.new()
 	_judge_popup.position = Vector2(0, 460)
 	_judge_popup.size = Vector2(1920, 90)
@@ -344,6 +350,9 @@ func _build_hud() -> void:
 	_judge_popup.label_settings = jp_ls
 	_judge_popup.modulate.a = 0.0
 	layer.add_child(_judge_popup)
+	# 佈局工具 v2（P4）：判定彈出字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_judge_popup, "minigame/bowling/judge_popup")
 	var tip := Label.new()
 	tip.text = "〔←→〕移動位置　〔C〕切換球種　〔空白鍵〕出球（%d 分過關）" % WIN_PINS
 	tip.position = Vector2(0, 1020)

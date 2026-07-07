@@ -218,6 +218,10 @@ func _build_scene() -> void:
 	_gauge_fill.position = Vector2(1520, 760)
 	_gauge_fill.color = Color(0.788, 0.659, 0.38)
 	add_child(_gauge_fill)
+	# 佈局工具 v2（P4）：力度計整塊登記代表（gauge_bg/sweet 疊在同位置，
+	# 隨此塊視覺同步，不重複登記）。父節點是本場景根節點（Node2D，非
+	# Container），is_free()==true。
+	LayoutStore.register(_gauge_fill, "minigame/offeringtoss/gauge")
 	var sweet := ColorRect.new()   # 甜蜜點刻度
 	sweet.size = Vector2(48, 4)
 	sweet.position = Vector2(1514, 760.0 - 300.0 * POWER_SWEET)
@@ -233,15 +237,24 @@ func _build_hud() -> void:
 	_hud.add_theme_font_size_override("font_size", 40)
 	_hud.add_theme_color_override("font_color", Color(0.788, 0.659, 0.38))
 	layer.add_child(_hud)
+	# 佈局工具 v2（P4）：左上 HUD 文字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_hud, "minigame/offeringtoss/hud_label")
 	_wind_label = Label.new()
 	_wind_label.position = Vector2(820, 120)
 	_wind_label.add_theme_font_size_override("font_size", 44)
 	layer.add_child(_wind_label)
+	# 佈局工具 v2（P4）：風向標籤整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_wind_label, "minigame/offeringtoss/wind_label")
 	_judge_popup = Label.new()
 	_judge_popup.position = Vector2(830, 560)
 	_judge_popup.add_theme_font_size_override("font_size", 52)
 	_judge_popup.modulate.a = 0.0
 	layer.add_child(_judge_popup)
+	# 佈局工具 v2（P4）：判定彈出字整塊登記（父節點 layer 是 CanvasLayer，非
+	# Container，is_free()==true）。
+	LayoutStore.register(_judge_popup, "minigame/offeringtoss/judge_popup")
 	var tip := Label.new()
 	tip.text = "看準力度與風向，按〔空白鍵〕投出香油錢"
 	tip.position = Vector2(660, 990)
