@@ -6,13 +6,14 @@ extends Node
 ## 只在 OS.is_debug_build() 生效（正式版無感，_ready 直接跳過所有註冊）。
 ## 3D 場景（探索街景）不在範圍——只服務 2D CanvasItem。
 ##
-## F8：切換調整模式（開/關）。開啟時：
+## `（反引號，備用 F8）：切換調整模式（開/關）。⚠從編輯器跑時 F8 會被「停止執行」
+## 快捷鍵搶走直接關遊戲（使用者實測），反引號才是主鍵。開啟時：
 ##   - 顯示角落操作說明小卡
 ##   - get_tree().paused = true（凍住遊戲方便對準；與①暫停頁共存規則：
 ##     F8 模式開啟時 ESC 不再開暫停頁，見 MinigameBase._is_layout_tuner_active）
 ##   - 滑鼠左鍵點擊 → 命中測試選中最上層 CanvasItem（面積最小者優先，避免選到背景）
 ##   - 拖曳移動選中節點；方向鍵微調 1px／Shift+方向鍵 10px
-## F9：把本次所有被移動過的節點寫進 JSON（讀舊檔合併／append）。
+## S（備用 F9）：把本次所有被移動過的節點寫進 JSON（讀舊檔合併／append）。
 
 const OUTPUT_PATH := "res://_layout_tuning.json"
 const NUDGE_STEP := 1.0
@@ -47,11 +48,15 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not _debug_enabled:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_F8:
+		# 開關主鍵＝`（數字 1 左邊的反引號）。F8 保留當備用：從編輯器跑（尤其內嵌視窗）時
+		# F8 是編輯器「停止執行」快捷鍵，會被編輯器攔走直接關遊戲（使用者實測踩到），
+		# 反引號編輯器不佔用，兩種跑法都安全。
+		if event.keycode == KEY_QUOTELEFT or event.keycode == KEY_F8:
 			toggle_tuning()
 			get_viewport().set_input_as_handled()
 			return
-		if event.keycode == KEY_F9 and tuning_active:
+		# 儲存＝S（調整模式中遊戲已暫停，不會跟移動鍵打架）；F9 備用（編輯器 F9=中斷點，同理讓位）。
+		if (event.keycode == KEY_S or event.keycode == KEY_F9) and tuning_active:
 			save_tuning()
 			get_viewport().set_input_as_handled()
 			return
@@ -145,7 +150,7 @@ func _refresh_info_card() -> void:
 	if _info_card == null:
 		return
 	var lines := [
-		"【佈局調整模式】F8 關閉／點選拖曳／方向鍵微調 1px、Shift+方向鍵 10px／F9 儲存",
+		"【佈局調整模式】` 關閉（數字1左邊）／點選拖曳／方向鍵微調 1px、Shift+方向鍵 10px／S 儲存",
 	]
 	if _selected != null and is_instance_valid(_selected):
 		lines.append("已選中：%s @ %s" % [String(_selected.get_path()), _get_pos(_selected)])
