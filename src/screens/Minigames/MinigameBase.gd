@@ -222,6 +222,19 @@ func is_result_panel_open() -> bool:
 	return _result_layer != null and is_instance_valid(_result_layer)
 
 func _unhandled_input(event: InputEvent) -> void:
+	# 確保常駐監聽節點存在（暫停中的一切輸入都靠它，見上方 _PauseWatcher 說明）。
+	# 這裡是 MinigameBase 自身的 _unhandled_input，只有未暫停時才會被引擎呼叫，
+	# 剛好符合「在遊戲第一次收到輸入前把 watcher 準備好」的需求。
+	_ensure_pause_watcher()
+
+	# cancel 開暫停頁：只在「未暫停、結算面板未開」時由這裡處理；
+	# 暫停中的 cancel（恢復）與暫停選單本身的鍵盤導覽全部交給 _PauseWatcher，
+	# 因為 MinigameBase 本體在暫停中收不到 _unhandled_input（PROCESS_MODE_INHERIT 被凍結）。
+	if event.is_action_pressed("cancel") and not is_result_panel_open() and not is_paused_menu_open():
+		if _maybe_open_pause_menu():
+			get_viewport().set_input_as_handled()
+			return
+
 	if not is_result_panel_open():
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -242,6 +255,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		if _result_btn_idx >= 0 and _result_btn_idx < _result_buttons.size():
 			_result_buttons[_result_btn_idx].pressed.emit()
 		get_viewport().set_input_as_handled()
+
+## 暫停選單鍵盤導覽（由 _PauseWatcher 呼叫，暫停中仍可運作）。
+func _pause_nav(delta: int) -> void:
+	_pause_btn_idx = clampi(_pause_btn_idx + delta, 0, _pause_buttons.size() - 1)
+	_pause_refresh_selection()
+
+func _pause_activate_selected() -> void:
+	if _pause_btn_idx >= 0 and _pause_btn_idx < _pause_buttons.size():
+		_pause_buttons[_pause_btn_idx].pressed.emit()
 
 func _on_result_restart() -> void:
 	_close_result_panel()
@@ -310,3 +332,210 @@ func _spawn_fx(file: String, pos: Vector2, fx_scale: float, grow_t: float, fade_
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.parallel().tween_property(s, "modulate:a", 0.0, grow_t + fade_t)
 	tw.tween_callback(s.queue_free)
+
+# ════════════════════════════════════════════════════════════════
+# ESC 暫停頁：全部 9 款小遊戲共用。get_tree().paused=true 凍結子類的
+# _process/tween/timer（皆為預設 PROCESS_MODE_INHERIT）——這是我們要的效果，
+# 所以 MinigameBase 自己（場景根節點）絕對不能整個設成 PROCESS_MODE_ALWAYS，
+# 那樣會連帶讓所有 INHERIT 的子節點（=幾乎整個場景）在暫停中繼續跑，凍結就失效了。
+# 做法：另開一個「常駐輸入監聽節點」_PauseWatcher（獨立 Node，process_mode=ALWAYS），
+# 只有它在暫停中還能收 _unhandled_input；暫停 UI（CanvasLayer/Panel/Button）也各自
+# 標記 ALWAYS 才能被點擊/收鍵盤。除此之外的場景樹維持預設，凍結行為不受影響。
+#
+# 邊界（見規格）：
+#   - 結算面板開著時 ESC 不觸發暫停（已經結束了，is_result_panel_open() 擋下）。
+#   - intro 過場播放中 ESC 是跳過短片的既有行為（CutsceneScreen 自己處理
+#     "cancel"/滑鼠點擊），不屬於本機制；本機制只在過場 overlay 不存在時才接手
+#     "cancel"（用目前場景是否還疊著過場 overlay 判斷，見 _is_intro_playing）。
+#   - LayoutTuner 的 F8 調整模式開啟時，ESC 不開暫停頁（LayoutTuner.tuning_active）。
+# ════════════════════════════════════════════════════════════════
+
+const PAUSE_BG := Color(0, 0, 0, 0.72)
+
+var _pause_layer: CanvasLayer
+var _pause_btn_idx: int = 0
+var _pause_buttons: Array[Button] = []
+var _pause_watcher: Node
+
+signal paused_opened()
+signal paused_closed()
+
+func is_paused_menu_open() -> bool:
+	return _pause_layer != null and is_instance_valid(_pause_layer)
+
+## intro 過場播放中：SceneRouter.go_to_minigame 播放期間，current_scene 底下會疊著
+## 一個「有 play 方法＋finished 訊號」的 CutsceneScreen overlay（見 play_minigame_cutscene）。
+## 存在期間 ESC 應該走過場自己的跳過邏輯，不搶著開暫停頁。
+func _is_intro_playing() -> bool:
+	var root := get_tree().current_scene
+	if root == null:
+		return false
+	return _find_cutscene_overlay(root) != null
+
+func _find_cutscene_overlay(node: Node) -> Node:
+	if node != self and node.has_method("play") and node.has_signal("finished"):
+		return node
+	for c in node.get_children():
+		var found := _find_cutscene_overlay(c)
+		if found != null:
+			return found
+	return null
+
+func _is_layout_tuner_active() -> bool:
+	var lt := get_node_or_null("/root/LayoutTuner")
+	return lt != null and bool(lt.get("tuning_active"))
+
+## 常駐輸入監聽節點：process_mode=ALWAYS，暫停中仍會收到 _unhandled_input
+## （MinigameBase 本體暫停中就凍結了，收不到），負責暫停選單開著時的全部輸入：
+## cancel 恢復、↑↓/WS 切換選項、Enter/Space/confirm 觸發選中項、滑鼠已由
+## Button 自己的 pressed 訊號處理（Button 也標了 PROCESS_MODE_ALWAYS）。
+class _PauseWatcher extends Node:
+	var owner_game: Node
+
+	func _unhandled_input(event: InputEvent) -> void:
+		if owner_game == null or not is_instance_valid(owner_game):
+			return
+		if not owner_game.is_paused_menu_open():
+			return
+		if event.is_action_pressed("cancel"):
+			owner_game._close_pause_menu()
+			get_viewport().set_input_as_handled()
+			return
+		if event is InputEventKey and event.pressed and not event.echo:
+			match event.keycode:
+				KEY_UP, KEY_W:
+					owner_game._pause_nav(-1)
+					get_viewport().set_input_as_handled()
+				KEY_DOWN, KEY_S:
+					owner_game._pause_nav(1)
+					get_viewport().set_input_as_handled()
+				KEY_ENTER, KEY_KP_ENTER, KEY_SPACE:
+					owner_game._pause_activate_selected()
+					get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("confirm"):
+			owner_game._pause_activate_selected()
+			get_viewport().set_input_as_handled()
+
+func _ensure_pause_watcher() -> void:
+	if _pause_watcher != null and is_instance_valid(_pause_watcher):
+		return
+	_pause_watcher = _PauseWatcher.new()
+	_pause_watcher.owner_game = self
+	_pause_watcher.process_mode = Node.PROCESS_MODE_ALWAYS
+	_pause_watcher.name = "_PauseWatcher"
+	add_child(_pause_watcher)
+
+## 未暫停狀態下的 cancel：判斷是否該開啟暫停頁。呼叫端（_unhandled_input）
+## 已在遊戲未暫停時才會走到這裡（暫停中的 cancel 由 _PauseWatcher 接手處理）。
+func _maybe_open_pause_menu() -> bool:
+	if is_result_panel_open():
+		return false
+	if _is_layout_tuner_active():
+		return false
+	if _is_intro_playing():
+		return false
+	_open_pause_menu()
+	return true
+
+func _open_pause_menu() -> void:
+	if is_paused_menu_open():
+		return
+	_ensure_pause_watcher()
+	_pause_btn_idx = 0
+	_pause_buttons.clear()
+
+	_pause_layer = CanvasLayer.new()
+	_pause_layer.layer = 110
+	_pause_layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(_pause_layer)
+
+	var dim := ColorRect.new()
+	dim.color = PAUSE_BG
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	dim.process_mode = Node.PROCESS_MODE_ALWAYS
+	_pause_layer.add_child(dim)
+
+	var panel := Panel.new()
+	var panel_w := 420.0
+	var panel_h := 320.0
+	panel.position = Vector2(960.0 - panel_w * 0.5, 540.0 - panel_h * 0.5)
+	panel.size = Vector2(panel_w, panel_h)
+	panel.process_mode = Node.PROCESS_MODE_ALWAYS
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = PANEL_BG
+	sb.border_color = PANEL_BORDER
+	sb.set_border_width_all(4)
+	sb.set_corner_radius_all(10)
+	panel.add_theme_stylebox_override("panel", sb)
+	_pause_layer.add_child(panel)
+
+	var title_l := Label.new()
+	title_l.text = "暫停"
+	title_l.position = Vector2(0, 28)
+	title_l.size = Vector2(panel_w, 44)
+	title_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_l.add_theme_font_size_override("font_size", 34)
+	title_l.add_theme_color_override("font_color", PANEL_GOLD)
+	title_l.process_mode = Node.PROCESS_MODE_ALWAYS
+	panel.add_child(title_l)
+
+	var labels := ["繼續", "再試一次", "離開"]
+	var btn_w := 280.0
+	var btn_h := 56.0
+	var btn_gap := 18.0
+	var btn_x := (panel_w - btn_w) * 0.5
+	var btn_y0 := 108.0
+	for i in labels.size():
+		var b := _make_result_button(labels[i], Vector2(btn_x, btn_y0 + i * (btn_h + btn_gap)), Vector2(btn_w, btn_h))
+		b.process_mode = Node.PROCESS_MODE_ALWAYS
+		match i:
+			0: b.pressed.connect(_on_pause_resume)
+			1: b.pressed.connect(_on_pause_restart)
+			2: b.pressed.connect(_on_pause_leave)
+		panel.add_child(b)
+		_pause_buttons.append(b)
+
+	get_tree().paused = true
+	_pause_refresh_selection()
+	paused_opened.emit()
+
+func _close_pause_menu() -> void:
+	if _pause_layer != null and is_instance_valid(_pause_layer):
+		_pause_layer.queue_free()
+	_pause_layer = null
+	_pause_buttons.clear()
+	get_tree().paused = false
+
+func _pause_refresh_selection() -> void:
+	for i in _pause_buttons.size():
+		var b := _pause_buttons[i]
+		var box := (b.get_theme_stylebox("hover") if i == _pause_btn_idx else b.get_theme_stylebox("normal")) as StyleBoxFlat
+		b.add_theme_stylebox_override("normal", box)
+
+func _on_pause_resume() -> void:
+	_close_pause_menu()
+	paused_closed.emit()
+
+func _on_pause_restart() -> void:
+	_close_pause_menu()
+	paused_closed.emit()
+	restart()
+
+## 離開：中途放棄，不套用獎勵（不是 result 面板的「離開」，那個才會 finish 套獎勵）。
+## 直接返回地圖／原場景，並清乾淨 SceneRouter 的 _minigame_context，避免污染下一局。
+func _on_pause_leave() -> void:
+	_close_pause_menu()
+	paused_closed.emit()
+	if get_node_or_null("/root/SceneRouter") != null:
+		var ctx: Dictionary = SceneRouter._minigame_context
+		var return_scene := String(ctx.get("return_scene", ""))
+		SceneRouter._minigame_context = {}
+		SceneRouter._active_minigame = ""
+		if return_scene != "" and ResourceLoader.exists(return_scene):
+			SceneRouter.go_to_scene(return_scene)
+		else:
+			SceneRouter.go_to_map()
+	else:
+		# 測試情境下沒有 SceneRouter autoload：發訊號讓測試接住，不套用獎勵。
+		minigame_finished.emit({})

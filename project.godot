@@ -30,6 +30,7 @@ AchievementSystem="*res://src/systems/AchievementSystem.gd"
 GodIntel="*res://src/systems/GodIntel.gd"
 Dialogic="*res://addons/dialogic/Core/DialogicGameHandler.gd"
 SettingsManager="*res://src/autoloads/SettingsManager.gd"
+LayoutTuner="*res://src/autoloads/LayoutTuner.gd"
 
 [dialogic]
 

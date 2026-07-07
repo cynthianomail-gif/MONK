@@ -216,6 +216,8 @@ func _ready() -> void:
 	_build_player()
 	_build_hud()
 	_register_interact_action()
+	paused_opened.connect(_on_paused_opened)
+	paused_closed.connect(_on_paused_closed)
 	if auto_start:
 		_start_game()
 
@@ -256,8 +258,13 @@ func _process(delta: float) -> void:
 	_check_proximity()
 	_update_hud()
 
+## 覆寫基底：SoupCarry 是唯一的 FPS 滑鼠捕捉小遊戲。呼叫 super 走 MinigameBase
+## 共用的暫停頁/結算面板輸入邏輯（cancel 開暫停頁等），游標捕捉/釋放則交給
+## _on_paused_opened/_on_paused_closed（見 _ready 內的訊號連接），不在這裡處理，
+## 避免暫停面板開著時滑鼠移動事件還被下面的邏輯拿去轉視角。
 func _unhandled_input(event: InputEvent) -> void:
-	if is_result_panel_open():
+	super._unhandled_input(event)
+	if is_result_panel_open() or is_paused_menu_open():
 		return
 	if event is InputEventMouseMotion and _running:
 		_mouse_dx += event.relative.x
@@ -265,8 +272,17 @@ func _unhandled_input(event: InputEvent) -> void:
 		_mouse_look_dy += event.relative.y
 	if event.is_action_pressed("interact") and _running:
 		_try_interact()
-	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+## 暫停開啟：釋放滑鼠捕捉，讓玩家能點暫停頁的按鈕（否則 MOUSE_MODE_CAPTURED
+## 下滑鼠游標是隱藏鎖定的，點不到 UI）。
+func _on_paused_opened() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+## 暫停關閉（繼續／再試一次）：遊戲仍在跑就重新捕捉滑鼠，恢復 FPS 視角操作。
+## 「離開」也會先發這個訊號，但緊接著換場，捕捉與否不影響下一個場景。
+func _on_paused_closed() -> void:
+	if _running and is_inside_tree():
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 ## FPS 視角：滑鼠 X 轉玩家 yaw(左右環顧，移動方向跟著轉)，Y 轉相機 pitch(上下看，clamp)。
 ## 與 _mouse_dx(托盤修正/晃動輸入)分開的獨立累積量，兩者互不干擾、互不改變對方的換算。
