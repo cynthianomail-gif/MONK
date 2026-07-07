@@ -345,9 +345,29 @@ func _build_env(root: Node3D) -> void:
 	root.add_child(_sun)
 
 # ── L 形地面（主 + 側 兩塊，含碰撞）───────────────────────
+## 2026-07-08 邊界破綻修正：主街地面北緣原本只到 z=-30，但神社本殿平台中心在
+## z≈-35.5（NORTH_Z-7.5），平台實際落在地面網格外——從轉彎口等角度側看會看見
+## 平台底部與虛空天空間的縫隙。北緣延伸到 z=-46 完整包住本殿平台＋背景杉林。
 func _build_ground(root: Node3D) -> void:
-	_ground_slab(root, Vector3(0, -0.1, -10.0), Vector3(16, 0.2, 40))          # 主街 x[-8,8] z[-30,10]
+	_ground_slab(root, Vector3(0, -0.1, -18.0), Vector3(16, 0.2, 56))          # 主街 x[-8,8] z[-46,10]
 	_ground_slab(root, Vector3(-18.5, -0.1, JUNC_Z), Vector3(25, 0.2, 12))     # 側街 x[-31,-6] z[-19,-7]
+	_build_ground_skirt(root)
+
+## 遠景「圍裙」地面：一片遠比可走範圍大、貼地略低於主地面的純視覺(無碰撞)平面，
+## 蓋住主街/支街地面網格邊緣以外的所有方向。純色配地面材質基調，配合霧把接縫
+## 藏進霧裡——不新增碰撞、不影響既有邊界牆/相機遮擋，最小改動堵住任意角度側看
+## /回頭看時「地板邊緣外的虛空」破綻（南口回頭看、東西側看皆會露這塊）。
+func _build_ground_skirt(root: Node3D) -> void:
+	var skirt := MeshInstance3D.new()
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(600, 600)   # 遠超霧視距(即使 fog_density 最低 0.001 也在數百米內糊掉)，接縫不會露餡
+	skirt.mesh = pm
+	skirt.position = Vector3(-10.0, -0.35, -10.0)
+	var m := StandardMaterial3D.new()
+	m.albedo_color = Color(0.50, 0.48, 0.42)   # 略暗於主石板色，遠景霧會再壓一層，避免跟主地面搶戲
+	m.roughness = 0.95
+	skirt.material_override = m
+	root.add_child(skirt)
 
 func _ground_slab(root: Node3D, pos: Vector3, size: Vector3) -> void:
 	var ground := MeshInstance3D.new()
@@ -795,6 +815,11 @@ func _build_lanterns(root: Node3D) -> void:
 		_lantern(root, x, JUNC_Z - SIDE_HALF_D - 0.6)
 		x -= 8.0
 
+## 2026-07-08 邊界破綻修正：原本只有北端+西端林，主街東牆外、南口(回頭看)、
+## 支街東端(轉彎口外)都沒有背景收尾——GPU 截圖驗到這些方向直接看穿邊界牆
+## 露出純色天空虛空（見 D:\monk\_boundary_audit\shrine_south_entrance_yaw180_*.png、
+## shrine_main_ne_corner_yaw45_*.png 等）。補東端林(主街東牆外)＋南端林(南口外，
+## 樹列退到 SOUTH_Z+6 避免擋住 spawn 鏡頭)，同款 _tree_row，純視覺無碰撞。
 func _build_backdrop(root: Node3D) -> void:
 	# 遠景：北端 + 西端 杉林＋山；山染霞藍(空氣遠近感)、杉林綠——遠景也要有顏色
 	var rng := RandomNumberGenerator.new()
@@ -804,6 +829,8 @@ func _build_backdrop(root: Node3D) -> void:
 		_roof(root, Vector3(mx, mh * 0.5 - 2.0, NORTH_Z - 24.0), Vector3(rng.randf_range(22.0, 34.0), mh, 6.0), Color(0.52, 0.60, 0.76), false)
 	_tree_row(root, rng, NORTH_Z - 16.0, NORTH_Z - 12.0, -18.0, 18.0, false)   # 北端林
 	_tree_row(root, rng, JUNC_Z - 4.0, JUNC_Z + 4.0, WEST_X - 8.0, WEST_X - 4.0, true)  # 西端林（沿 z 排）
+	_tree_row(root, rng, MAIN_HALF_W + 10.0, MAIN_HALF_W + 14.0, NORTH_Z - 2.0, SOUTH_Z + 2.0, true)  # 東端林(主街東牆外，x∈[a,b] 沿 z 排)
+	_tree_row(root, rng, SOUTH_Z + 6.0, SOUTH_Z + 10.0, -18.0, 18.0, false)   # 南端林(南口外，z∈[a,b] 沿 x 排[c,dd)，退遠避開 spawn 鏡頭)
 
 func _tree_row(root: Node3D, rng: RandomNumberGenerator, a: float, b: float, c: float, dd: float, along_z: bool) -> void:
 	var t := c

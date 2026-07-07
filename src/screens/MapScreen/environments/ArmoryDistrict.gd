@@ -94,6 +94,23 @@ func _corrugated_mat(color: Color) -> ShaderMaterial:
 	m.set_shader_parameter("bump", 0.3)
 	return m
 
+## 2026-07-08 邊界破綻修正：遠景「圍裙」地面——一片遠比地面網格大、貼地略低於
+## 主地面的純視覺(無碰撞)平面，蓋住地面邊緣以外的所有方向。街區沒有隱形邊界牆
+## （唯一約束是地面網格本身），回頭看南口/東西側看倉庫間隙都會露出網格邊緣外的
+## 純色天空虛空——加這片圍裙用低調暗色配合既有霧把接縫藏掉，不新增碰撞、
+## 不改任何既有牆/相機遮擋/TIME 相關參數。
+func _build_ground_skirt(root: Node3D) -> void:
+	var skirt := MeshInstance3D.new()
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(600, 600)   # 遠超霧視距，接縫不會露餡
+	skirt.mesh = pm
+	skirt.position = Vector3(0, -0.35, -12.0)
+	var m := StandardMaterial3D.new()
+	m.albedo_color = Color(0.16, 0.15, 0.16)   # 暗鋼灰，比主地面(0.30)略暗，霧會再壓一層
+	m.roughness = 0.95
+	skirt.material_override = m
+	root.add_child(skirt)
+
 func _steel_box(root: Node3D, pos: Vector3, size: Vector3, color: Color) -> void:
 	var mi := MeshInstance3D.new()
 	var bm := BoxMesh.new()
@@ -213,6 +230,7 @@ func _build_district(root: Node3D) -> void:
 	floor_body.add_child(cshape)
 	floor_body.position = Vector3(0, -0.1, -12)
 	root.add_child(floor_body)
+	_build_ground_skirt(root)
 
 	var steels := [Color(0.25, 0.24, 0.26), Color(0.22, 0.22, 0.24), Color(0.27, 0.26, 0.27)]
 	var wood := Color(0.36, 0.28, 0.18)
@@ -370,6 +388,11 @@ func _build_parlor_door(root: Node3D) -> void:
 	_omni(root, Vector3(dx - 0.5, 2.0, dz), Color(1.0, 0.62, 0.30), 1.6, 7.0)
 
 # ── 遠景：暗工業剪影＋煙囪＋煙(取代杉林) ──────────────────
+## 2026-07-08 邊界破綻修正：原本只在北端(z∈[-46,-40])擺剪影，回頭看南口(z>23附近)
+## 或直視東西側(x→±20)都會穿過地面網格看見純色天空虛空（GPU 截圖驗到，見
+## D:\monk\_boundary_audit\armory_entrance_yaw180_*.png 等）。補南端＋東西側剪影列，
+## 同款暗工業剪影 box，純視覺無碰撞（同北端既有寫法），把四個方向的地平線都用
+## 建築剪影墊住，霧再把細節糊掉。
 func _build_backdrop(root: Node3D) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 9
@@ -381,3 +404,17 @@ func _build_backdrop(root: Node3D) -> void:
 		if rng.randf() < 0.4:
 			_box(root, Vector3(x + 1.0, h + 2.0, -44.0), Vector3(0.8, 5.0, 0.8), Color(0.15, 0.15, 0.17))
 		x += rng.randf_range(3.0, 5.0)
+	# 南端剪影（回頭看入口方向的地平線）
+	var xs := -18.0
+	while xs < 18.0:
+		var hs := rng.randf_range(7.0, 15.0)
+		_box(root, Vector3(xs, hs * 0.5 - 1.0, rng.randf_range(26.0, 32.0)), Vector3(rng.randf_range(3.0, 6.0), hs, 3.0), Color(0.17, 0.17, 0.19))
+		xs += rng.randf_range(3.5, 5.5)
+	# 東西側剪影（直視街寬方向的地平線；街區可走寬度內建築約在 x∈[±7.5,±16]，
+	# 剪影擺在更外側 x=±26 當遠景輪廓）
+	var zs := -44.0
+	while zs < 26.0:
+		var hz := rng.randf_range(7.0, 16.0)
+		_box(root, Vector3(-26.0, hz * 0.5 - 1.0, zs), Vector3(3.0, hz, rng.randf_range(3.0, 5.0)), Color(0.17, 0.17, 0.19))
+		_box(root, Vector3(26.0, hz * 0.5 - 1.0, zs + rng.randf_range(-2.0, 2.0)), Vector3(3.0, hz, rng.randf_range(3.0, 5.0)), Color(0.16, 0.16, 0.18))
+		zs += rng.randf_range(6.0, 9.0)
