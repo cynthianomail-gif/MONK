@@ -74,6 +74,8 @@ var _hud_time: Label
 var _hud_combo: Label
 var _world: Node2D
 var _bowl_node: Node2D
+var _monk_sprite: Sprite2D           # 玩家捧缽立繪（水平翻轉轉向用，見 _move_bowl）
+var _facing_right: bool = false      # player_bowl.png 原圖側身朝左＝false；往右移動翻轉為 true
 var _rng := RandomNumberGenerator.new()
 
 func minigame_id() -> String:
@@ -204,6 +206,18 @@ func _move_bowl(delta: float) -> void:
 	_bowl_x = clampf(_bowl_x + dir * BOWL_SPEED * delta, PLAY_LEFT, PLAY_RIGHT)
 	if _bowl_node:
 		_bowl_node.position.x = _bowl_x
+	_update_facing(dir)
+
+## 依移動方向翻轉玩家立繪（水平翻轉，不生新圖）。player_bowl.png 原圖側身朝左，
+## 往左移動＝原圖朝向；往右移動＝翻轉。停住（dir==0，呼叫端已提早 return）保持最後朝向。
+## 只翻 _monk_sprite 這個視覺節點，_bowl_node 本身（位置/碰撞判定邏輯）不受影響。
+func _update_facing(dir: float) -> void:
+	var want_right: bool = dir > 0.0
+	if want_right == _facing_right:
+		return
+	_facing_right = want_right
+	if _monk_sprite and is_instance_valid(_monk_sprite):
+		_monk_sprite.flip_h = _facing_right
 
 func _update_drops(delta: float) -> void:
 	for i in range(_drops.size() - 1, -1, -1):
@@ -390,6 +404,9 @@ func restart() -> void:
 	_bowl_x = 960.0
 	if _bowl_node:
 		_bowl_node.position.x = _bowl_x
+	_facing_right = false
+	if _monk_sprite and is_instance_valid(_monk_sprite):
+		_monk_sprite.flip_h = false
 	_finished = false
 	_update_hud()
 	_running = true
@@ -419,6 +436,7 @@ func _build_bowl() -> void:
 		monk.scale = Vector2.ONE * 0.33203125
 		monk.position = Vector2(48.64, -18.87)
 		_bowl_node.add_child(monk)
+		_monk_sprite = monk
 		var hint := Polygon2D.new()
 		hint.polygon = _ellipse_points(BOWL_HALF_W, 22.0)
 		hint.color = Color(0.95, 0.85, 0.5, 0.16)
@@ -431,6 +449,7 @@ func _build_bowl() -> void:
 		monk.position = Vector2(0, -100)
 		monk.scale = Vector2(0.31, 0.31)
 		_bowl_node.add_child(monk)
+		_monk_sprite = monk
 		var hint := Polygon2D.new()
 		hint.polygon = _ellipse_points(BOWL_HALF_W, 22.0)
 		hint.color = Color(0.95, 0.85, 0.5, 0.16)

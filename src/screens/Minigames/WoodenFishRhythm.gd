@@ -9,7 +9,6 @@ const PERFECT_MS: float = 60.0
 const GOOD_MS: float = 120.0
 const PERFECT_SCORE: int = 100
 const GOOD_SCORE: int = 50
-const MINIGAME_ART_DIR: String = "res://assets/art_direction/new_ink_shrine_style/minigames/"
 const NEW_ART_DIR: String = "res://assets/2d/minigames/woodenfish/"
 
 ## --- 12 回合曲目表 ---
@@ -53,7 +52,7 @@ enum Phase { DEMO_A, DEMO_B, PLAYER, ROUND_GAP, DONE }
 @export var auto_start: bool = true
 
 const MONK_A_POS := Vector2(560, 620)
-const MONK_B_POS := Vector2(960, 660)
+const MONK_B_POS := Vector2(960, 620)
 const PLAYER_POS := Vector2(1400, 620)
 const FISH_A_POS := Vector2(560, 780)
 const FISH_B_POS := Vector2(960, 820)
@@ -466,25 +465,14 @@ func _fill_circle(img: Image, center: Vector2, r: float, color: Color) -> void:
 			if Vector2(x, y).distance_to(center) <= r:
 				img.set_pixel(x, y, color)
 
+## 純位置錨點（不畫任何木魚圖形）：Q 版生成的角色立繪本身已畫出木魚，
+## 不再疊加寫實道具圖或程式繪製的色塊木魚。錨點保留給敲擊時的縮放彈跳動畫
+## （_animate_demo_hit/_animate_player_hit 對這個 Node2D 做 scale tween）與
+## Perfect 判定的 sparkle 特效定位（spawn_fx_sparkle(_fish_player.position, ...)）用。
 func _make_fish(pos: Vector2) -> Node2D:
 	var fish := Node2D.new()
 	fish.position = pos
 	add_child(fish)
-	var tex := _try_load(MINIGAME_ART_DIR + "woodenfish_instrument.png")
-	if tex:
-		var sp := Sprite2D.new()
-		sp.texture = tex
-		sp.scale = Vector2(0.32, 0.32)
-		fish.add_child(sp)
-	else:
-		var body := Polygon2D.new()
-		var pts := PackedVector2Array()
-		for a in range(20):
-			var ang := TAU * a / 20.0
-			pts.append(Vector2(cos(ang) * 54.0, sin(ang) * 38.0))
-		body.polygon = pts
-		body.color = Color(0.45, 0.32, 0.2)
-		fish.add_child(body)
 	return fish
 
 ## 示範者敲擊：換「敲擊」幀＋木魚跳一下，收尾回「舉槌」預備姿（段落結束由 _enter_phase 收回 idle）。
