@@ -37,8 +37,13 @@ func _ready() -> void:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
 	ms._current_loc = "npc_liaochen"  # perform_action 內部只用 _current_area，位置無關，這裡維持一致性
 	ms._on_dialogic_signal("menu_action:save")
-	await get_tree().process_frame  # call_deferred 於下一輪 idle frame 執行
-	await get_tree().process_frame
+	# call_deferred＋_run_menu_action 可能等 Dialogic 收尾（timeline_ended＋一幀），
+	# 收尾幀數依 Dialogic 內部 ending timeline 而定非固定 → 輪詢等待，上限 120 幀。
+	var waited := 0
+	while not FileAccess.file_exists(save_path) and waited < 120:
+		await get_tree().process_frame
+		waited += 1
+	print("TestMapInteraction: menu_action:save 於 %d 幀後生效" % waited)
 	if not FileAccess.file_exists(save_path): return _fail("menu_action:save 應 deferred 觸發存檔")
 
 	# 4) 走近阿明（2026-07-04 起改 2 動作：支線＋常駐「再切磋一場木魚」，進 ah_ming_hub 對話分流）
