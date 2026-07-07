@@ -57,7 +57,6 @@ func _pay_mrt(area_id: String) -> bool:
 	if not GameManager.spend_gold(MRT_FARE):
 		_warn("金幣不足")
 		return false
-	GameManager.advance_time(1)
 	return true
 
 func _pay_taxi(loc_id: String) -> bool:

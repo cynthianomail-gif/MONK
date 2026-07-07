@@ -62,8 +62,14 @@ func _ready() -> void:
 	_build_prompt_ui()
 	_build_ambient(self)
 	_fix_player_deferred()
+	# 遊藝場內小遊戲完成（return_scene=本場景）才推進時段（2026-07-08 拍板）；
+	# 無 pending 立即 return，同 MapScreen 慣例。
+	call_deferred("_consume_period_advance")
 	if OS.is_debug_build():
 		print("UNDERGROUND_PARLOR ready")
+
+func _consume_period_advance() -> void:
+	await SceneRouter.consume_period_advance()
 
 # ── 互動（自理，不經 MapScreen）────────────────────────────
 func _input(event: InputEvent) -> void:

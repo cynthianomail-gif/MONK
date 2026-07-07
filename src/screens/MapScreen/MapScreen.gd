@@ -42,6 +42,12 @@ func _ready() -> void:
 	_drain_pending_achievements()
 	_load_area(_current_area)
 	_update_hud()
+	# 戰鬥/小遊戲結束回地圖才推進時段（2026-07-08 拍板）：無 pending 立即 return，
+	# 有 pending 才等場景安定播字卡；deferred 讓本場景其餘 _ready 邏輯先跑完。
+	call_deferred("_consume_period_advance")
+
+func _consume_period_advance() -> void:
+	await SceneRouter.consume_period_advance()
 
 ## 載入區環境 + 灑該區觸發點 + 定位玩家 + 切 BGM。
 func _load_area(area_id: String) -> void:
@@ -101,6 +107,8 @@ func _on_enemy_caught(enemy_id: String) -> void:
 		return
 	if get_node_or_null("MenuShell") != null or get_node_or_null("ShopScreen") != null:
 		return
+	if SceneRouter._period_card_active:
+		return  # 時段字卡播放中不進戰：換場會把字卡協程連場景一起拔掉
 	GameManager.set_flag("battle_clear_flag_on_win", "roamer_down_" + enemy_id)
 	SceneRouter.go_to_battle(enemy_id)
 
@@ -243,7 +251,6 @@ func _on_time_advanced(_p: int) -> void:
 
 func perform_action(action: String) -> void:
 	hud.hide_action_menu()
-	GameManager.advance_time(1)
 	match action:
 		"main_quest":
 			MainQuestManager.continue_story()

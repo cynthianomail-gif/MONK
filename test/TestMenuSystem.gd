@@ -279,12 +279,12 @@ func _test_travel_app() -> void:
 	var app = load("res://src/ui/menu/pages/TravelApp.gd").new()
 	get_tree().root.add_child(app)
 	await get_tree().process_frame
-	# 捷運扣款＋耗時（_pay_mrt 只處理付費/推時，不換場）
+	# 捷運扣款，不耗時（2026-07-08 拍板：移動不再推進時段，_pay_mrt 只處理付費，不換場）
 	GameManager.player.gold = 100
 	var p0: int = GameManager.player.period
 	var ok_mrt: bool = app._pay_mrt("shrine")
 	_check(ok_mrt and GameManager.player.gold == 95, "MRT charges 5 gold (got %d)" % GameManager.player.gold)
-	_check(GameManager.player.period == (p0 + 1) % 4, "MRT advances 1 period")
+	_check(GameManager.player.period == p0, "MRT no time cost")
 	# 計程車扣款＋設 pending_arrival、不耗時
 	GameManager.player.gold = 100
 	GameManager.pending_arrival = {}
@@ -313,9 +313,7 @@ func _test_job_app() -> void:
 	for j in app.JOBS:
 		ids.append(j.id)
 	_check("soup_carry" in ids and "beggar_challenge" in ids, "jobs = soup_carry + beggar_challenge")
-	# 開工耗 1 時段（_start_job_time 只推時，不換場）
-	var p0: int = GameManager.player.period
-	app._start_job_time()
-	_check(GameManager.player.period == (p0 + 1) % 4, "job advances 1 period")
+	# 打工不再直接推時段（2026-07-08 拍板：只有戰鬥/小遊戲完成才推進；打工進小遊戲，
+	# 完成時走 pending_period_advance，此處僅驗證按鈕存在即進入小遊戲，不驗時段）
 	app.queue_free()
 	await get_tree().process_frame

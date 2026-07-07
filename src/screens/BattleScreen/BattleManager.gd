@@ -572,6 +572,7 @@ func _victory() -> void:
 	_apply_battle_victory_hooks()
 	await tutorial.show_point("victory")
 	EventBus.battle_ended.emit("win")
+	GameManager.pending_period_advance = true  # 戰鬥結束才推進時段（2026-07-08 拍板）
 	await get_tree().create_timer(1.0).timeout
 	_return_from_battle()
 
@@ -585,6 +586,7 @@ func _defeat() -> void:
 	_clear_battle_return_flags()  # 戰敗回古廟而非原場景，清掉暫存避免外洩到下一場
 	# 教學戰若中途戰敗：清掉旗標避免殘留影響下一場真實戰鬥（重推本 stage 時對話會重新設回）。
 	GameManager.set_flag("tutorial_battle", false)
+	GameManager.pending_period_advance = true  # 戰鬥結束（含戰敗）才推進時段（2026-07-08 拍板）
 	await get_tree().create_timer(1.0).timeout
 	SceneRouter.go_to_map()
 

@@ -32,6 +32,11 @@ var player: Dictionary = {
 ## 計程車落點暫存：{area, x}。MapScreen 載入時讀一次後清空。不寫進 player、不存檔。
 var pending_arrival: Dictionary = {}
 
+## 時段推進暫存：戰鬥（勝/敗）或小遊戲「完成」（非中途放棄）結束時設 true，
+## 由 SceneRouter.consume_period_advance() 在回到地圖/遊藝場後消費（播字卡＋真正 advance_time）。
+## 純執行期旗標，不進 player dict、不存檔。
+var pending_period_advance: bool = false
+
 ## 無戒對話立繪依職業切換：對話 .dtl 一律寫 `Wujie (calm)` 等(不帶職)，
 ## 由本機制在每段對話開始時把 Wujie 的 4 表情 image 覆寫成「當前職業」的 bust
 ## (苦行 ascetic / 誦經 chanter / 化緣 beggar)→ 零 .dtl 改、零 addon 改。

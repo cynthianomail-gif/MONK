@@ -34,11 +34,6 @@ func _ready() -> void:
 		box.add_child(desc)
 		add_child(box)
 
-## 開工：耗 1 時段（抽出供測試，不換場）。
-func _start_job_time() -> void:
-	GameManager.advance_time(1)
-
 func _take_job(minigame_id: String) -> void:
 	get_tree().paused = false
-	_start_job_time()
 	SceneRouter.go_to_minigame(minigame_id)

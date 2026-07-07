@@ -13,6 +13,7 @@ const CUTSCENE_SCENE: String = "res://src/screens/CutsceneScreen/CutsceneScreen.
 const STORY_CUTSCENE_SCENE: String = "res://src/screens/CutsceneScreen/StoryCutscene.tscn"
 const LOADING_SCENE:  String = "res://src/ui/LoadingScreen.tscn"
 const TRANSITION_FX:  String = "res://src/ui/TransitionEffect.tscn"
+const PERIOD_CARD_BLOCKER_SCRIPT := preload("res://src/ui/PeriodAdvanceBlocker.gd")
 
 var _loading_screen: CanvasLayer = null
 var _minigame_context: Dictionary = {}
@@ -200,6 +201,110 @@ func dismiss_minigame_cutscene(overlay: CanvasLayer) -> void:
 	await _fade_cover(cover, 1.0, 0.3)
 	overlay.queue_free()
 
+## 時段字卡播放中＝true：MapScreen 用它擋漫遊敵遭遇（字卡 2.5s 內被抓進戰會
+## 把字卡協程連場景一起拔掉）；也用於字卡排隊防疊播。
+var _period_card_active: bool = false
+
+## 時段推進消費：戰鬥／小遊戲「完成」回到地圖或遊藝場後由該場景 _ready 呼叫
+## （2026-07-08 拍板：只有戰鬥/小遊戲結束才推進時段，且要有轉場字卡，不能無感切換；
+## 對話/移動/打工/存檔/休息不再推進）。無 pending 直接 return。有 pending：
+## 先等場景安定（無對話中、主線 cinematic 鏈未進行中），全程 timeout ~30s——
+## 時段推進絕不能丟失也絕不能卡死，超時就靜默 advance_time(1) 不播字卡。
+## 先清旗標再播，防重入（本函式本身可能因等待而被同場景重複呼叫）。
+func consume_period_advance() -> void:
+	if not GameManager.pending_period_advance:
+		return
+	GameManager.pending_period_advance = false
+	var elapsed := 0.0
+	const TIMEOUT := 30.0
+	while elapsed < TIMEOUT:
+		var story_busy: bool = false
+		var mqm := get_node_or_null("/root/MainQuestManager")
+		if mqm != null and "_running" in mqm:
+			story_busy = bool(mqm._running)
+		if Dialogic.current_timeline == null and not story_busy:
+			break
+		await get_tree().process_frame
+		elapsed += get_process_delta_time()
+	if elapsed >= TIMEOUT:
+		push_warning("SceneRouter: consume_period_advance 等待逾時(%.1fs)，靜默推進不播字卡" % TIMEOUT)
+		GameManager.advance_time(1)
+		return
+	# 字卡排隊：連續兩場戰鬥各自的消費協程同時醒來時，後到的等前一張播完
+	# 再播（各自推進各自的時段，不疊卡）。等待有上限，逾時直接播避免卡死。
+	var queue_wait := 0.0
+	while _period_card_active and queue_wait < 10.0:
+		await get_tree().process_frame
+		queue_wait += get_process_delta_time()
+	_period_card_active = true
+	await _play_period_advance_card()
+	_period_card_active = false
+
+## 全螢幕黑幕字卡（沿用 play_battle_cutscene 的 CanvasLayer+ColorRect 淡入淡出樣板，
+## layer 130＝壓過小遊戲過場的 128，避免疊場時序衝突）：淡入黑→黑幕下呼叫
+## advance_time（光照趁黑切換）→顯示「第X日　時段名」→停留→淡出。
+## 播放期間用一個吃光全部 unhandled_input 的 Control 擋玩家輸入，避免字卡播放中
+## 誤觸地圖互動。
+func _play_period_advance_card() -> void:
+	var root := get_tree().current_scene
+	if root == null:
+		GameManager.advance_time(1)
+		return
+	var overlay := CanvasLayer.new()
+	overlay.layer = 130
+	root.add_child(overlay)
+	var blocker := Control.new()
+	blocker.set_script(PERIOD_CARD_BLOCKER_SCRIPT)
+	blocker.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	blocker.mouse_filter = Control.MOUSE_FILTER_STOP
+	blocker.focus_mode = Control.FOCUS_ALL
+	overlay.add_child(blocker)
+	blocker.grab_focus()
+	var cover := ColorRect.new()
+	cover.color = Color(0, 0, 0, 0)
+	cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cover.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(cover)
+	var label := Label.new()
+	label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 34)
+	label.add_theme_color_override("font_color", Color(0.95, 0.90, 0.78))
+	label.modulate.a = 0.0
+	label.visible = false
+	overlay.add_child(label)
+	const FADE := 0.4
+	const HOLD := 1.2
+	const FADE_OUT := 0.5
+	# 本函式所有 await 一律用 create_timer 步調，不 await tween.finished——
+	# 場景若在播放中被換掉，overlay 隨舊場景釋放，tween 的 finished 永不發＝
+	# 協程卡死、_period_card_active 永遠 true（漫遊遭遇會被永久擋掉）。
+	# 計時器保證恢復；每個恢復點檢查節點存活，死了就安靜收場（時段照樣推進）。
+	var tw0 := create_tween()
+	tw0.tween_property(cover, "color:a", 1.0, FADE)
+	await get_tree().create_timer(FADE).timeout
+	GameManager.advance_time(1)
+	if not is_instance_valid(overlay) or not is_instance_valid(label):
+		return
+	label.text = "第%d日　%s" % [GameManager.player.day, GameManager.TIME_PERIODS[GameManager.player.period]]
+	label.visible = true
+	var tw := create_tween()
+	tw.tween_property(label, "modulate:a", 1.0, 0.25)
+	await get_tree().create_timer(0.25 + HOLD).timeout
+	if not is_instance_valid(overlay) or not is_instance_valid(label):
+		return
+	var tw2 := create_tween()
+	tw2.tween_property(label, "modulate:a", 0.0, 0.25)
+	await get_tree().create_timer(0.25).timeout
+	if not is_instance_valid(overlay) or not is_instance_valid(cover):
+		return
+	var tw3 := create_tween()
+	tw3.tween_property(cover, "color:a", 0.0, FADE_OUT)
+	await get_tree().create_timer(FADE_OUT).timeout
+	if is_instance_valid(overlay):
+		overlay.queue_free()
+
 ## 啟動小遊戲。context 可帶情境（如支線 win/lose 獎勵 dict），
 ## 結束時由 finish_minigame 依 result.win 套用。
 ## 載入場景後、遊戲開始前播 minigame_<id>_intro（缺檔優雅跳過，不擋流程）；
@@ -269,6 +374,8 @@ func finish_minigame(result: Dictionary) -> void:
 	# ③ 回報並返回。context 可帶 return_scene 指定回原 3D 場景
 	#（如地下遊藝場房間），沒帶或場景不存在則照舊回城市地圖。
 	minigame_finished.emit(id, result)
+	# 小遊戲「完成」（非中途放棄，見 MinigameBase._on_pause_leave）才推進時段（2026-07-08 拍板）。
+	GameManager.pending_period_advance = true
 	var return_scene := String(ctx.get("return_scene", ""))
 	if return_scene != "" and ResourceLoader.exists(return_scene):
 		go_to_scene(return_scene)
