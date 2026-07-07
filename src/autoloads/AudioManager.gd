@@ -9,6 +9,7 @@ const _SILENCE_LINEAR_THRESHOLD := 0.0005  # below ~-66 dB, treat as full mute (
 var _bgm_lib: Dictionary = {}
 var _sfx_lib: Dictionary = {}
 var _current_bgm: String = ""
+var _switch_seq: int = 0  # 切歌世代：await 淡出期間若有更新請求，舊請求醒來後放棄
 
 func _ready() -> void:
 	_bgm_lib = JsonLoader.load_json("res://data/audio_bgm.json")
@@ -26,10 +27,15 @@ func switch_bgm(id: String, fade_time: float = 0.5, target_db: float = 0.0, fade
 	var path: String = _bgm_lib.get(id, "")
 	if path.is_empty() or not ResourceLoader.exists(path):
 		return
+	_switch_seq += 1
+	var seq := _switch_seq
+	_current_bgm = id  # 提前記錄：淡出期間同曲重複請求走頂部去重，不再併發
 	if bgm_player.stream and bgm_player.playing:
 		var tw := create_tween()
 		tw.tween_property(bgm_player, "volume_db", -60.0, fade_time)
 		await tw.finished
+		if seq != _switch_seq:
+			return  # 淡出期間來了更新的切歌請求，由它接手播放
 	var stream := load(path)
 	# Force BGM to loop regardless of per-file import settings (.ogg/.mp3
 	# default loop varies; this guarantees seamless looping in-game).
