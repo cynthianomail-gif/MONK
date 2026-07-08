@@ -7,6 +7,7 @@ enum State { PLAYER_TURN, ENEMY_TURN, SKILL_ANIM, ALL_OUT, HOLD_UP, END }
 const ALL_OUT_DMG: int = 9999
 const MAX_ENEMIES: int = 4
 const GUARD_WINDOW_SECS: float = 0.5   # 完美格擋判定窗（第二期）
+const SPEEDUP_SCALE: float = 2.5       # 按住 Shift 加速倍率（QoL：刷道行演出太磨）
 
 # 減傷檔位（第二期第 2 點）：防禦 50%／完美格擋 70%／兩者疊加 90%
 const REDUCE_DEFEND: float = 0.5
@@ -43,9 +44,30 @@ var _boss_data: Dictionary = {}   # 目前 Boss 的 boss.json 原始資料（讀
 var _summons: Dictionary = {}      # summons.json 內容
 var _summons_used: Dictionary = {} # summon_id → true（本場戰鬥已用過，每場每尊限 1 次）
 
+# ─── 按住加速（QoL）────────────────────────────────────
+var _speedup_active: bool = false
+var _test_speedup_pressed: bool = false   # 測試注入：headless 無鍵盤，模擬按住 Shift
+
 func _ready() -> void:
 	add_to_group("battle_manager")
 	AudioManager.switch_bgm("battle_theme")
+
+func _process(_delta: float) -> void:
+	if state == State.END:
+		return
+	var pressed: bool = Input.is_key_pressed(KEY_SHIFT) or _test_speedup_pressed
+	if pressed != _speedup_active:
+		_set_battle_speedup(pressed)
+
+## 測試注入：模擬按住/放開 Shift（headless 無鍵盤）。
+func inject_speedup(pressed: bool) -> void:
+	_test_speedup_pressed = pressed
+
+func _set_battle_speedup(on: bool) -> void:
+	_speedup_active = on
+	Engine.time_scale = SPEEDUP_SCALE if on else 1.0
+	if ui.has_method("set_speedup_indicator"):
+		ui.set_speedup_indicator(on)
 
 func setup(enemy_id: String) -> void:
 	_enemies_data = JsonLoader.load_json("res://data/enemies.json")
@@ -178,10 +200,23 @@ func _begin_player_turn() -> void:
 		ui.show_skill_menu(available_skills())
 
 ## 護法指令灰置條件（第四期）：至少 1 尊「未用過且金幣夠」才可選；否則灰置。
+## 逃跑指令灰置條件（QoL）：任一敵人 is_boss，或 GameManager flag battle_no_escape 為 true
+## （主線/劇情戰由 MainQuestManager 在 go_to_battle 前後設/清）。
 func _disabled_commands() -> Array:
-	if _any_summon_available():
-		return []
-	return ["summon"]
+	var d: Array = []
+	if not _any_summon_available():
+		d.append("summon")
+	if not _can_flee():
+		d.append("flee")
+	return d
+
+func _can_flee() -> bool:
+	if GameManager.get_flag("battle_no_escape", false):
+		return false
+	for e in enemy_combatants:
+		if e.is_boss:
+			return false
+	return true
 
 ## 是否還有至少一尊護法本場未用過、且金幣足夠請動。
 func _any_summon_available() -> bool:
@@ -223,6 +258,8 @@ func on_command(cmd: String) -> void:
 			player_use_defend()
 		"summon":
 			ui.show_summon_menu()
+		"flee":
+			player_use_flee()
 
 ## 依職業取 basic 技（攻擊指令＝免費基本攻擊）。
 func _basic_skill_id() -> String:
@@ -247,6 +284,21 @@ func player_use_defend() -> void:
 	_hits = 0
 	EventBus.combo_count_changed.emit(0)
 	_pop_and_advance()
+
+## 逃跑指令（QoL）：雜魚戰佛系放生，成功率 100%（灰置條件見 _can_flee）。
+## 不算戰鬥結束（不推時段、無獎勵）；漫遊敵抓到的場合要把 roamer_down 補立，
+## 否則回街上原地秒被同隻再抓（歷史踩過的坑，同勝利路徑的 _apply_battle_victory_hooks 邏輯）。
+func player_use_flee() -> void:
+	if state != State.PLAYER_TURN:
+		return
+	if not _can_flee():
+		return
+	_set_state(State.END)
+	battle_log.emit("三十六計，走為上計")
+	await get_tree().create_timer(0.8).timeout
+	_apply_battle_victory_hooks()  # 消費 battle_clear_flag_on_win → 立 roamer_down，避免原地被同敵再抓（同勝利路徑）
+	EventBus.battle_ended.emit("flee")
+	_return_from_battle()  # battle_return_scene 沿用勝利路徑的回場邏輯（同一份旗標）
 
 ## 護法召喚（第四期）：花金幣＝香油錢請神，不動業/淨資源。每尊每場限 1 次。
 ## 消耗一回合 → 佇列下一位（不觸發 One More，同道具指令）。
@@ -692,7 +744,15 @@ func _boss_fig(filename_path: String) -> String:
 
 func _set_state(s: State) -> void:
 	state = s
+	if s == State.END:
+		_set_battle_speedup(false)  # 戰鬥結束（勝/敗/逃跑）當下立刻還原 time_scale，收尾動畫不受殘留加速影響
 	state_changed.emit(s)
+
+## 保險絲：本節點被移出場景樹（換場/queue_free）時，若還在加速中要還原，
+## 否則地圖/字卡（用 SceneTreeTimer，受 time_scale 影響）會被殘留加速拖著跑。
+func _exit_tree() -> void:
+	if Engine.time_scale != 1.0:
+		Engine.time_scale = 1.0
 
 # ─── 道具（戰鬥中使用）─────────────────────────────────
 ## 玩家回合使用消耗道具：自我施放、消耗一回合、不選敵、不觸發 One More。

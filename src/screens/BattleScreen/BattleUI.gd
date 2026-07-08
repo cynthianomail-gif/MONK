@@ -78,8 +78,27 @@ func _ready() -> void:
 	%HoldUpItem.pressed.connect(func(): _choose_hold_up("item"))
 	focus_dim.visible = false
 	_setup_command_menu()
+	_setup_speedup_indicator()
 	_update_daoxing()
 	_register_layout_tunables()
+
+## 按住加速指示（QoL）：右上角小標籤，加速時顯示「▶▶」，平時隱藏。純 Label，無新素材。
+var _speedup_label: Label
+func _setup_speedup_indicator() -> void:
+	_speedup_label = Label.new()
+	_speedup_label.text = "▶▶"
+	_speedup_label.add_theme_font_size_override("font_size", 28)
+	_speedup_label.add_theme_color_override("font_color", Color(0.788, 0.659, 0.38))
+	_speedup_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_speedup_label.position = Vector2(-72, 12)
+	_speedup_label.visible = false
+	_speedup_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_speedup_label)
+
+## BattleManager 呼叫：切換右上角加速指示顯示。
+func set_speedup_indicator(on: bool) -> void:
+	if _speedup_label != null:
+		_speedup_label.visible = on
 
 ## 佈局工具 v2（P1）：7 個自由定位大塊登記進 LayoutStore（父節點皆為 BattleUI 這個
 ## CanvasLayer，非 Container，is_free() 皆為 true，可被 tuner 自由拖曳＋永久存檔）。

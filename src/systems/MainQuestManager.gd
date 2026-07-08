@@ -222,9 +222,14 @@ func _play_dialogue(timeline: String) -> void:
 	Dialogic.start(timeline)
 	await Dialogic.timeline_ended
 
+## 主線/劇情戰不可逃跑（QoL 逃跑指令的灰置條件之一，見 BattleManager._can_flee）：
+## 進戰前設 battle_no_escape=true，戰鬥結束（win/lose 皆算）立刻清掉，避免殘留擋到
+## 之後的雜魚戰或漫遊敵遭遇戰。教學戰走同一路徑，天然覆蓋不必額外處理。
 func _play_battle(enemy_id: String) -> bool:
+	GameManager.set_flag("battle_no_escape", true)
 	SceneRouter.go_to_battle(enemy_id)
 	var result: Variant = await EventBus.battle_ended
+	GameManager.set_flag("battle_no_escape", false)
 	# 等 BattleManager 自行返回地圖後再續，避免與其 go_to_map 競爭場景切換。
 	await get_tree().create_timer(1.3).timeout
 	return String(result) == "win"

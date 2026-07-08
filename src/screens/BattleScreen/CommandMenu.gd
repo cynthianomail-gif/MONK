@@ -6,7 +6,7 @@ extends Control
 ## 鍵盤上下＋interact(E) 確認，滑鼠可點。出現時從左滑入 0.15s。
 ## 純 Control+Tween，不新增圖片素材。護法為第四期接點（顯示但灰置）。
 
-signal command_chosen(cmd: String)   # "attack" | "skill" | "defend" | "item" | "summon"
+signal command_chosen(cmd: String)   # "attack" | "skill" | "defend" | "item" | "summon" | "flee"
 
 const INK_RED := Color("#C93A2E")
 const GOLD := Color(0.788, 0.659, 0.38)
@@ -18,6 +18,7 @@ const COMMANDS := [
 	{"id": "defend", "label": "防禦"},
 	{"id": "item",   "label": "道具"},
 	{"id": "summon", "label": "護法"},  # 第四期接點
+	{"id": "flee",   "label": "逃跑"},  # QoL：雜魚戰可逃，Boss/劇情戰灰置
 ]
 
 var _rows: Array = []          # Array[PanelContainer]
