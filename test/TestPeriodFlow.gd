@@ -2,7 +2,8 @@ extends Node
 ## 驗證時段推進新規則（2026-07-08 拍板）：只有戰鬥/小遊戲「完成」回到地圖/遊藝場才推進，
 ## 且經 SceneRouter.consume_period_advance() 播字卡；對話/移動/打工/存檔/休息不推進。
 ##
-## a) perform_action("rest")/("save") 後 period 不變
+## a) perform_action("save") 後 period 不變；("rest")＝打坐，恰推進 1 時段（經字卡）＋回血
+##    （2026-07-08 二批拍板：時段只在戰鬥/小遊戲後推進之後，打坐是玩家唯一主動跳時段手段）
 ## b) 模擬小遊戲完成：設 pending → SceneRouter.finish_minigame → go_to_map 換場 →
 ##    等消費完成 → period 恰 +1、旗標已清
 ## c) finish_minigame 本身即設 pending（併入 b 驗證，見上）
@@ -16,20 +17,30 @@ func _ready() -> void:
 	await get_tree().process_frame
 	get_tree().current_scene = null  # 脫離 current_scene，之後任何換場都不會釋放本測試節點
 
-	# a) rest / save 不推進
+	# a) save 不推進；rest（打坐）回血＋經字卡恰推進 1 時段
 	var ms := (load("res://src/screens/MapScreen/MapScreen.tscn") as PackedScene).instantiate()
 	add_child(ms)
 	await get_tree().process_frame
 	await get_tree().process_frame
 	var p0: int = GameManager.player.period
-	ms.perform_action("rest")
-	if GameManager.player.period != p0:
-		return _fail("rest 不應推進時段，實 %d→%d" % [p0, GameManager.player.period])
 	ms.perform_action("save")
 	if GameManager.player.period != p0:
 		return _fail("save 不應推進時段，實 %d→%d" % [p0, GameManager.player.period])
 	if GameManager.pending_period_advance:
-		return _fail("rest/save 不應設 pending_period_advance")
+		return _fail("save 不應設 pending_period_advance")
+	GameManager.player.current_hp = 100
+	ms.perform_action("rest")
+	var expect_rest: int = (p0 + 1) % GameManager.TIME_PERIODS.size()
+	var waited_rest := 0
+	while GameManager.player.period != expect_rest and waited_rest < 3600:
+		await get_tree().process_frame
+		waited_rest += 1
+	if GameManager.player.period != expect_rest:
+		return _fail("打坐應恰推進 1 時段（經字卡），實 %d→%d（等了 %d 幀）" % [p0, GameManager.player.period, waited_rest])
+	if GameManager.player.current_hp != 250:
+		return _fail("打坐應回血 150，實 %d" % GameManager.player.current_hp)
+	if GameManager.pending_period_advance:
+		return _fail("打坐消費後旗標應已清")
 	ms.queue_free()
 	await get_tree().process_frame
 
@@ -103,7 +114,7 @@ func _ready() -> void:
 	if leave_fn_body.contains("pending_period_advance"):
 		return _fail("_on_pause_leave（中途放棄）不應設 pending_period_advance")
 
-	print("TEST PASS: 時段推進新規則(rest/save/移動/打工不推進＋小遊戲完成回地圖/遊藝場恰+1且清pending＋中途放棄不推進) OK")
+	print("TEST PASS: 時段推進新規則(save/移動/打工不推進＋打坐主動+1＋小遊戲完成回地圖/遊藝場恰+1且清pending＋中途放棄不推進) OK")
 	get_tree().quit(0)
 
 func _wait_for_scene(scene_name: String, max_frames: int = 600) -> Node:

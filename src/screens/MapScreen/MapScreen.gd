@@ -297,8 +297,12 @@ func perform_action(action: String) -> void:
 		"job_switch":
 			hud.open_job_menu()
 		"rest":
+			# 打坐＝回血＋主動推進時段（2026-07-08 二批）：時段改成只在戰鬥/小遊戲後推進
+			# 之後，玩家需要一個主動改變時段的手段（等深夜的醉金閣、避開時段限定敵人等），
+			# 打坐就是那個手段。沿用戰後同一套字卡轉場，不另造流程。
 			GameManager.heal(150)
-			hud.show_toast("休息片刻，恢復了體力")
+			GameManager.pending_period_advance = true
+			SceneRouter.consume_period_advance()
 		"shop":
 			if not GameManager.get_flag("zheng_ma_shop_unlocked"):
 				hud.show_toast("水野的店還沒開")
