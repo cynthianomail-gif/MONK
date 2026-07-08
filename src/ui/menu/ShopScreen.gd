@@ -1,8 +1,12 @@
 extends CanvasLayer
-## 水野佛具店：消耗道具商店 overlay（只買不賣，DEMO）。
+## 水野佛具店：消耗道具＋佛具裝備商店 overlay（DEMO）。
 ## 仿 MenuShell：layer=100、process_mode ALWAYS、暫停地圖、cancel 關閉、暗金×黑框。
 ## 由 MapScreen 的 shop 動作開啟（已 gate zheng_ma_shop_unlocked）。時段推進由
 ## MapScreen.perform_action 開頭統一處理，本檔不碰時間。
+##
+## 2026-07-08 佛具裝備位（第五期）：加「消耗品／佛具」分頁。佛具分頁只列已達進貨門檻
+## 的品項（EquipmentSystem.is_unlocked）；已持有顯示「已購入」灰置（每件限購一次）；
+## 佛具購買不進 inventory（EquipmentSystem.purchase），不會混入戰鬥道具選單。
 
 const GOLD := Color(0.788, 0.659, 0.38)
 const NEAR_BLACK := Color(0.043, 0.043, 0.043, 0.97)
@@ -12,13 +16,19 @@ const DIM := Color(0.55, 0.52, 0.46)
 const PRICE_COL := Color(0.85, 0.78, 0.5)
 const ITEMS_PATH := "res://data/items.json"
 
+const TABS := ["消耗品", "佛具"]
+
 @export var pause_game: bool = true   # 測試時設 false
 
 var _items: Dictionary = {}
+var _equipment: Dictionary = {}
 var _rows: Dictionary = {}        # item_id -> Button
 var _detail_box: VBoxContainer
 var _gold_label: Label
 var _selected: String = ""
+var _current_tab: int = 0
+var _list: VBoxContainer
+var _tab_row: HBoxContainer
 
 func _ready() -> void:
 	layer = 100
@@ -26,6 +36,7 @@ func _ready() -> void:
 	if pause_game:
 		get_tree().paused = true
 	_items = JsonLoader.load_json(ITEMS_PATH)
+	_equipment = EquipmentSystem.get_items()
 	_build()
 
 func close() -> void:
@@ -72,6 +83,12 @@ func _build() -> void:
 
 	root.add_child(_hsep())
 
+	# 分頁列：消耗品／佛具
+	_tab_row = HBoxContainer.new()
+	_tab_row.add_theme_constant_override("separation", 8)
+	root.add_child(_tab_row)
+	_refresh_tabs()
+
 	var hb := HBoxContainer.new()
 	hb.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	hb.add_theme_constant_override("separation", 24)
@@ -82,12 +99,10 @@ func _build() -> void:
 	scroll.custom_minimum_size = Vector2(560, 0)
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	hb.add_child(scroll)
-	var list := VBoxContainer.new()
-	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	list.add_theme_constant_override("separation", 6)
-	scroll.add_child(list)
-	for id in _items:
-		list.add_child(_item_row(id))
+	_list = VBoxContainer.new()
+	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_list.add_theme_constant_override("separation", 6)
+	scroll.add_child(_list)
 
 	# 右：詳情
 	var detail_panel := PanelContainer.new()
@@ -107,23 +122,61 @@ func _build() -> void:
 	root.add_child(hint)
 
 	_refresh_gold()
+	_show_tab(0)
+
+func _refresh_tabs() -> void:
+	for c in _tab_row.get_children():
+		c.queue_free()
+	for i in TABS.size():
+		var btn := Button.new()
+		btn.text = TABS[i]
+		btn.add_theme_font_size_override("font_size", 24)
+		btn.add_theme_color_override("font_color", GOLD if i == _current_tab else DIM)
+		var idx: int = i
+		btn.pressed.connect(func() -> void: _show_tab(idx))
+		_tab_row.add_child(btn)
+
+func _show_tab(idx: int) -> void:
+	_current_tab = idx
+	_selected = ""
+	_refresh_tabs()
+	_rebuild_list()
 	_show_detail("")
 
-func _item_row(id: String) -> Button:
+func _rebuild_list() -> void:
+	for c in _list.get_children():
+		c.queue_free()
+	_rows.clear()
+	if _current_tab == 0:
+		for id in _items:
+			_list.add_child(_item_row(id, false))
+	else:
+		for id in _equipment:
+			if not EquipmentSystem.is_unlocked(id):
+				continue  # 未達進貨門檻的不顯示（不劇透）
+			_list.add_child(_item_row(id, true))
+
+func _item_row(id: String, is_equip: bool) -> Button:
 	var btn := Button.new()
 	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	btn.add_theme_font_size_override("font_size", 22)
 	var iid: String = id
 	btn.pressed.connect(func() -> void: _select(iid))
 	_rows[id] = btn
-	_style_row(id)
+	_style_row(id, is_equip)
 	return btn
 
-func _style_row(id: String) -> void:
+func _style_row(id: String, is_equip: bool) -> void:
 	var btn: Button = _rows[id]
-	var d: Dictionary = _items[id]
-	btn.text = "%s　%d 金　(持有 ×%d)" % [d.get("name", id), int(d.get("price", 0)), GameManager.item_count(id)]
-	btn.add_theme_color_override("font_color", WARM)
+	if is_equip:
+		var d: Dictionary = _equipment[id]
+		var owned: bool = EquipmentSystem.is_owned(id)
+		btn.text = "%s　%d 金　%s" % [d.get("name", id), int(d.get("price", 0)), "（已購入）" if owned else ""]
+		btn.add_theme_color_override("font_color", DIM if owned else WARM)
+	else:
+		var d: Dictionary = _items[id]
+		btn.text = "%s　%d 金　(持有 ×%d)" % [d.get("name", id), int(d.get("price", 0)), GameManager.item_count(id)]
+		btn.add_theme_color_override("font_color", WARM)
 
 func _select(id: String) -> void:
 	_selected = id
@@ -138,6 +191,9 @@ func _show_detail(id: String) -> void:
 		hint.add_theme_color_override("font_color", DIM)
 		hint.add_theme_font_size_override("font_size", 22)
 		_detail_box.add_child(hint)
+		return
+	if _current_tab == 1:
+		_show_equipment_detail(id)
 		return
 	var d: Dictionary = _items[id]
 	_add_label(d.get("name", id), 34, GOLD)
@@ -154,13 +210,40 @@ func _show_detail(id: String) -> void:
 	buy.pressed.connect(func() -> void: _on_buy(iid))
 	_detail_box.add_child(buy)
 
+func _show_equipment_detail(id: String) -> void:
+	var d: Dictionary = _equipment[id]
+	_add_label(d.get("name", id), 34, GOLD)
+	var desc := _add_label(d.get("desc", ""), 22, WARM)
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc.custom_minimum_size = Vector2(640, 0)
+	_add_label("價格：%d 金" % int(d.get("price", 0)), 22, PRICE_COL)
+	var owned: bool = EquipmentSystem.is_owned(id)
+	if owned:
+		_add_label("已購入（每件限購一次，於經書「佛具」頁換裝）", 20, DIM)
+	else:
+		var buy := Button.new()
+		buy.text = "購買"
+		buy.add_theme_font_size_override("font_size", 24)
+		buy.disabled = GameManager.player.gold < int(d.get("price", 0))
+		var iid: String = id
+		buy.pressed.connect(func() -> void: _on_buy_equipment(iid))
+		_detail_box.add_child(buy)
+
 func _on_buy(id: String) -> void:
 	var price: int = int(_items[id].get("price", 0))
 	if not GameManager.spend_gold(price):
 		return
 	GameManager.add_item(id)
 	AudioManager.play_sfx("gold_collect")
-	_style_row(id)
+	_style_row(id, false)
+	_refresh_gold()
+	_show_detail(id)
+
+func _on_buy_equipment(id: String) -> void:
+	if not EquipmentSystem.purchase(id):
+		return
+	AudioManager.play_sfx("gold_collect")
+	_style_row(id, true)
 	_refresh_gold()
 	_show_detail(id)
 

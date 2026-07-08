@@ -617,9 +617,15 @@ func _victory() -> void:
 		kills += 1
 	if GameManager.get_flag("gold_multiplier_active"):
 		gold = int(gold * 1.5)
-	await ui.play_victory(gold, 15, daoxing)  # 結算三行：金幣/功德/道行
+	# 佛具「缽」被動（第五期）：戰勝金幣加成與 gold_multiplier_active 疊乘；功德每勝額外加成。
+	var eq_bonus: Dictionary = EquipmentSystem.compute_bonus()
+	var gold_pct: float = float(eq_bonus.get("gold_pct", 0.0))
+	if gold_pct > 0.0:
+		gold = int(gold * (1.0 + gold_pct))
+	var merit_gain: int = 15 + int(eq_bonus.get("merit_per_win", 0))
+	await ui.play_victory(gold, merit_gain, daoxing)  # 結算三行：金幣/功德/道行
 	GameManager.add_gold(gold)
-	GameManager.add_merit(15)
+	GameManager.add_merit(merit_gain)
 	GameManager.add_daoxing(daoxing)
 	GameManager.set_flag("kill_count", GameManager.get_flag("kill_count", 0) + kills)
 	GameManager.player.current_hp = player_combatant.current_hp

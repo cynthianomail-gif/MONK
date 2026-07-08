@@ -213,11 +213,24 @@ func _smoke_scenes() -> void:
 				await get_tree().process_frame
 			shell._show_device("book")
 			await get_tree().process_frame
+			# 經書應有 3 頁：技能/狀態/佛具（第五期佛具裝備位新增「佛具」頁）
+			_check("book" in shell._devices, "book device exists in _devices")
+			var book_pages: Array = shell._devices["book"]["pages"]
+			_check(book_pages.size() == 3, "book has 3 pages (got %d)" % book_pages.size())
+			var book_titles := []
+			for p in book_pages:
+				book_titles.append(p.title)
+			_check("技能" in book_titles and "狀態" in book_titles and "佛具" in book_titles,
+				"book tabs include 技能/狀態/佛具")
+			for i in book_pages.size():
+				shell._show_page(i)
+				await get_tree().process_frame
 		shell.queue_free()
 		await get_tree().process_frame
-	# 兩個經書頁直接 instantiate
+	# 三個經書頁直接 instantiate
 	for path in ["res://src/ui/menu/pages/SkillsPage.gd",
-			"res://src/ui/menu/pages/StatusPage.gd"]:
+			"res://src/ui/menu/pages/StatusPage.gd",
+			"res://src/ui/menu/pages/EquipPage.gd"]:
 		var gs = load(path)
 		if gs == null:
 			_check(false, "load %s" % path); continue

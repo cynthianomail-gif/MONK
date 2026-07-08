@@ -27,7 +27,10 @@ var player: Dictionary = {
 	"daoxing": 0,                 # 修行盤成長貨幣（第二期勝利發放，第三期消費）
 	"weakness_intel": {},         # enemy_id → [已探知的弱點屬性]（第一期，跨戰鬥保留）
 	"board_unlocked": ["core"],   # 修行盤已解鎖節點（第三期接點）
-	"enemies_seen": []            # 已遭遇過的敵人 base_id（圖鑑用，跨戰鬥保留）
+	"enemies_seen": [],           # 已遭遇過的敵人 base_id（圖鑑用，跨戰鬥保留）
+	# 佛具裝備位新鍵（第五期，舊存檔缺鍵→load_game 保留預設，不炸）
+	"equipment": {"beads": "", "kasaya": "", "bowl": ""},  # 三欄目前裝備的 item_id（空＝未裝）
+	"equipment_owned": []         # 已購入的佛具 id（每件限購一次，跨欄位）
 }
 
 ## 計程車落點暫存：{area, x}。MapScreen 載入時讀一次後清空。不寫進 player、不存檔。
@@ -268,7 +271,9 @@ func new_game() -> void:
 		"daoxing": 0,
 		"weakness_intel": {},
 		"board_unlocked": ["core"],
-		"enemies_seen": []
+		"enemies_seen": [],
+		"equipment": {"beads": "", "kasaya": "", "bowl": ""},
+		"equipment_owned": []
 	}
 	if is_instance_valid(dialogue_history):
 		dialogue_history.clear_log()

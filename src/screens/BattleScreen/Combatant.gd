@@ -68,10 +68,12 @@ static func from_player() -> Combatant:
 	c.display_name = p.name
 	# 基礎值 HP500／攻100／防10／敏15 不變，成長全靠修行盤（第三期）：bonus 讀 board_unlocked 計算。
 	var bonus: Dictionary = CultivationBoard.compute_bonus()
-	c.max_hp = p.max_hp + int(bonus.get("hp", 0))
+	# 佛具裝備位（第五期）：三欄 atk/def/hp 加成與修行盤同點加總，不動修行盤既有行。
+	var eq_bonus: Dictionary = EquipmentSystem.compute_bonus()
+	c.max_hp = p.max_hp + int(bonus.get("hp", 0)) + int(eq_bonus.get("hp", 0))
 	c.current_hp = mini(p.current_hp, c.max_hp)
-	c.attack = 100 + int(bonus.get("atk", 0))
-	c.defense = 10 + int(bonus.get("def", 0))
+	c.attack = 100 + int(bonus.get("atk", 0)) + int(eq_bonus.get("atk", 0))
+	c.defense = 10 + int(bonus.get("def", 0)) + int(eq_bonus.get("def", 0))
 	c.speed = 15 + int(bonus.get("spd", 0))
 	c.karma = p.karma
 	c.is_player = true

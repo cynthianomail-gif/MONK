@@ -1,0 +1,59 @@
+{
+	"beads_bodhi": {
+		"name": "菩提子念珠", "slot": "beads", "tier": 1, "price": 400,
+		"bonus": { "atk": 8 },
+		"unlock_flag": "",
+		"desc": "常見菩提子串成，加持拳勁。攻擊+8。"
+	},
+	"beads_vajra": {
+		"name": "金剛杵念珠", "slot": "beads", "tier": 2, "price": 900,
+		"bonus": { "atk": 15 },
+		"unlock_flag": "armory_unlocked",
+		"desc": "金剛杵造型念珠，剛猛加持。攻擊+15。"
+	},
+	"beads_agarwood": {
+		"name": "沉水香念珠", "slot": "beads", "tier": 3, "price": 1500,
+		"bonus": { "atk": 22 },
+		"unlock_flag": "ares_purified",
+		"desc": "沉水香木製，香氣凝神，攻擊大幅提升。攻擊+22。"
+	},
+	"kasaya_rough": {
+		"name": "粗布袈裟", "slot": "kasaya", "tier": 1, "price": 350,
+		"bonus": { "def": 1, "hp": 20 },
+		"unlock_flag": "",
+		"desc": "粗布縫製的簡樸袈裟。防禦+1，HP+20。"
+	},
+	"kasaya_brocade": {
+		"name": "錦斕袈裟", "slot": "kasaya", "tier": 2, "price": 800,
+		"bonus": { "def": 2, "hp": 90 },
+		"unlock_flag": "armory_unlocked",
+		"desc": "織錦袈裟，護體又壯氣血。防禦+2，HP+90。"
+	},
+	"kasaya_gold": {
+		"name": "金襴袈裟", "slot": "kasaya", "tier": 3, "price": 1400,
+		"bonus": { "def": 3, "hp": 180 },
+		"unlock_flag": "ares_purified",
+		"desc": "金線織就的袈裟，護體渾厚。防禦+3，HP+180。"
+	},
+	"bowl_pine": {
+		"name": "松木缽", "slot": "bowl", "tier": 1, "price": 300,
+		"bonus": {},
+		"passive": { "gold_pct": 0.10 },
+		"unlock_flag": "",
+		"desc": "松木化緣缽，戰勝金幣+10%。"
+	},
+	"bowl_iron": {
+		"name": "鐵缽", "slot": "bowl", "tier": 2, "price": 700,
+		"bonus": { "hp": 40 },
+		"passive": { "gold_pct": 0.20 },
+		"unlock_flag": "armory_unlocked",
+		"desc": "鐵鑄化緣缽，沉甸甸帶勁。戰勝金幣+20%，HP+40。"
+	},
+	"bowl_zijin": {
+		"name": "紫金缽", "slot": "bowl", "tier": 3, "price": 1200,
+		"bonus": {},
+		"passive": { "gold_pct": 0.25, "merit_per_win": 1 },
+		"unlock_flag": "ares_purified",
+		"desc": "紫金化緣缽，功德加持。戰勝金幣+25%，每勝功德+1。"
+	}
+}

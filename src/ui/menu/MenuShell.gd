@@ -5,6 +5,7 @@ extends CanvasLayer
 
 const SkillsPage := preload("res://src/ui/menu/pages/SkillsPage.gd")
 const StatusPage := preload("res://src/ui/menu/pages/StatusPage.gd")
+const EquipPage := preload("res://src/ui/menu/pages/EquipPage.gd")
 const QuestsApp := preload("res://src/ui/menu/pages/QuestsApp.gd")
 const IntelApp := preload("res://src/ui/menu/pages/IntelApp.gd")
 const TravelApp := preload("res://src/ui/menu/pages/TravelApp.gd")
@@ -42,6 +43,7 @@ func _ready() -> void:
 		"book": {"name": "經書", "pages": [
 			{"title": "技能", "factory": func() -> Control: return SkillsPage.new()},
 			{"title": "狀態", "factory": func() -> Control: return StatusPage.new()},
+			{"title": "佛具", "factory": func() -> Control: return EquipPage.new()},
 		]},
 		"phone": {"name": "手機", "pages": [
 			{"title": "任務", "factory": func() -> Control: return QuestsApp.new()},
