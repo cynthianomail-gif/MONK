@@ -6,6 +6,7 @@ const MENU_SHELL := preload("res://src/ui/menu/MenuShell.tscn")
 const SHOP_SCREEN := preload("res://src/ui/menu/ShopScreen.gd")
 const LOCATION_TRIGGER := preload("res://src/screens/MapScreen/LocationTrigger.tscn")
 const ROAMING_ENEMY := preload("res://src/screens/MapScreen/RoamingEnemy.gd")
+const SAVE_SLOT_PICKER := preload("res://src/ui/SaveSlotPicker.gd")
 
 ## 多功能 NPC：按 E 不跳 ActionMenu，改進對話——NPC 先問話，玩家在 Dialogic 選項裡分流。
 ## 選項各自 [signal arg="menu_action:<action id>"]，由 _on_dialogic_signal 收到後
@@ -291,9 +292,7 @@ func perform_action(action: String) -> void:
 			SceneRouter.go_to_scene("res://src/screens/MapScreen/environments/UndergroundParlor.tscn")
 		"save":
 			_store_position()
-			SaveManager.save_game()
-			AudioManager.play_sfx("save_done")
-			hud.show_toast("存檔完成")
+			_open_save_slot_picker()
 		"job_switch":
 			hud.open_job_menu()
 		"rest":
@@ -326,6 +325,19 @@ func _store_position() -> void:
 	if player:
 		var p := player.global_position
 		GameManager.player.last_position = {"x": p.x, "y": p.y, "z": p.z}
+
+## 地圖「存檔」動作：開 SlotPicker(save 模式) 讓玩家選槽，取代舊版直接存進單槽。
+func _open_save_slot_picker() -> void:
+	var picker := SAVE_SLOT_PICKER.new()
+	get_tree().root.add_child(picker)
+	picker.closed.connect(func():
+		if is_instance_valid(picker):
+			picker.queue_free()
+	)
+	picker.slot_chosen.connect(func(_n: int):
+		hud.show_toast("存檔完成")
+	)
+	picker.open("save")
 
 func _pick_enemy(dist: String) -> String:
 	var enemies: Dictionary = JsonLoader.load_json("res://data/enemies.json")
