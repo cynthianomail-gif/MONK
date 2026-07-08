@@ -139,11 +139,14 @@ func _input(event: InputEvent) -> void:
 func _move(dir: int) -> void:
 	var n: int = COMMANDS.size()
 	var i: int = _selected
+	var prev: int = _selected
 	for _k in n:
 		i = (i + dir + n) % n
 		if not _disabled.get(COMMANDS[i].id, false):
 			_selected = i
 			break
+	if _selected != prev:
+		AudioManager.play_sfx("ui_select", 1.15)
 	_refresh()
 
 func _hover(i: int) -> void:
@@ -163,6 +166,7 @@ func _confirm() -> void:
 	var cmd: String = COMMANDS[_selected].id
 	if _disabled.get(cmd, false):
 		return
+	AudioManager.play_sfx("ui_select")
 	command_chosen.emit(cmd)
 
 func _refresh() -> void:

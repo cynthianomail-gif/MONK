@@ -44,6 +44,7 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_ESCAPE:
 			get_viewport().set_input_as_handled()
+			AudioManager.play_sfx("ui_cancel")
 			_close(false)
 			return
 		if event.keycode == KEY_UP:
@@ -128,6 +129,7 @@ func _on_slot_pressed(n: int) -> void:
 	else:  # load
 		if not SaveManager.slot_exists(n):
 			return
+		AudioManager.play_sfx("ui_select")
 		SaveManager.load_from_slot(n)
 		slot_chosen.emit(n)
 		_close(true)
@@ -138,6 +140,7 @@ func _move_focus(delta: int) -> void:
 		return
 	var n := _slot_buttons.size()
 	_focus_index = ((_focus_index + delta) % n + n) % n
+	AudioManager.play_sfx("ui_select", 1.15)
 	_apply_focus_visual()
 
 

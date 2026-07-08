@@ -11,6 +11,7 @@ const TravelApp := preload("res://src/ui/menu/pages/TravelApp.gd")
 const JobApp := preload("res://src/ui/menu/pages/JobApp.gd")
 const BoardApp := preload("res://src/ui/menu/pages/BoardApp.gd")
 const SettingsApp := preload("res://src/ui/menu/pages/SettingsApp.gd")
+const HelpApp := preload("res://src/ui/menu/pages/HelpApp.gd")
 
 const GOLD := Color(0.788, 0.659, 0.38)
 const NEAR_BLACK := Color(0.043, 0.043, 0.043, 0.97)
@@ -49,12 +50,14 @@ func _ready() -> void:
 			{"title": "打工", "factory": func() -> Control: return JobApp.new()},
 			{"title": "修行", "factory": func() -> Control: return BoardApp.new()},
 			{"title": "設定", "factory": func() -> Control: return SettingsApp.new()},
+			{"title": "說明", "factory": func() -> Control: return HelpApp.new()},
 		]},
 	}
 	_build()
 	_show_device(_current_device)
 
 func close() -> void:
+	AudioManager.play_sfx("ui_cancel")
 	if pause_game:
 		get_tree().paused = false
 	queue_free()
@@ -128,6 +131,8 @@ func _refresh_device_row() -> void:
 			_attach_badge(btn)  # 經書有可學的招
 
 func _show_device(id: String) -> void:
+	if id != _current_device:
+		AudioManager.play_sfx("ui_select")
 	_current_device = id
 	_current_page = 0
 	_refresh_device_row()
@@ -151,6 +156,8 @@ func _refresh_tabs() -> void:
 			_attach_badge(btn)  # 技能頁有可學的招
 
 func _show_page(idx: int) -> void:
+	if idx != _current_page:
+		AudioManager.play_sfx("ui_select", 1.08)
 	_current_page = idx
 	for c in _content.get_children():
 		c.queue_free()

@@ -46,6 +46,7 @@ func _input(event: InputEvent) -> void:
 		# 開啟期間吞掉全部輸入（對話不能被推進）：在 Dialogic 的文字框/選項層之前攔截。
 		get_viewport().set_input_as_handled()
 		if is_tab:
+			AudioManager.play_sfx("ui_cancel")
 			close()
 		return
 
@@ -55,6 +56,7 @@ func _input(event: InputEvent) -> void:
 		return
 
 	get_viewport().set_input_as_handled()
+	AudioManager.play_sfx("ui_select")
 	open()
 
 

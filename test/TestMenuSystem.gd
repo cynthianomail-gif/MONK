@@ -194,19 +194,19 @@ func _smoke_scenes() -> void:
 		for i in 4:
 			await get_tree().process_frame
 		_check(is_instance_valid(shell), "MenuShell alive")
-		# 手機應有 6 頁：任務/情報/移動/打工/修行/設定（第三期新增「修行」app）
+		# 手機應有 7 頁：任務/情報/移動/打工/修行/設定/說明（K3 新增「說明」app）
 		_check(shell.has_method("_show_device"), "MenuShell has _show_device")
 		if shell.has_method("_show_device"):
 			shell._show_device("phone")
 			await get_tree().process_frame
 			_check("phone" in shell._devices, "phone device exists in _devices")
 			var phone_pages: Array = shell._devices["phone"]["pages"]
-			_check(phone_pages.size() == 6, "phone has 6 pages (got %d)" % phone_pages.size())
+			_check(phone_pages.size() == 7, "phone has 7 pages (got %d)" % phone_pages.size())
 			var titles := []
 			for p in phone_pages:
 				titles.append(p.title)
-			_check("移動" in titles and "打工" in titles and "設定" in titles and "修行" in titles,
-				"phone tabs include 移動/打工/設定/修行")
+			_check("移動" in titles and "打工" in titles and "設定" in titles and "修行" in titles and "說明" in titles,
+				"phone tabs include 移動/打工/設定/修行/說明")
 			# 逐頁開啟不崩
 			for i in phone_pages.size():
 				shell._show_page(i)
@@ -245,10 +245,11 @@ func _smoke_scenes() -> void:
 	sp.queue_free()
 	await get_tree().process_frame
 
-	# 新手機 app smoke（含設定頁 + 移動頁 + 打工頁）
+	# 新手機 app smoke（含設定頁 + 移動頁 + 打工頁 + 說明頁）
 	for path in ["res://src/ui/menu/pages/SettingsApp.gd",
 			"res://src/ui/menu/pages/TravelApp.gd",
-			"res://src/ui/menu/pages/JobApp.gd"]:
+			"res://src/ui/menu/pages/JobApp.gd",
+			"res://src/ui/menu/pages/HelpApp.gd"]:
 		var gs2 = load(path)
 		if gs2 == null:
 			_check(false, "load %s" % path); continue
