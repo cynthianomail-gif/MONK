@@ -4,6 +4,20 @@ extends "res://src/screens/Minigames/MinigameBase.gd"
 ## 純程式幾何（賽錢箱/銅錢皆 Polygon2D/ColorRect），零新美術。
 
 const THROWS: int = 5
+# 正式美術（2026-07-08 Codex 交回；缺檔自動退回程式幾何佔位）
+const BG_ART := "res://assets/2d/minigames/offering/bg_offering_night.png"
+const BOX_ART := "res://assets/2d/minigames/offering/offering_box.png"
+const GAUGE_ART := "res://assets/2d/minigames/offering/gauge_frame.png"
+const COIN_ART := "res://assets/2d/minigames/beggar/item_coin.png"  # 沿用化緣關銅錢
+# 箱圖縮放依「投入口視覺半寬≈判定半寬 BOX_HALF_W(110)」定，不是照舊色塊尺寸——
+# 圖中直櫺開口內緣半寬約 410px，0.3 倍後 ≈123px，與判定窗最貼近。
+const BOX_ART_SCALE: float = 0.3
+const BOX_ART_OFFSET := Vector2(0, -12)  # 開口中心(圖心上方~125px×0.3)對齊 BOX_MOUTH_Y(380)
+const COIN_ART_SCALE: float = 0.167     # 512px 圖 → 60px 遊戲尺寸
+# 力度計框：像素實測 內窗 x47-79 y279-539（畫布 128×768，圖面僅佔 y190-578）。
+# 1.2 倍時窗=39.6×313，恰好含邊距罩住 36×300 填充條；位置=窗心(63,409)對齊填充中心(1538,610)。
+const GAUGE_ART_POS := Vector2(1539, 580)
+const GAUGE_ART_SCALE := Vector2(1.2, 1.2)
 const GAUGE_SPEED: float = 1.4          # 力度計往返頻率(Hz)
 const FLIGHT_SECS: float = 0.9
 const START_POS := Vector2(960, 900)
@@ -165,10 +179,18 @@ func _bounce_coin() -> void:
 	tw.parallel().tween_property(_coin, "modulate:a", 0.0, 0.35)
 
 func _build_scene() -> void:
-	# 背景：夜色神社前(幾何)
-	var bg := ColorRect.new()
-	bg.size = Vector2(1920, 1080)
-	bg.color = Color(0.10, 0.10, 0.13)
+	# 背景：正式圖（夜色神社前庭）優先，缺檔退幾何深底
+	var bg: Control
+	if ResourceLoader.exists(BG_ART):
+		var tex := TextureRect.new()
+		tex.texture = load(BG_ART)
+		tex.size = Vector2(1920, 1080)
+		bg = tex
+	else:
+		var rect := ColorRect.new()
+		rect.size = Vector2(1920, 1080)
+		rect.color = Color(0.10, 0.10, 0.13)
+		bg = rect
 	add_child(bg)
 	# 佈局工具 v3：背景整塊登記（A 靜態，父節點是本場景根節點，非 Container，
 	# is_free()==true）。純幾何(ColorRect)照樣登記，不限貼圖。
@@ -182,37 +204,51 @@ func _build_scene() -> void:
 	# 標樣板不可拖（要調整判定窗要同時改常數，不是拖節點）。
 	box.set_meta("layout_template", "minigame/offeringtoss/box")
 	add_child(box)
-	var body := ColorRect.new()
-	body.size = Vector2(360, 190)
-	body.position = Vector2(-180, -70)
-	body.color = Color(0.30, 0.21, 0.13)
-	box.add_child(body)
-	var trim := ColorRect.new()
-	trim.size = Vector2(376, 16)
-	trim.position = Vector2(-188, -80)
-	trim.color = Color(0.55, 0.14, 0.11)
-	box.add_child(trim)
-	for i in 7:
-		var slat := ColorRect.new()
-		slat.size = Vector2(14, 46)
-		slat.position = Vector2(-140 + i * 44, -58)
-		slat.color = Color(0.16, 0.11, 0.07)
-		box.add_child(slat)
-	# 銅錢
+	if ResourceLoader.exists(BOX_ART):
+		# 正式圖：縮放/偏移讓直櫺開口貼齊判定窗（常數見檔頭，勿只憑觀感改）
+		var box_spr := Sprite2D.new()
+		box_spr.texture = load(BOX_ART)
+		box_spr.position = BOX_ART_OFFSET
+		box_spr.scale = Vector2.ONE * BOX_ART_SCALE
+		box.add_child(box_spr)
+	else:
+		var body := ColorRect.new()
+		body.size = Vector2(360, 190)
+		body.position = Vector2(-180, -70)
+		body.color = Color(0.30, 0.21, 0.13)
+		box.add_child(body)
+		var trim := ColorRect.new()
+		trim.size = Vector2(376, 16)
+		trim.position = Vector2(-188, -80)
+		trim.color = Color(0.55, 0.14, 0.11)
+		box.add_child(trim)
+		for i in 7:
+			var slat := ColorRect.new()
+			slat.size = Vector2(14, 46)
+			slat.position = Vector2(-140 + i * 44, -58)
+			slat.color = Color(0.16, 0.11, 0.07)
+			box.add_child(slat)
+	# 銅錢：沿用化緣關正式圖（方孔銅錢），缺檔退幾何圓片
 	_coin = Node2D.new()
-	var disc := Polygon2D.new()
-	var pts := PackedVector2Array()
-	for a in range(20):
-		var ang := TAU * a / 20.0
-		pts.append(Vector2(cos(ang), sin(ang)) * 30.0)
-	disc.polygon = pts
-	disc.color = Color(0.788, 0.659, 0.38)
-	_coin.add_child(disc)
-	var hole := ColorRect.new()
-	hole.size = Vector2(16, 16)
-	hole.position = Vector2(-8, -8)
-	hole.color = Color(0.10, 0.10, 0.13)
-	_coin.add_child(hole)
+	if ResourceLoader.exists(COIN_ART):
+		var coin_spr := Sprite2D.new()
+		coin_spr.texture = load(COIN_ART)
+		coin_spr.scale = Vector2.ONE * COIN_ART_SCALE
+		_coin.add_child(coin_spr)
+	else:
+		var disc := Polygon2D.new()
+		var pts := PackedVector2Array()
+		for a in range(20):
+			var ang := TAU * a / 20.0
+			pts.append(Vector2(cos(ang), sin(ang)) * 30.0)
+		disc.polygon = pts
+		disc.color = Color(0.788, 0.659, 0.38)
+		_coin.add_child(disc)
+		var hole := ColorRect.new()
+		hole.size = Vector2(16, 16)
+		hole.position = Vector2(-8, -8)
+		hole.color = Color(0.10, 0.10, 0.13)
+		_coin.add_child(hole)
 	_coin.position = START_POS
 	# 佈局工具 v3：銅錢＝C 類（_throw() tween_method 沿拋物線每幀更新 position），
 	# 標樣板不可拖。
@@ -224,6 +260,13 @@ func _build_scene() -> void:
 	gauge_bg.position = Vector2(1520, 460)
 	gauge_bg.color = Color(0.2, 0.2, 0.24)
 	add_child(gauge_bg)
+	if ResourceLoader.exists(GAUGE_ART):
+		# 木框在深底之上、填充條之下：框窗鏤空，金色力度條從窗內長高
+		var frame := Sprite2D.new()
+		frame.texture = load(GAUGE_ART)
+		frame.position = GAUGE_ART_POS
+		frame.scale = GAUGE_ART_SCALE
+		add_child(frame)
 	_gauge_fill = ColorRect.new()
 	_gauge_fill.size = Vector2(36, 0)
 	_gauge_fill.position = Vector2(1520, 760)
