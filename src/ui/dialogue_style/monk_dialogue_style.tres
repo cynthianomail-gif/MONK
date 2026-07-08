@@ -26,6 +26,7 @@ scene = ExtResource("4_8y2vo")
 script = ExtResource("2_i34tx")
 scene = ExtResource("3_epko4")
 overrides = {
+"box_animation_out": "0",
 "box_color_custom": "Color(1, 1, 1, 1)",
 "box_color_use_global": "false",
 "box_margin_bottom": "40",
