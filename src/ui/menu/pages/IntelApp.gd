@@ -1,6 +1,8 @@
 extends Control
-## 手機·情報 app：萬神殿 12 神情報圖鑑。每位神有蒐集進度條，碎片要逐塊探聽補齊。
-## 狀態來源＝GodIntel（碎片純從旗標/完成支線推導）。
+## 手機·情報 app：萬神殿 12 神情報圖鑑 ＋ 敵人圖鑑雛形。
+## 神祇：每位神有蒐集進度條，碎片要逐塊探聽補齊，狀態來源＝GodIntel（碎片純從旗標/完成支線推導）。
+## 敵人：戰鬥中探知的 weakness_intel 情報出口——只列「已遭遇」(GameManager.player.enemies_seen)
+## 的敵人，顯示已知弱點；未遭遇的敵人完全不列（避免劇透敵人總數）。
 
 const GOLD := Color(0.788, 0.659, 0.38)
 const WARM := Color(0.92, 0.89, 0.82)
@@ -41,6 +43,85 @@ func _build() -> void:
 
 	for e in GodIntel.get_all():
 		col.add_child(_entry(e))
+
+	col.add_child(HSeparator.new())
+	col.add_child(_bestiary_section())
+
+## ─── 敵人圖鑑（weakness_intel UI 出口）─────────────────────
+func _bestiary_section() -> Control:
+	var section := VBoxContainer.new()
+	section.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	section.add_theme_constant_override("separation", 12)
+
+	var seen: Array = GameManager.player.get("enemies_seen", [])
+	var head := HBoxContainer.new()
+	var title := Label.new()
+	title.text = "敵人情報"
+	title.add_theme_color_override("font_color", GOLD)
+	title.add_theme_font_size_override("font_size", 26)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var cnt := Label.new()
+	cnt.text = "已遭遇 %d" % seen.size()
+	cnt.add_theme_color_override("font_color", DIM)
+	cnt.add_theme_font_size_override("font_size", 20)
+	cnt.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	head.add_child(title); head.add_child(cnt)
+	section.add_child(head)
+
+	if seen.is_empty():
+		var empty := Label.new()
+		empty.text = "尚未遭遇任何敵人。"
+		empty.add_theme_color_override("font_color", LOCKED)
+		empty.add_theme_font_size_override("font_size", 18)
+		section.add_child(empty)
+		return section
+
+	var defs: Dictionary = JsonLoader.load_json("res://data/enemies.json")
+	defs.merge(JsonLoader.load_json("res://data/boss.json"))
+	for eid in seen:
+		section.add_child(_bestiary_entry(String(eid), defs.get(eid, {})))
+	return section
+
+func _bestiary_entry(eid: String, data: Dictionary) -> Control:
+	var pc := PanelContainer.new()
+	pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = NEAR_BLACK
+	sb.border_color = GOLD.darkened(0.3)
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(6)
+	sb.set_content_margin_all(14)
+	pc.add_theme_stylebox_override("panel", sb)
+
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 6)
+	pc.add_child(vb)
+
+	var nm := Label.new()
+	nm.text = String(data.get("name", eid)) if not data.is_empty() else eid
+	nm.add_theme_color_override("font_color", WARM)
+	nm.add_theme_font_size_override("font_size", 22)
+	vb.add_child(nm)
+
+	var wk := Label.new()
+	wk.add_theme_font_size_override("font_size", 18)
+	var weaknesses: Array = data.get("weaknesses", [])
+	if weaknesses.is_empty():
+		wk.text = "弱點：無"
+		wk.add_theme_color_override("font_color", DIM)
+	else:
+		var parts: Array = []
+		var known_any := false
+		for w in weaknesses:
+			if GameManager.knows_weakness(eid, w):
+				parts.append(EnemyPanel.ELEM_NAMES.get(w, w))
+				known_any = true
+			else:
+				parts.append("？？？")
+		wk.text = "弱點：" + "、".join(parts)
+		wk.add_theme_color_override("font_color", FILL if known_any else LOCKED)
+	vb.add_child(wk)
+	return pc
 
 func _entry(e: Dictionary) -> Control:
 	var pc := PanelContainer.new()

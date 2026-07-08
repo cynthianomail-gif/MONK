@@ -92,6 +92,8 @@ func setup(enemy_id: String) -> void:
 		if not ally_data.is_empty():
 			enemy_combatants.append(Combatant.from_enemy(ally_id, ally_data))
 	_init_boss_phases(data)
+	for e in enemy_combatants:
+		GameManager.record_enemy_seen(e.base_id if e.base_id != "" else e.id)
 	status.reset()
 	ui.build(player_combatant, enemy_combatants)
 	ui.set_battle_bg(BattleArt.resolve_battle_bg(data))
@@ -534,6 +536,7 @@ func _summon(summon_id: String) -> void:
 	# (max_once/summon 類技能)在 _condition_met 會被擋下，不能再召喚下一隻。
 	c.summoned_backup = true
 	enemy_combatants.append(c)
+	GameManager.record_enemy_seen(c.base_id if c.base_id != "" else c.id)
 	ui.add_enemy_panel(c)
 	# 援兵加入本回合佇列尾（本回合稍後行動），並更新順序條
 	_turn_queue.append(c)

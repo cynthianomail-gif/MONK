@@ -26,7 +26,8 @@ var player: Dictionary = {
 	# 戰鬥改版新鍵（舊存檔缺鍵→load_game 保留預設，不炸）
 	"daoxing": 0,                 # 修行盤成長貨幣（第二期勝利發放，第三期消費）
 	"weakness_intel": {},         # enemy_id → [已探知的弱點屬性]（第一期，跨戰鬥保留）
-	"board_unlocked": ["core"]    # 修行盤已解鎖節點（第三期接點）
+	"board_unlocked": ["core"],   # 修行盤已解鎖節點（第三期接點）
+	"enemies_seen": []            # 已遭遇過的敵人 base_id（圖鑑用，跨戰鬥保留）
 }
 
 ## 計程車落點暫存：{area, x}。MapScreen 載入時讀一次後清空。不寫進 player、不存檔。
@@ -170,6 +171,8 @@ func _ensure_battle_keys() -> void:
 		player["weakness_intel"] = {}
 	if not player.has("board_unlocked") or typeof(player.board_unlocked) != TYPE_ARRAY:
 		player["board_unlocked"] = ["core"]
+	if not player.has("enemies_seen") or typeof(player.enemies_seen) != TYPE_ARRAY:
+		player["enemies_seen"] = []
 
 func add_daoxing(v: int) -> void:
 	_ensure_battle_keys()
@@ -191,6 +194,18 @@ func record_weakness_intel(enemy_id: String, element: String) -> bool:
 func knows_weakness(enemy_id: String, element: String) -> bool:
 	_ensure_battle_keys()
 	return element in player.weakness_intel.get(enemy_id, [])
+
+## 記錄已遭遇敵人（圖鑑用，跨戰鬥保留）。傳 base_id（不含 spawn_pair/summon 後綴）。
+func record_enemy_seen(enemy_id: String) -> void:
+	_ensure_battle_keys()
+	if enemy_id not in player.enemies_seen:
+		player.enemies_seen.append(enemy_id)
+		stat_changed.emit("enemies_seen", player.enemies_seen)
+
+## 查某敵是否已遭遇過（圖鑑列表用）。
+func has_seen_enemy(enemy_id: String) -> bool:
+	_ensure_battle_keys()
+	return enemy_id in player.enemies_seen
 
 # ─── 背包 / 道具 ───────────────────────────────────────
 ## 舊存檔可能無 inventory 鍵 → 存取前確保存在（belt-and-suspenders；
@@ -252,7 +267,8 @@ func new_game() -> void:
 		"inventory": {},
 		"daoxing": 0,
 		"weakness_intel": {},
-		"board_unlocked": ["core"]
+		"board_unlocked": ["core"],
+		"enemies_seen": []
 	}
 	if is_instance_valid(dialogue_history):
 		dialogue_history.clear_log()
