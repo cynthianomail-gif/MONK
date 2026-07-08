@@ -47,12 +47,26 @@ const WUJIE_MOODS := ["calm", "angry", "happy", "surprised"]
 ## Dialogic load() 拿到的就是我們 mutate 過的同一份。
 var _wujie_char: Resource = load(WUJIE_DCH)
 
+const DIALOGUE_HISTORY_PANEL := preload("res://src/ui/DialogueHistoryPanel.gd")
+
+## 對話回想 log 面板：常駐掛在 root 下，跨場景可用（Tab 開關，見 DialogueHistoryPanel.gd）。
+var dialogue_history: CanvasLayer
+
 func _ready() -> void:
 	# 對話橋接：timeline 內 [signal arg="type:value"] → 改動遊戲狀態。
 	# 慣例 type: flag(設旗標true) / affection(累加 cherry_affection) / merit / karma / gold。
 	Dialogic.signal_event.connect(_on_dialogic_signal)
 	# 每段對話開始 → 依玩家職業套無戒立繪。
 	Dialogic.timeline_started.connect(_apply_wujie_job_portraits)
+	# 對話回想 log：建一次常駐 overlay，掛在 root 下（不依賴特定畫面）。
+	_setup_dialogue_history()
+
+func _setup_dialogue_history() -> void:
+	if is_instance_valid(dialogue_history):
+		return
+	dialogue_history = DIALOGUE_HISTORY_PANEL.new()
+	dialogue_history.name = "DialogueHistoryPanel"
+	get_tree().root.add_child.call_deferred(dialogue_history)
 
 ## 把 Wujie 角色資源的 4 表情立繪換成當前職業的 bust。Dialogic 以快取資源載入
 ## "Wujie" → 改的就是它實際用的那份；image 用 var_to_str 格式(同 .dch 存法)。
@@ -240,3 +254,5 @@ func new_game() -> void:
 		"weakness_intel": {},
 		"board_unlocked": ["core"]
 	}
+	if is_instance_valid(dialogue_history):
+		dialogue_history.clear_log()
