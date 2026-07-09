@@ -37,7 +37,17 @@
 
 ## 風格
 
-大神 okami 水墨/半寫實厚塗、game-ready，與遊戲既有方向一致。參考錨點：
+大神 okami 水墨/半寫實厚塗、game-ready，與遊戲既有方向一致。
+
+**⚠ 色調鐵則（使用者明確要求，優先級最高）：不要太暗。**
+- 暮色＝**亮暮色**：天空要看得見暖橘紫的雲彩層次與餘暉，不是壓黑的夜
+- 中間調要亮：城市窗光/燈籠是點綴，不是唯一光源；整體第一眼是「黃昏」不是「深夜」
+- 亮度基準＝`assets/2d/minigames/offering/bg_offering_night.png`（V2 黃昏祭典版）——
+  這張的亮度使用者已認可；主畫面可以同級或再亮一點，**不准比它暗**
+- 前科：香火投擲背景 V1 就是因為太暗被退件重生，別重演
+- 剪影元素（山門/主角背影/天際線）靠形狀對比成立，不需要把全圖壓暗來襯托
+
+參考錨點：
 - 無戒本人＝`assets/2d/portraits/wujie/cut/wujie_ascetic.png`
 - 暮色氛圍＝`assets/2d/minigames/offering/bg_offering_night.png`（V2 黃昏祭典版，剛定案）
 - 水墨城市戰鬥背景＝`assets/2d/backgrounds/bg_battle_wanhua.png`
