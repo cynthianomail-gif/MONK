@@ -1,6 +1,22 @@
-[gd_scene load_steps=2 format=3 uid="uid://bl32km2ahqmc6"]
+[gd_scene load_steps=3 format=3 uid="uid://bl32km2ahqmc6"]
 
 [ext_resource type="Script" uid="uid://dcoobdexs8uoy" path="res://src/screens/TitleScreen/TitleScreen.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btnpanel"]
+bg_color = Color(0, 0, 0, 0.45)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_left = 14
+corner_radius_bottom_right = 14
+content_margin_left = 28.0
+content_margin_top = 24.0
+content_margin_right = 28.0
+content_margin_bottom = 24.0
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.843, 0, 0.35)
 
 [node name="TitleScreen" type="Control"]
 layout_mode = 3
@@ -20,6 +36,18 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.039, 0.039, 0.039, 1)
 
+[node name="BgImage" type="TextureRect" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 6
+
 [node name="Center" type="CenterContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -33,6 +61,7 @@ layout_mode = 2
 theme_override_constants/separation = 20
 
 [node name="Title" type="Label" parent="Center/VBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.176, 0.176, 1)
 theme_override_font_sizes/font_size = 110
@@ -40,6 +69,7 @@ text = "和尚逆天"
 horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="Center/VBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.843, 0, 1)
 theme_override_font_sizes/font_size = 30
@@ -50,25 +80,39 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 
-[node name="StartButton" type="Button" parent="Center/VBox"]
+[node name="ButtonPanel" type="PanelContainer" parent="Center/VBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_btnpanel")
+
+[node name="ButtonList" type="VBoxContainer" parent="Center/VBox/ButtonPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="StartButton" type="Button" parent="Center/VBox/ButtonPanel/ButtonList"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(320, 56)
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
 text = "開始修行"
 
-[node name="ContinueButton" type="Button" parent="Center/VBox"]
+[node name="ContinueButton" type="Button" parent="Center/VBox/ButtonPanel/ButtonList"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(320, 56)
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
 text = "繼續修行"
 
-[node name="QuitButton" type="Button" parent="Center/VBox"]
+[node name="QuitButton" type="Button" parent="Center/VBox/ButtonPanel/ButtonList"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(320, 56)
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
 text = "離開紅塵"
 
 [node name="Version" type="Label" parent="."]

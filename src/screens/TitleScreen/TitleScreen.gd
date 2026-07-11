@@ -1,18 +1,36 @@
 extends Control
 
 const SAVE_SLOT_PICKER := preload("res://src/ui/SaveSlotPicker.gd")
+const BG_ART := "res://assets/2d/title/title_bg.png"
 
-@onready var start_button: Button    = %StartButton
-@onready var continue_button: Button = %ContinueButton
-@onready var quit_button: Button     = %QuitButton
+@onready var start_button: Button       = %StartButton
+@onready var continue_button: Button    = %ContinueButton
+@onready var quit_button: Button        = %QuitButton
+@onready var bg_image: TextureRect      = %BgImage
+@onready var title_label: Label         = %Title
+@onready var subtitle_label: Label      = %Subtitle
 
 func _ready() -> void:
 	AudioManager.switch_bgm("title_theme")
+	_setup_background()
 	continue_button.visible = _any_slot_has_save()
 	start_button.pressed.connect(_on_start_pressed)
 	continue_button.pressed.connect(_on_continue_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
 	start_button.grab_focus()
+
+## 正式合成背景圖（title_bg.png）自帶題字／副標／印章，成功載入時要藏掉
+## 程式畫的標題文字，避免疊字；缺檔時 fallback 回現行黑底＋程式字（本專案慣例）。
+func _setup_background() -> void:
+	if ResourceLoader.exists(BG_ART):
+		bg_image.texture = load(BG_ART)
+		bg_image.visible = true
+		title_label.visible = false
+		subtitle_label.visible = false
+	else:
+		bg_image.visible = false
+		title_label.visible = true
+		subtitle_label.visible = true
 
 func _any_slot_has_save() -> bool:
 	for n in range(1, SaveManager.SLOT_COUNT + 1):
