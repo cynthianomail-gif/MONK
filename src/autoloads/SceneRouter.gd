@@ -240,10 +240,11 @@ func consume_period_advance() -> void:
 	await _play_period_advance_card()
 	_period_card_active = false
 
-## 全螢幕黑幕字卡（沿用 play_battle_cutscene 的 CanvasLayer+ColorRect 淡入淡出樣板，
+## 全螢幕黑幕轉場（沿用 play_battle_cutscene 的 CanvasLayer+ColorRect 淡入淡出樣板，
 ## layer 130＝壓過小遊戲過場的 128，避免疊場時序衝突）：淡入黑→黑幕下呼叫
-## advance_time（光照趁黑切換）→顯示「第X日　時段名」→停留→淡出。
-## 播放期間用一個吃光全部 unhandled_input 的 Control 擋玩家輸入，避免字卡播放中
+## advance_time（光照趁黑切換）→淡出。2026-07-10 拍板：拿掉「第X日　時段」文字字卡，
+## 只留短暫淡入淡出黑幕（總時長 ≤0.6s），玩家嫌黑幕+文字拖時間又多餘。
+## 播放期間用一個吃光全部 unhandled_input 的 Control 擋玩家輸入，避免轉場播放中
 ## 誤觸地圖互動。
 func _play_period_advance_card() -> void:
 	var root := get_tree().current_scene
@@ -265,38 +266,16 @@ func _play_period_advance_card() -> void:
 	cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	cover.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.add_child(cover)
-	var label := Label.new()
-	label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", 34)
-	label.add_theme_color_override("font_color", Color(0.95, 0.90, 0.78))
-	label.modulate.a = 0.0
-	label.visible = false
-	overlay.add_child(label)
-	const FADE := 0.4
-	const HOLD := 1.2
-	const FADE_OUT := 0.5
+	const FADE_IN := 0.25
+	const FADE_OUT := 0.3
 	# 本函式所有 await 一律用 create_timer 步調，不 await tween.finished——
 	# 場景若在播放中被換掉，overlay 隨舊場景釋放，tween 的 finished 永不發＝
 	# 協程卡死、_period_card_active 永遠 true（漫遊遭遇會被永久擋掉）。
 	# 計時器保證恢復；每個恢復點檢查節點存活，死了就安靜收場（時段照樣推進）。
 	var tw0 := create_tween()
-	tw0.tween_property(cover, "color:a", 1.0, FADE)
-	await get_tree().create_timer(FADE).timeout
+	tw0.tween_property(cover, "color:a", 1.0, FADE_IN)
+	await get_tree().create_timer(FADE_IN).timeout
 	GameManager.advance_time(1)
-	if not is_instance_valid(overlay) or not is_instance_valid(label):
-		return
-	label.text = "第%d日　%s" % [GameManager.player.day, GameManager.TIME_PERIODS[GameManager.player.period]]
-	label.visible = true
-	var tw := create_tween()
-	tw.tween_property(label, "modulate:a", 1.0, 0.25)
-	await get_tree().create_timer(0.25 + HOLD).timeout
-	if not is_instance_valid(overlay) or not is_instance_valid(label):
-		return
-	var tw2 := create_tween()
-	tw2.tween_property(label, "modulate:a", 0.0, 0.25)
-	await get_tree().create_timer(0.25).timeout
 	if not is_instance_valid(overlay) or not is_instance_valid(cover):
 		return
 	var tw3 := create_tween()

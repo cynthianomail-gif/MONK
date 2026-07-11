@@ -28,8 +28,8 @@ func _ready() -> void:
 	# 驗收條件①：LayoutStore.live_entries() 含登記的 map/* key，各自 free==true。
 	var live := LayoutStore.live_entries()
 	var expect_keys := [
-		"map/time_label", "map/stats_label", "map/interaction_prompt",
-		"map/action_menu", "map/toast", "map/minimap",
+		"map/stats_label", "map/interaction_prompt",
+		"map/action_menu", "map/toast", "map/minimap", "map/action_hints",
 	]
 	var got_keys: Array = []
 	for e in live:

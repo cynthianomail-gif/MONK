@@ -376,7 +376,6 @@ func _toast_achievement(id: String) -> void:
 	hud.show_toast("十二因緣 · %s　已證" % label)
 
 func _update_hud() -> void:
-	hud.set_time(GameManager.player.day, GameManager.TIME_PERIODS[GameManager.player.period])
 	hud.update_stats()
 
 func _open_main_menu() -> void:

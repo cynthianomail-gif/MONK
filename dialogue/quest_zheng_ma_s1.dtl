@@ -1,19 +1,19 @@
 join ZhengMa (default)
 ZhengMa (default): 師父你來得正好……這兩位「先生」說我跟他們公司借過錢，利滾利要我今天關店抵債。我這輩子賣的都是佛祖，哪敢欠地下錢莊的錢啊！
 join DebtCollector (default)
-DebtCollector (default): （瞥了無戒一眼，啐了一聲）哪來的禿驢，少管閒事。
+DebtCollector (default): 哪來的禿驢，少管閒事。
 Wujie (calm): 阿彌陀佛。店裡供著千手觀音，二位在佛前討債，就不怕因果?
 - 業障壓人：盯著他們，催動殺氣
-	Wujie (angry): （眼神一沉，神社裡帶出的那股戾氣漫了開來）貧僧這幾年走過的路，比你們混的場子黑。要動手，先問過我背上的業障。
-	DebtCollector (default): （竟莫名腿軟）靠……這和尚不對勁，走走走！
+	Wujie (angry): 貧僧這幾年走過的路，比你們混的場子黑。要動手，先問過我背上的業障。
+	DebtCollector (default): 靠……這和尚不對勁，走走走！
 	ZhengMa (default): 師、師父你剛剛那個眼神……佛門中人怎麼會有那種煞氣?
 	Wujie (calm): 渡人之前，要先能鎮得住惡。這點業障，貧僧擔得起。
 	[signal arg="karma:+20"]
 	[signal arg="merit:+10"]
 	[signal arg="flag:zheng_ma_saved_karma"]
 - 替她墊一筆錢，先打發走
-	Wujie (calm): （從化緣的布袋裡掏出一疊鈔票）二位要的不過是錢。今日這筆，貧僧替水野結了，往後莫再上門。
-	DebtCollector (default): （數了數，悻悻地）算你識相。走了走了。
+	Wujie (calm): 二位要的不過是錢。今日這筆，貧僧替水野結了，往後莫再上門。
+	DebtCollector (default): 算你識相。走了走了。
 	ZhengMa (default): 師父你哪來這麼多錢……這怎麼好意思，我一定還你！
 	Wujie (calm): 不急。錢財是渡人的方便，不是貧僧的執念。水野好好顧店便是。
 	[signal arg="gold:-2000"]

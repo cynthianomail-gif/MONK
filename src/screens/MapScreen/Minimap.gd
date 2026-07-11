@@ -11,7 +11,8 @@ const RING := Color(0.79, 0.659, 0.38, 0.9)         # 暗金環
 const STREET_FILL := Color(0.88, 0.86, 0.78, 0.16)  # 街道淡墨帶
 const STREET_EDGE := Color(0.88, 0.86, 0.78, 0.30)
 const DOT_LANDMARK := Color(0.86, 0.86, 0.92, 0.95)
-const DOT_QUEST := Color(1.0, 0.86, 0.12, 1.0)      # 任務黃
+const DOT_QUEST := Color(1.0, 0.86, 0.12, 1.0)      # 支線任務黃
+const DOT_QUEST_MAIN := Color(1.0, 0.45, 0.08, 1.0) # 主線任務橘（2026-07-10：與支線黃一眼可分）
 const PLAYER_COL := Color(0.92, 0.32, 0.26, 1.0)    # 玩家紅
 
 var _clip_poly := PackedVector2Array()   # 圓形裁切用多邊形（快取）
@@ -67,10 +68,14 @@ func _draw() -> void:
 		if rel.length() > RADIUS - 7.0:
 			rel = rel.normalized() * (RADIUS - 7.0)
 		var pos := c + rel
+		var is_main_quest: bool = "loc_data" in t and QuestManager.location_has_main_quest(t.loc_data)
 		var is_quest: bool = "loc_data" in t and QuestManager.location_has_quest(t.loc_data)
-		if is_quest:
+		if is_main_quest:
+			draw_circle(pos, 5.5, DOT_QUEST_MAIN)
+			draw_arc(pos, 8.0, 0, TAU, 20, DOT_QUEST_MAIN, 1.5, true)   # 主線外環（吸睛）
+		elif is_quest:
 			draw_circle(pos, 5.5, DOT_QUEST)
-			draw_arc(pos, 8.0, 0, TAU, 20, DOT_QUEST, 1.5, true)   # 任務外環（吸睛）
+			draw_arc(pos, 8.0, 0, TAU, 20, DOT_QUEST, 1.5, true)   # 支線外環（吸睛）
 		else:
 			draw_circle(pos, 4.0, DOT_LANDMARK)
 

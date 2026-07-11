@@ -143,3 +143,11 @@ func location_has_quest(loc_data: Dictionary) -> bool:
 			if is_quest_actionable(a.replace("quest_", "")):
 				return true
 	return false
+
+## 地點是否有「現在可推進的主線」（main_quest action，demo 未跑完）——與支線分開判斷，
+## 供小地圖／3D 觸發點標記橘色（2026-07-10：主線點統一橘色，跟支線黃/金一眼可分）。
+func location_has_main_quest(loc_data: Dictionary) -> bool:
+	for action in loc_data.get("actions", []):
+		if String(action) == "main_quest":
+			return not MainQuestManager.is_demo_complete()
+	return false
