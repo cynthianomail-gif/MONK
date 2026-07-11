@@ -33,6 +33,7 @@ Dialogic="*res://addons/dialogic/Core/DialogicGameHandler.gd"
 SettingsManager="*res://src/autoloads/SettingsManager.gd"
 LayoutStore="*res://src/autoloads/LayoutStore.gd"
 LayoutTuner="*res://src/autoloads/LayoutTuner.gd"
+DialogueTextFx="*res://src/autoloads/DialogueTextFx.gd"
 
 [dialogic]
 

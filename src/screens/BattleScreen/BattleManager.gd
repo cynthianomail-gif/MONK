@@ -442,7 +442,7 @@ func _process_result(r: Dictionary) -> void:
 		enemy_weakpoint_hit.emit(r.get("target_id", ""))
 		EventBus.combo_count_changed.emit(_hits)
 		SkillUnlockManager.check_unlocks()
-		battle_log.emit("弱點！One More")
+		battle_log.emit("如來爆擊！佛祖保佑再來一擊")
 		await tutorial.show_point("weakness")
 		if _all_downed():
 			_all_out_attack()

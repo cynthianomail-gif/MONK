@@ -2,7 +2,7 @@ class_name DamageFloater
 extends Label
 
 ## 傷害漂浮字（第一期）：斜體、彈跳上飄淡出。三態：
-##   普通命中＝白字；爆擊＝放大 1.4x 變朱紅；命中弱點＝附斜切「WEAK！」標籤；Miss＝灰字。
+##   普通命中＝白字；爆擊＝放大 1.4x 變朱紅；命中弱點＝附斜切「如來爆擊」金字大標籤（帶入場衝擊縮放）；Miss＝灰字。
 ## 純 Control+Tween，不新增圖片素材。用完自清。
 ## 用法：DamageFloater.spawn(parent, world_pos, amount, {"is_crit":true, "hit_weakness":true, "miss":false})
 
@@ -37,15 +37,28 @@ func _play(pos: Vector2, amount: int, opts: Dictionary) -> void:
 		text = str(amount)
 		add_theme_color_override("font_color", WHITE)
 
-	# 弱點：附斜切「WEAK！」小標籤在上方
+	# 弱點：附斜切「如來爆擊」金字大標籤在上方，比一般傷害浮字更大更有衝擊感（沿用既有 weakness_hit 音效/紅閃/震動）。
 	if hit_weakness and not miss:
 		var weak := Label.new()
-		weak.text = "WEAK!"
-		weak.add_theme_font_size_override("font_size", 26)
+		weak.text = "如來爆擊"
+		weak.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		weak.custom_minimum_size = Vector2(190, 44)
+		weak.add_theme_font_size_override("font_size", 40)
 		weak.add_theme_color_override("font_color", Color("#FFD700"))
-		weak.rotation_degrees = -10.0   # 斜切
-		weak.position = Vector2(-6, -40)
+		weak.add_theme_color_override("font_outline_color", Color("#5A1A0D"))
+		weak.add_theme_constant_override("outline_size", 6)
+		weak.rotation_degrees = -8.0   # 斜切
+		weak.position = Vector2(-15, -54)   # 水平置中於本體浮字（本體寬 160，pivot 已設為自身中心供斜切旋轉）
+		weak.pivot_offset = weak.custom_minimum_size * 0.5
 		add_child(weak)
+		# 入場衝擊縮放：從放大狀態砸下收斂到定位，強化「爆擊」感。
+		weak.scale = Vector2(1.7, 1.7)
+		weak.modulate.a = 0.0
+		var wtw := create_tween()
+		wtw.set_parallel(true)
+		wtw.tween_property(weak, "scale", Vector2.ONE, 0.16) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		wtw.tween_property(weak, "modulate:a", 1.0, 0.06)
 
 	custom_minimum_size = Vector2(160, 60)
 	size = custom_minimum_size

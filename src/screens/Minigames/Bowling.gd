@@ -14,6 +14,7 @@ const BALL_START_Y: float = 930.0
 const DECK_Y: float = 585.0              # 球滾到瓶區的 y（拱門口地板 ≈577）
 const PIN_ROW_Y: float = 553.0           # 頭瓶(1號瓶)中心 y＝最靠拱門口
 const PIN_ROW_DEPTH: Array = [0.0, 22.0, 40.0, 55.0]  # 各排往深處的累積位移（透視壓縮）
+const PIN_OFFSET := Vector2(22.0, 14.0)  # 瓶陣整體校位：往右下貼齊背景瓶區（球軌跡不動，判定/FX 同步位移）
 const AIM_MAX: float = 180.0             # 起始位置左右可移範圍(底部座標)
 const TOP_SCALE: float = 0.37            # 球道遠端的透視收縮比
 const HOOK_AMT: float = 150.0            # 曲球總勾量(底部座標，向左)
@@ -165,7 +166,7 @@ func _on_impact(f: float, knocked: int) -> void:
 	for c in _ball.get_children():
 		c.queue_free()   # 收掉速度尾焰
 	if knocked > 0:
-		spawn_fx_burst(Vector2(LANE_CENTER_X + f * TOP_SCALE, PIN_ROW_Y - 15.0), 0.12)
+		spawn_fx_burst(Vector2(LANE_CENTER_X + PIN_OFFSET.x + f * TOP_SCALE, PIN_ROW_Y + PIN_OFFSET.y - 15.0), 0.12)
 		shake(4.0 + float(knocked) * 1.3, 0.24)     # 撞擊震動隨倒瓶數放大
 		if knocked >= 10:
 			hit_stop(0.08)                           # 全倒頓幀
@@ -210,7 +211,7 @@ func _on_impact(f: float, knocked: int) -> void:
 
 ## 從撞擊點近到遠擊倒 knocked 支瓶（彈飛+淡出），其餘留在原地補第二球。
 func _knock_pins(f: float, knocked: int) -> void:
-	var impact_x: float = LANE_CENTER_X + f * TOP_SCALE
+	var impact_x: float = LANE_CENTER_X + PIN_OFFSET.x + f * TOP_SCALE
 	var order := _pins.duplicate()
 	order.sort_custom(func(a, b) -> bool:
 		return absf((a as Sprite2D).position.x - impact_x) < absf((b as Sprite2D).position.x - impact_x))
@@ -281,9 +282,9 @@ func _setup_pins() -> void:
 	var rows: Array = [1, 2, 3, 4]
 	for r in rows.size():
 		var count: int = rows[r]
-		var y: float = PIN_ROW_Y - PIN_ROW_DEPTH[r]
+		var y: float = PIN_ROW_Y + PIN_OFFSET.y - PIN_ROW_DEPTH[r]
 		var gap: float = 46.0 - r * 5.0
-		var x0: float = LANE_CENTER_X - gap * (count - 1) * 0.5
+		var x0: float = LANE_CENTER_X + PIN_OFFSET.x - gap * (count - 1) * 0.5
 		for i in count:
 			var pin := Sprite2D.new()
 			pin.texture = tex

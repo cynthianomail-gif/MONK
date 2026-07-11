@@ -31,16 +31,20 @@ overrides = {
 "box_color_use_global": "false",
 "box_margin_bottom": "40",
 "box_panel": "res://src/ui/dialogue_style/monk_textbox_panel.tres",
-"box_size": "Vector2(1180, 230)",
+"box_size": "Vector2(1180, 270)",
 "name_label_box_modulate": "Color(1, 1, 1, 1)",
 "name_label_box_offset": "Vector2(295, 0)",
 "name_label_box_panel": "res://src/ui/dialogue_style/monk_nametag_panel.tres",
 "name_label_box_use_global_color": "false",
 "name_label_custom_color": "Color(0.043, 0.043, 0.043, 1)",
+"name_label_custom_font_size": "27",
 "name_label_use_character_color": "false",
 "name_label_use_global_color": "false",
+"name_label_use_global_font_size": "false",
 "text_custom_color": "Color(0.941, 0.913, 0.847, 1)",
-"text_use_global_color": "false"
+"text_size": "26",
+"text_use_global_color": "false",
+"text_use_global_size": "false"
 }
 
 [sub_resource type="Resource" id="Resource_glossary"]

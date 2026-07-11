@@ -1,5 +1,5 @@
 {
-  "_schema": "3D 探索的『個別互動點』：每個 NPC/店/功能各一點(取代舊 map_locations 打包選單)。走近顯提示、按互動鍵觸發；actions 只 1 項＝直接執行，多項＝跳該點小選單。（ambient_break 欄位已於 2026-07-07 移除：破戒改為支線完成自動觸發，見 BreakVowSystem。）npc_facing_deg 讓路邊 NPC 面向街道中央（2026-07-06 修正朝向公式：主街 x>0 面向 270°/-X，x<0 面向 90°/+X；支街 z>JUNC_Z(-13) 面向 180°/-Z，z<JUNC_Z 面向 0°/+Z，皆朝向玩家行走的街心，不再面牆）。座標於 2026-07-06 全面重排避免地面圈圈重疊、沿 L 形街道均勻分布。",
+  "_schema": "3D 探索的『個別互動點』：每個 NPC/店/功能各一點(取代舊 map_locations 打包選單)。走近顯提示、按互動鍵觸發；actions 只 1 項＝直接執行，多項＝跳該點小選單。（ambient_break 欄位已於 2026-07-07 移除：破戒改為支線完成自動觸發，見 BreakVowSystem。）npc_facing_deg 讓路邊 NPC 面向街道中央（2026-07-06 修正朝向公式：主街 x>0 面向 270°/-X，x<0 面向 90°/+X；支街 z>JUNC_Z(-13) 面向 180°/-Z，z<JUNC_Z 面向 0°/+Z，皆朝向玩家行走的街心，不再面牆）。座標於 2026-07-06 全面重排避免地面圈圈重疊、沿 L 形街道均勻分布。2026-07-10 QC 修正：batting_entrance 從 (-4.8,-14.0) 校到 (-4.0,-21.0)(原本離打擊場店面招牌 7 米，圈圈飄在空街上；z 校到招牌位置後 x=-4.8 離西側隨機店家外牆只剩 0.28 米太貼，再退到 -4.0 留 1米清空間)；npc_tie_shu(armory) x 從 -4.0 校到 0.0(原本卡在熔鑄爐與倉庫接縫、圈圈被建築遮住大半)；offering_box/npc_alms 座標貼齊賽錢箱/化緣蓆道具中心；bowling_entrance z 貼齊保齡球館門面。詳見 D:\\monk\\_mapfix_report_20260710.md。",
 
   "npc_liaochen": {
     "name": "了塵", "district": "shrine",
@@ -69,28 +69,28 @@
   },
   "npc_alms": {
     "name": "化緣", "district": "shrine",
-    "position_3d": {"x": 2.0, "y": 0.0, "z": -1.0}, "trigger_radius": 2.0,
+    "position_3d": {"x": 3.0, "y": 0.0, "z": -2.0}, "trigger_radius": 2.0,
     "actions": ["beggar_minigame"]
   },
   "offering_box": {
     "name": "賽錢箱", "district": "shrine",
-    "position_3d": {"x": 0.0, "y": 0.0, "z": -27.0}, "trigger_radius": 2.2,
+    "position_3d": {"x": 1.8, "y": 0.0, "z": -26.5}, "trigger_radius": 2.2,
     "actions": ["offering_toss"]
   },
   "bowling_entrance": {
     "name": "保齡球館入口", "district": "shrine",
-    "position_3d": {"x": 5.0, "y": 0.0, "z": -11.0}, "trigger_radius": 2.2,
+    "position_3d": {"x": 5.0, "y": 0.0, "z": -9.0}, "trigger_radius": 2.2,
     "actions": ["bowling_minigame"]
   },
   "batting_entrance": {
     "name": "打擊場入口", "district": "shrine",
-    "position_3d": {"x": -4.8, "y": 0.0, "z": -14.0}, "trigger_radius": 2.2,
+    "position_3d": {"x": -4.0, "y": 0.0, "z": -21.0}, "trigger_radius": 2.2,
     "actions": ["batting_minigame"]
   },
 
   "npc_tie_shu": {
     "name": "鐵叔", "district": "armory",
-    "position_3d": {"x": -4.0, "y": 0.0, "z": -16.0}, "trigger_radius": 2.5,
+    "position_3d": {"x": 0.0, "y": 0.0, "z": -16.0}, "trigger_radius": 2.5,
     "npc_model": "tie_shu", "npc_facing_deg": 90.0, "unlock_flag": "armory_unlocked",
     "actions": ["armory_npc"]
   },
