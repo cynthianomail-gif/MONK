@@ -1,4 +1,3 @@
-join Cherry (neutral)
 if GameManager.get_flag("cherry_escape"):
 	Cherry (sorrow): 我們就這樣……跑出來了。蝶子不會放過我們的，你知道吧。
 	Wujie (calm): 知道。但貧僧也不會放開這隻手了。前路再黑，兩個人走，總比一個人強。

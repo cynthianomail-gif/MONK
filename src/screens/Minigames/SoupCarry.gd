@@ -205,6 +205,11 @@ func build_result() -> Dictionary:
 # ════ 流程 ════
 
 func _ready() -> void:
+	# 2026-07-11：探索地圖的 CameraRig.gd 拿掉滑鼠視角後不再設這個全域旗標——過去是
+	# CameraRig._ready() 設的（Input.mouse_mode 不隨場景釋放，探索地圖先跑過一次就會
+	# 沿用到後面進的小遊戲），本場景自己的 FPS 滑鼠視角其實一直間接依賴它。本場景是
+	# 唯一還在用滑鼠視角的地方（玩法核心，不動邏輯），故自己補設，避免被間接弱化。
+	Input.set_use_accumulated_input(false)
 	_world = Node3D.new()
 	_world.name = "World3D"
 	add_child(_world)

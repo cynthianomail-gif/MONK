@@ -16,6 +16,7 @@ func _ready() -> void:
 	_test_fail_open_for_unmapped_locations()
 	_test_quest_location_gate_blocks_then_passes()
 	_test_quest_location_fail_open()
+	await _test_gate_orange_marker_updates_instantly_on_quest_complete()
 	print("QUEST_LOCATION_WIRING_TEST: ", "ALL PASS" if ok else "HAS FAILURES")
 	get_tree().quit(0 if ok else 1)
 
@@ -116,3 +117,54 @@ func _test_quest_location_fail_open() -> void:
 	# 觸發點不在 map_npcs.json（例如舊測試直接呼叫，非地圖互動觸發）→ fail-open 通過
 	_check(qm.quest_location_passed("ah_ming", "not_a_real_trigger_point"),
 		"觸發點不在 map_npcs.json → fail-open 通過")
+
+# ============================================================
+# 2026-07-11：c1_armory_gate 前置支線橘點即時刷新（LocationTrigger 3D 地面環）
+# ============================================================
+
+## 前情：QuestManager._advance_quest() 完成支線最後一 stage 時，若該 stage 帶 "flag"
+## 欄位，會先 GameManager.set_flag()（觸發 flag_changed）才把 quest id 塞進
+## completed_quests，最後才 EventBus.quest_updated.emit()。LocationTrigger 若只聽
+## flag_changed，該次刷新其實還讀不到剛完成的 completed_quests，橘點會慢半拍
+## （要等下一次無關的 flag 變動才會恢復）。驗證 LocationTrigger 同時接了
+## quest_updated，完成支線那一刻（單一次 _advance_quest 呼叫內）地面環材質就正確
+## 恢復（null＝原色），不需要額外的 flag 變動才刷新。
+func _test_gate_orange_marker_updates_instantly_on_quest_complete() -> void:
+	const LOCATION_TRIGGER_SCENE := preload("res://src/screens/MapScreen/LocationTrigger.tscn")
+	var qm := QuestManager
+	var saved_flags: Dictionary = GameManager.player.flags.duplicate()
+	var saved_quests: Array = GameManager.player.completed_quests.duplicate()
+	var saved_active: Dictionary = GameManager.player.active_quests.duplicate()
+
+	# 卡在 c1_armory_gate，大村(ah_zhong)已完成、水野(zheng_ma)是最後一位待完成者
+	# （湊滿 2 位門檻的臨門一腳）。
+	GameManager.player.flags.erase("ares_purified")
+	GameManager.set_flag("main_stage_ch01_ares", 4)
+	GameManager.player.completed_quests = ["ah_zhong"]
+	GameManager.player.active_quests["zheng_ma"] = 1  # 已在最後一個 stage（quest_zheng_ma_s2）
+
+	var trigger: Area3D = LOCATION_TRIGGER_SCENE.instantiate()
+	add_child(trigger)
+	trigger.setup("npc_zheng_ma", qm._npcs.get("npc_zheng_ma", {}))
+	await get_tree().process_frame
+
+	var marker := trigger.get_node("Marker") as MeshInstance3D
+	_check(marker.get_surface_override_material(0) != null,
+		"完成前：水野地面環已是橘（main_quest 前置支線候選）")
+
+	# 直接呼叫 _advance_quest 模擬玩家在地圖上把 zheng_ma 最後一 stage 走完
+	# （s2 帶 flag:"zheng_ma_shop_unlocked"，會先 set_flag 才 append completed_quests）。
+	var q: Dictionary = qm._quests.get("zheng_ma", {})
+	qm._advance_quest("zheng_ma", 1, q)
+	_check("zheng_ma" in GameManager.player.completed_quests, "zheng_ma 已進 completed_quests")
+	_check(qm.c1_armory_gate_pending_quests().is_empty(),
+		"大村+水野湊滿 2 位 → pending 清空")
+
+	# 不必等下一次 flag_changed，_advance_quest 這一次呼叫內地面環材質就該恢復原色。
+	_check(marker.get_surface_override_material(0) == null,
+		"完成 zheng_ma 當下（同一次 _advance_quest 呼叫內）地面環立刻恢復原色，不用等下次 flag 變動")
+
+	trigger.queue_free()
+	GameManager.player.flags = saved_flags
+	GameManager.player.completed_quests = saved_quests
+	GameManager.player.active_quests = saved_active

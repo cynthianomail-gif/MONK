@@ -19,6 +19,17 @@ func _physics_process(delta: float) -> void:
 	_refresh_cam_basis()
 	if not is_on_floor():
 		velocity.y += GRAVITY * delta
+	# 2026-07-11 使用者實機回饋：Dialogic 對話開著時玩家角色還能被 WASD 走動（對話
+	# 不像 MenuShell/ShopScreen 那樣會 get_tree().paused=true，PlayerController 原本
+	# 完全沒檢查對話狀態）。對話中鎖死水平輸入，但仍讓既有速度衰減到 0＋照常
+	# move_and_slide()（維持重力貼地，不是整個函式 return，避免對話開始那瞬間卡在
+	# 半空或穿地板）。
+	if Dialogic.current_timeline != null:
+		velocity.x = move_toward(velocity.x, 0.0, WALK_SPEED)
+		velocity.z = move_toward(velocity.z, 0.0, WALK_SPEED)
+		_set_blend(0.0)
+		move_and_slide()
+		return
 	var input := Vector2(
 		Input.get_axis("ui_left", "ui_right"),
 		Input.get_axis("ui_up", "ui_down")

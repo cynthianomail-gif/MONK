@@ -64,6 +64,14 @@ func setup(data: Dictionary) -> void:
 func _physics_process(delta: float) -> void:
 	if _done:
 		return
+	# 2026-07-11 補強：MapScreen._on_enemy_caught() 已經在對話中擋掉「進戰鬥」，但沒擋
+	# 這裡繼續巡邏/追擊——若對話拖得夠久，敵人仍會追到玩家(對話中玩家不動，見
+	# PlayerController.gd)觸發 _trigger()，_done 被設 true 但 MapScreen 那邊因為
+	# Dialogic.current_timeline != null 而不開戰，等於這隻敵人平白「被用掉」再也不會
+	# 動。對話中乾脆整個凍結（不追不巡邏），行為與玩家/相機一起鎖住一致。
+	if Dialogic.current_timeline != null:
+		velocity = Vector3.ZERO
+		return
 	_t += delta
 	var player := get_tree().get_first_node_in_group("player") as Node3D
 	var to_player := Vector3.ZERO

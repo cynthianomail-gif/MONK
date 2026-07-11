@@ -1,5 +1,15 @@
 extends Node
 
+## c1_armory_gate（了塵修練門檻，data/main_quests.json）前置支線：了塵在 main_ch1_intel
+## 點名的三位（大村 ah_zhong／水野 zheng_ma／源造 lao_wang），各自的支線完成後都會讓對應
+## 技能（sound_wave/great_compassion_shield/lions_roar）在經書「可習得」，任兩位湊到修練
+## 火候即可放行 gate（見 skill-learning-system-design.md「湊法」段）。硬編碼於此非資料驅動
+## 欄位，因為目前僅 ch1 這一個 gate 有此設計；未來若其他章節出現同型門檻，屆時再抽成通用欄位。
+const C1_ARMORY_GATE_CHAPTER := "ch01_ares"
+const C1_ARMORY_GATE_STAGE_ID := "c1_armory_gate"
+const C1_ARMORY_GATE_QUESTS := ["ah_zhong", "zheng_ma", "lao_wang"]
+const C1_ARMORY_GATE_NEED := 2
+
 var _quests: Dictionary = {}
 var _npcs: Dictionary = {}       # map_npcs.json：現行 3D 互動點，供 location 門檻查 district
 var _locations: Dictionary = {}  # map_locations.json：quest.location 值查 district 用
@@ -146,8 +156,34 @@ func location_has_quest(loc_data: Dictionary) -> bool:
 
 ## 地點是否有「現在可推進的主線」（main_quest action，demo 未跑完）——與支線分開判斷，
 ## 供小地圖／3D 觸發點標記橘色（2026-07-10：主線點統一橘色，跟支線黃/金一眼可分）。
+## 2026-07-11：主線卡在 c1_armory_gate 期間，尚未完成的前置支線地點也視為主線目標（橘點），
+## 玩家才知道要去哪——否則只看得到了塵本人橘、其他全黃，不知道兩顆黃點哪個才是關鍵。
 func location_has_main_quest(loc_data: Dictionary) -> bool:
 	for action in loc_data.get("actions", []):
 		if String(action) == "main_quest":
 			return not MainQuestManager.is_demo_complete()
+	var pending := c1_armory_gate_pending_quests()
+	if pending.is_empty():
+		return false
+	for action in loc_data.get("actions", []):
+		var a := String(action)
+		if a.begins_with("quest_") and a.replace("quest_", "") in pending:
+			return true
 	return false
+
+## 目前卡 c1_armory_gate 期間，還「有意義」需要玩家去做的前置支線 id 清單（尚未完成者）。
+## 未卡在該 gate、或已湊滿 C1_ARMORY_GATE_NEED 位（即使還有第三位沒幫）都回傳空陣列——
+## 已湊滿就不該再把玩家追著跑第三位，橘點該讓給了塵本人承接的「下一步」。純函式，供測試。
+func c1_armory_gate_pending_quests() -> Array:
+	if not MainQuestManager.is_blocked_at_gate(C1_ARMORY_GATE_CHAPTER, C1_ARMORY_GATE_STAGE_ID):
+		return []
+	var done := 0
+	var pending: Array = []
+	for qid in C1_ARMORY_GATE_QUESTS:
+		if qid in GameManager.player.completed_quests:
+			done += 1
+		else:
+			pending.append(qid)
+	if done >= C1_ARMORY_GATE_NEED:
+		return []
+	return pending

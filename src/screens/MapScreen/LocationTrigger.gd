@@ -44,8 +44,18 @@ func _ready() -> void:
 	# flag_changed 是涵蓋面最廣的單一訊號（同 AchievementSystem 監聽慣例）。
 	if not GameManager.flag_changed.is_connected(_on_flag_changed):
 		GameManager.flag_changed.connect(_on_flag_changed)
+	# 2026-07-11：c1_armory_gate 前置支線橘點要在完成當下即時變色，不能等下一次 flag 變動。
+	# QuestManager._advance_quest() 的呼叫順序是「先 set_flag（若該 stage 帶 flag）→ 才把
+	# quest id 塞進 completed_quests → 最後才 emit quest_updated」，所以支線完成那一刻最先
+	# 觸發的 flag_changed 訊號其實還讀不到新完成的 completed_quests（判斷仍會落後一拍）；
+	# quest_updated 保證觸發時 completed_quests 已經是最新值，兩個訊號都接才不會有這個空窗。
+	if not EventBus.quest_updated.is_connected(_on_quest_updated):
+		EventBus.quest_updated.connect(_on_quest_updated)
 
 func _on_flag_changed(_key: String, _val: Variant) -> void:
+	_refresh_marker_color()
+
+func _on_quest_updated(_id: String, _status: String) -> void:
 	_refresh_marker_color()
 
 ## 依 loc_data 目前是否有「現在可推進的主線」決定地面環顏色：橘＝主線、金＝原色（含支線／地標）。

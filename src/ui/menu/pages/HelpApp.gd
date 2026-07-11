@@ -39,7 +39,8 @@ func _build() -> void:
 # PlayerController.gd:49-56（sprint 執行期註冊=左Shift）、
 # PlayerController.gd:59-73（2026-07-10 review 退回修正 F5：ui_left/right/up/down 內建 action
 # 執行期補上 WASD 事件，"W/A/S/D 移動" 這行文字原本查無實據，現在是真的）、
-# CameraRig.gd:1-38+195-198（滑鼠視角預設捕捉即轉、Q/E 備援轉視角，2026-07-10 由 A/D 改，見 D-1）、
+# CameraRig.gd:1-25+92-103（2026-07-11 拍板整個拿掉滑鼠視角，探索地圖只留 Q/E 鍵盤轉視角，
+# 2026-07-10 由 A/D 改，見 D-1；游標永遠可見不再被捕捉）、
 # DialogueHistoryPanel.gd:42-58（Tab 開關對話回想）、
 # MapScreen.gd:298-304+MapHUD.gd:11（"休息"＝定點互動，非全域熱鍵）。
 func _keymap_section() -> Control:
@@ -50,10 +51,9 @@ func _keymap_section() -> Control:
 	var rows := [
 		["W / A / S / D", "移動（方向鍵亦可）"],
 		["左 Shift（按住）", "跑步（探索中）／加速戰鬥演出（戰鬥中）"],
-		["滑鼠移動", "轉動視角（探索中預設鎖定游標）"],
-		["Q / E", "轉動視角（備援，滑鼠不便時用）"],
+		["Q / E", "轉動視角（探索地圖不用滑鼠轉視角，游標全程可見）"],
 		["E", "互動 / 灌注解鎖（修行盤）／完美格擋（戰鬥中）"],
-		["Esc", "開關選單／取消／切換滑鼠視角鎖定"],
+		["Esc", "開關選單／取消"],
 		["M", "開關選單"],
 		["Enter / 空白鍵", "確認"],
 		["Tab", "開關對話回想記錄（對話進行中）"],

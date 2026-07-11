@@ -132,6 +132,26 @@ func gate_passed(gate: Dictionary) -> bool:
 			return GameManager.player.skills_unlocked.size() >= int(gate.get("min", 0))
 	return true
 
+## 目前是否卡在某章某個 stage（依 id 找）——即該 stage 是「上次中斷點」且該章未完成。
+## 2026-07-11：供 QuestManager 判斷「前置支線」是否要標主線橘點、了塵重複對話是否要
+## 播指路台詞。純以 stage index 判定（不重算 gate_passed），與 _run_chapter 的續跑邏輯
+## 同一套真相源；找不到該章/該 stage id 就回傳 false（fail-open，不誤標）。純函式，供測試。
+func is_blocked_at_gate(cid: String, stage_id: String) -> bool:
+	var c: Dictionary = _chapters.get(cid, {})
+	if c.is_empty():
+		return false
+	if bool(GameManager.get_flag(c.get("complete_flag", ""))):
+		return false
+	var stages: Array = c.get("stages", [])
+	var idx := -1
+	for i in stages.size():
+		if String(stages[i].get("id", "")) == stage_id:
+			idx = i
+			break
+	if idx == -1:
+		return false
+	return stage_index(cid) == idx
+
 ## stage.location 對應的現行 district（對不上 STAGE_LOCATION_DISTRICT 就回傳 ""＝未知/尚無場景）。
 ## 純函式，供測試。
 func stage_location_district(location_id: String) -> String:

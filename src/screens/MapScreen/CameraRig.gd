@@ -1,15 +1,19 @@
 extends Node3D
-## FPS 式滑鼠自由視角＋spring-arm 防穿牆。
-## 沿革：2026-07-02 原僅「右鍵按住拖曳」轉 yaw——實測「不能用」的根因是滑鼠游標
-## 全程停在 MOUSE_MODE_VISIBLE（沒人設過 Input.mouse_mode），拖曳靈敏度雖然沒問題，
-## 但體驗上更像「按著按鈕才勉強轉一點」，完全不是使用者期待的 FPS 直覺（滑鼠一動
-## 就轉）。2026-07-05 改為：探索中滑鼠 MOUSE_MODE_CAPTURED、X 軸直轉 yaw、Y 軸轉
-## pitch(clamp 防翻天)；任何 UI 開啟（手機選單/對話/商店/小遊戲/結算/傳送）自動
-## 釋放滑鼠、關閉後恢復；Esc 手動切換。Q/E 鍵轉視角與右鍵拖曳（備援輸入裝置時）皆保留。
+## 鍵盤式自由視角（Q/E 轉 yaw）＋spring-arm 防穿牆。
+## 沿革：2026-07-02 原僅「右鍵按住拖曳」轉 yaw；2026-07-05 改為 FPS 式滑鼠捕捉視角。
 ## 2026-07-10（D-1 鍵位定案）：轉視角備援鍵原為 A/D，與 ui_left/ui_right（Godot 內建
-## WASD 移動）鍵位重疊，導致玩家按 A/D 時「移動＋轉鏡頭」同時觸發。移動維持 ui_*
-## （WASD+方向鍵天然都通，且 B 批 UI 鍵盤化要用 ui_left/right/up/down），改動這裡的
-## cam_left/cam_right 綁鍵而非動 PlayerController，兩批工作互不影響。
+## WASD 移動）鍵位重疊，改用 Q/E。
+## 2026-07-11（使用者實機回饋拍板）：**整個拿掉滑鼠視角**（含 FPS 捕捉式與右鍵拖曳）。
+## 根因推定＝編輯器內嵌視窗下 MOUSE_MODE_CAPTURED 的位移事件時好時壞，不可靠到無法
+## 修好；使用者拍板探索地圖只留鍵盤轉視角（Q/E），滑鼠游標永遠可見、不再被捕捉。
+## 舊版 use_accumulated_input(false)／MOUSE_MODE_CAPTURED／pitch offset／視窗焦點
+## 追蹤全部隨滑鼠視角一併移除；SoupCarry.gd（端湯 3D 小遊戲，滑鼠視角是玩法核心，
+## 本次不動）原本間接依賴這裡設的 use_accumulated_input(false)（全域 Input 設定，
+## 不隨場景釋放，探索地圖先跑過一次就會沿用到後面進的小遊戲），拿掉後已改在
+## SoupCarry.gd 自己的 _ready() 補設，避免它的滑鼠視角隨這次改動被間接弱化。
+## 同批加上：對話進行中（Dialogic.current_timeline != null）鍵盤轉視角也鎖住
+## （原本只有滑鼠視角會被 _blocking_ui_present() 擋，Q/E 鍵盤旋轉不受影響，是本次
+## 一併修正的缺口）。
 
 @export var target_path: NodePath
 @export var camera_offset: Vector3 = Vector3(0.0, 11.0, 9.0)
@@ -17,10 +21,6 @@ extends Node3D
 @export var follow_speed: float = 0.08
 
 const KEY_ROT_SPEED := 2.2       # Q/E 旋轉速度 (rad/s)
-const MOUSE_ROT_SENS := 0.008    # 滑鼠 yaw 靈敏度 (rad/px)——捕捉模式與右鍵拖曳共用
-const MOUSE_PITCH_SENS := 0.006  # 滑鼠 pitch 靈敏度 (rad/px)
-const PITCH_MIN_DEG := -35.0     # pitch clamp：不讓相機翻到地板下
-const PITCH_MAX_DEG := 15.0      # pitch clamp：不讓相機翻到天花板上
 const YAW_SMOOTH := 0.14         # 旋轉平滑係數
 const CAM_BLOCK_MASK := 2        # 建築 cam blocker 碰撞層（層2＝只擋相機不擋角色）
 const CAM_MIN_FRAC := 0.30       # 相機最近可縮到 offset 的比例
@@ -28,52 +28,15 @@ const CAM_MIN_FRAC := 0.30       # 相機最近可縮到 offset 的比例
 @onready var camera: Camera3D = $Camera3D
 var _target: Node3D = null
 var _yaw: float = 0.0             # 目標 yaw；rotation.y 平滑追上
-var _pitch_offset_deg: float = 0.0  # 疊加在 camera_pitch_deg 上的滑鼠 pitch（clamp 過）
-var _mouse_look_enabled: bool = true   # Esc 手動開關
-## 邏輯捕捉狀態（獨立於 Input.mouse_mode 讀回值）——headless 測試環境沒有真實
-## 視窗，OS 層的 Input.mouse_mode 寫入會被靜默忽略、讀回恆為 VISIBLE，若拿它當
-## 判斷依據，headless 測試永遠驗不到「捕捉時滑鼠移動即轉視角」這件事。改成自己
-## 記錄「上一次要求的捕捉意圖」，GPU 真機與 headless 測試都能一致依此判斷。
-var _captured: bool = false
-## 視窗焦點狀態——headless 測試沒有焦點通知，預設 true 讓既有測試路徑不變。
-## 失焦時它是 _mouse_look_active() 的一票否決：沒有它，_physics_process 每 tick 的
-## _refresh_mouse_capture() 會在失焦後下一個 tick 就把游標搶回 CAPTURED，
-## 「失焦釋放游標」形同虛設。
-var _window_focused: bool = true
 
 func _ready() -> void:
 	camera.position = camera_offset
 	camera.rotation_degrees.x = camera_pitch_deg
-	# 不要累積滑鼠移動事件——累積模式下每個 physics tick 只送一個「合併」的
-	# InputEventMouseMotion，若引擎/宿主（例如編輯器內嵌遊戲視窗）在合併時
-	# 把位移歸零或漏送，FPS 視角就會「滑鼠一直動卻不轉」。關掉累積讓每筆
-	# OS 位移各自成一個事件，捕捉模式下的自由視角最穩。
-	Input.set_use_accumulated_input(false)
+	# 探索地圖不再捕捉滑鼠——保險起見明確釋放一次，避免上一個場景（例如某次意外
+	# 沒清乾淨的舊狀態）殘留 CAPTURED 讓游標卡住看不見。
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_register_rotate_actions()
-	_register_toggle_look_action()
 	_acquire_target()
-	_refresh_mouse_capture()
-
-func _exit_tree() -> void:
-	# 場景被 change_scene_to_file 整個換掉時，mouse_mode 是全域狀態，不隨場景樹釋放——
-	# 沒有這行，切去戰鬥/小遊戲/過場後滑鼠會繼續卡在 captured。
-	_set_mouse_captured(false)
-
-## 視窗重新取得焦點時（Alt-Tab 回來、或編輯器內嵌遊戲視窗被點回來）重新套用
-## 捕捉意圖——OS 在失焦時會自行把 mouse_mode 放回 VISIBLE，若不在回焦時補回
-## CAPTURED，玩家切出去再切回來滑鼠視角就死掉。失焦時明確釋放，避免游標被鎖在
-## 別的視窗上。
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_APPLICATION_FOCUS_IN:
-		_window_focused = true
-		if is_inside_tree():
-			_refresh_mouse_capture()
-	elif what == NOTIFICATION_WM_MOUSE_ENTER:
-		if is_inside_tree():
-			_refresh_mouse_capture()
-	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT:
-		_window_focused = false
-		_set_mouse_captured(false)
 
 ## 解析 target；成功時直接貼齊（避免相機從原點慢慢飄過去）。
 ## target_path 的 NodePath export 在某些載入時序會掉值，故以 "player" group 為備援。
@@ -90,11 +53,13 @@ func _physics_process(delta: float) -> void:
 		_acquire_target()
 		return
 	global_position = global_position.lerp(_target.global_position, follow_speed)
-	_yaw += (Input.get_action_strength("cam_left") - Input.get_action_strength("cam_right")) * KEY_ROT_SPEED * delta
+	# 對話／選單／商店等 UI 擋著時，Q/E 鍵盤轉視角也一併鎖住（跟玩家移動鎖住的
+	# 判準共用 _blocking_ui_present()，避免對話中鏡頭還轉來轉去）。
+	if not _blocking_ui_present():
+		_yaw += (Input.get_action_strength("cam_left") - Input.get_action_strength("cam_right")) * KEY_ROT_SPEED * delta
 	rotation.y = lerp_angle(rotation.y, _yaw, YAW_SMOOTH)
-	camera.rotation_degrees.x = camera_pitch_deg + _pitch_offset_deg
+	camera.rotation_degrees.x = camera_pitch_deg
 	_resolve_cam_collision()
-	_refresh_mouse_capture()
 
 ## Spring-arm：玩家→相機理想位置打射線（只打層2 cam blocker），被建築擋住就沿臂縮短。
 func _resolve_cam_collision() -> void:
@@ -107,53 +72,13 @@ func _resolve_cam_collision() -> void:
 		frac = clampf((hit.position - from).length() / (to - from).length() - 0.16, CAM_MIN_FRAC, 1.0)
 	camera.position = camera.position.lerp(camera_offset * frac, 0.25)
 
-## Esc 手動開關留在 _unhandled_input（維持原本「UI 先吃、rig 後收」的順序，
-## 不搶 MenuShell 的 Esc）。
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("toggle_mouse_look"):
-		# 只在真正探索中（無 UI 擋著）才切手動開關——否則玩家用 Esc 關手機選單時
-		# 會順便把 _mouse_look_enabled 切掉，選單關閉後視角反而卡死不會轉。
-		# _mouse_look_active() 已把「開關本身是否開著」也算進去，這裡改用
-		# _blocking_ui_present() 只看 UI，不看開關，才不會自己卡自己。
-		if not _blocking_ui_present():
-			_mouse_look_enabled = not _mouse_look_enabled
-			_refresh_mouse_capture()
-
-## 滑鼠移動：捕捉模式下（FPS 式，不用按鍵）或右鍵按住拖曳（未捕捉時的備援），
-## 直接轉 yaw／pitch。UI 擋著或手動關閉時 _mouse_look_active() 會擋掉。
-## ⚠改在 _input 而非 _unhandled_input：捕捉模式下 HUD 等 Control 節點會先把
-## InputEventMouseMotion 吃掉，事件到不了 _unhandled_input，視角就不轉——這正是
-## 真機「只能按右鍵才能轉」的成因（右鍵拖曳走另一條 OS 事件較不受影響）。_input
-## 先於 GUI 收事件，攔不掉；且這裡不呼叫 set_input_as_handled，UI 照常運作。
-func _input(event: InputEvent) -> void:
-	if not (event is InputEventMouseMotion):
-		return
-	if not _mouse_look_active():
-		return
-	if not _captured and not Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
-		return
-	var rel := (event as InputEventMouseMotion).relative
-	_yaw -= rel.x * MOUSE_ROT_SENS
-	_pitch_offset_deg = clampf(
-		_pitch_offset_deg - rel.y * MOUSE_PITCH_SENS * 57.2958,
-		PITCH_MIN_DEG, PITCH_MAX_DEG)
-
-## 是否該啟用滑鼠視角：手動開關開著、且沒有任何會擋掉探索輸入的 UI 蓋在上面。
-## 判準沿用 MapScreen._interact()/_on_enemy_caught() 的既有慣例（paused／Dialogic／
-## MenuShell／ShopScreen／action_menu），另加「本節點是否還在場景樹裡」防呆。
+## 是否有 UI／狀態擋著，該鎖住探索輸入（Q/E 轉視角、以及 PlayerController 的移動判準
+## 也沿用同一套邏輯）。判準沿用 MapScreen._interact()/_on_enemy_caught() 的既有慣例
+## （paused／Dialogic／MenuShell／ShopScreen／action_menu）。
 ## ⚠MenuShell/ShopScreen 是 MapScreen 的子節點（不是場景樹 current_scene 本身：
 ## UndergroundParlor 直切成 current_scene、CameraRig 才會是它的孫節點），故用
 ## _find_host_root() 從自己往上找最近的「有意義宿主」，不要用 get_tree().current_scene——
 ## 後者在巢狀/測試場景（rig 不是掛在 root 正下方）會找錯層級，MenuShell 開關偵測不到。
-func _mouse_look_active() -> bool:
-	if not _mouse_look_enabled:
-		return false
-	if not _window_focused:
-		return false
-	return not _blocking_ui_present()
-
-## 純粹只看「有沒有 UI 擋著」，不看 _mouse_look_enabled 手動開關——供 _unhandled_input
-## 判斷「現在能不能切開關」用，跟 _mouse_look_active() 分開才不會互相卡住。
 func _blocking_ui_present() -> bool:
 	if not is_inside_tree():
 		return true
@@ -185,17 +110,6 @@ func _find_host_root() -> Node:
 		n = n.get_parent()
 	return get_tree().current_scene
 
-## 依 _mouse_look_active() 的結果同步 Input.mouse_mode；狀態不變就不重複寫入。
-func _refresh_mouse_capture() -> void:
-	_set_mouse_captured(_mouse_look_active())
-
-## Input.mouse_mode 在 headless（無真實視窗）下設定是安全的 no-op（同 SoupCarry.gd
-## 既有慣例，未加防護也一路 ALL PASS，寫入不會拋錯，只是讀回值不會變）——這裡
-## 故意不擋 headless；真正的邏輯狀態記在 _captured，OS 呼叫只是「盡量同步」。
-func _set_mouse_captured(want_captured: bool) -> void:
-	_captured = want_captured
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if want_captured else Input.MOUSE_MODE_VISIBLE
-
 ## 執行期註冊 cam_left(Q) / cam_right(E)，避免動 project.godot 的 InputEvent 序列化格式。
 ## 2026-07-10：原為 A/D，改 Q/E 以避開 ui_left/ui_right（WASD 移動）鍵位重疊（D-1）。
 func _register_rotate_actions() -> void:
@@ -207,13 +121,3 @@ func _register_rotate_actions() -> void:
 		var ev := InputEventKey.new()
 		ev.physical_keycode = pair[1]
 		InputMap.action_add_event(action, ev)
-
-## 執行期註冊 toggle_mouse_look(Esc)——與 cancel 共用鍵位沒關係，這裡收到事件
-## 只切滑鼠視角開關，不 consume 事件，MenuShell 等其餘 Esc 監聽照常收到。
-func _register_toggle_look_action() -> void:
-	if InputMap.has_action("toggle_mouse_look"):
-		return
-	InputMap.add_action("toggle_mouse_look")
-	var ev := InputEventKey.new()
-	ev.physical_keycode = KEY_ESCAPE
-	InputMap.action_add_event("toggle_mouse_look", ev)

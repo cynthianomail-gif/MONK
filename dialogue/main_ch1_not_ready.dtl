@@ -1,7 +1,21 @@
-join Liaochen (default)
 Liaochen (default): 站住。我說過，沒練到火候，我不會帶你去送死。
 Liaochen (default): 你的拳，還沒『定』。這樣進去，第一道閘門都過不了。
 Wujie (calm): ……是貧僧躁進了。
-Liaochen (default): 回去。幫幫城裡那些走投無路的人，跟形形色色的對手過過招——紅塵就是你的道場。把自己練利了，再來找我。
+if not GameManager.player.completed_quests.has("ah_zhong") and not GameManager.player.completed_quests.has("zheng_ma") and not GameManager.player.completed_quests.has("lao_wang"):
+	Liaochen (default): 我先前點過的那幾位，你一個都還沒去見。禪味燒肉的大村師傅、神社前的源造，這兩位離得最近，先去會會他們。
+elif not GameManager.player.completed_quests.has("ah_zhong") and not GameManager.player.completed_quests.has("zheng_ma"):
+	Liaochen (default): 神社前的源造，你已經走了一趟。剩下的，去禪味燒肉會會大村師傅，再去櫻木会館看看佛具店的水野，這兩位隨你先辦哪個。
+elif not GameManager.player.completed_quests.has("ah_zhong") and not GameManager.player.completed_quests.has("lao_wang"):
+	Liaochen (default): 櫻木会館的水野，你已經幫過了。剩下的，去禪味燒肉會會大村師傅，再繞去神社前見見源造，這兩位湊一湊便夠。
+elif not GameManager.player.completed_quests.has("zheng_ma") and not GameManager.player.completed_quests.has("lao_wang"):
+	Liaochen (default): 禪味燒肉的大村師傅那頭辦妥了。剩下的，去神社前會會源造，再去櫻木会館見見水野，這兩位隨你先辦哪個。
+elif not GameManager.player.completed_quests.has("ah_zhong"):
+	Liaochen (default): 源造、水野那頭都辦妥了，只差禪味燒肉的大村師傅還沒見著。去會會他；要是招式其實學夠了，也去經書瞧瞧，是不是還有沒習得的。
+elif not GameManager.player.completed_quests.has("zheng_ma"):
+	Liaochen (default): 大村師傅、源造那頭都辦妥了，只差櫻木会館的水野還沒去見。去會會她；要是招式其實學夠了，也去經書瞧瞧，是不是還有沒習得的。
+elif not GameManager.player.completed_quests.has("lao_wang"):
+	Liaochen (default): 大村師傅、水野那頭都辦妥了，只差神社前的源造還沒會過。去會會他；要是招式其實學夠了，也去經書瞧瞧，是不是還有沒習得的。
+else:
+	Liaochen (default): 那幾位你都幫過了，火候不該還沒到——是不是還有招式沒回經書習得？去瞧瞧，該學的別留著。
 Liaochen (default): 我在這茶攤，等你。
 Wujie (calm): 修行，還沒到頭。

@@ -22,6 +22,8 @@ func _ready() -> void:
 	_test_new_dialogues()
 	_test_opening_wakeup()
 	_test_skill_learning()
+	_test_gate_side_quest_orange_dots()
+	await _test_gate_side_quest_dialogue_hints()
 	await _smoke_intel_app()
 	await _smoke_phone_menu()
 	print("CH1_EXPANSION_TEST: ", "ALL PASS" if ok else "HAS FAILURES")
@@ -225,3 +227,129 @@ func _test_skill_learning() -> void:
 	_check(SkillUnlockManager.learn_skill("self_harm"), "learn self_harm")
 	_check(GameManager.player.skills_unlocked.size() == 5, "5 skills after learning 2")
 	_check(MainQuestManager.gate_passed(gate), "gate passes at 5 (grind-only path, no softlock)")
+
+## 2026-07-11：主線卡 c1_armory_gate 期間，前置支線（大村 ah_zhong／水野 zheng_ma／源造 lao_wang）
+## 地點視為主線目標（橘點）。驗證三態：0 完成→三位全橘；完成 1 個→該點恢復、其餘仍橘；
+## 完成 2 個（湊滿門檻）→ 全部恢復，橘點回了塵本人承接的「下一目標」。亦驗未卡在 gate／
+## 已通關時 fail-open，不誤標。
+func _test_gate_side_quest_orange_dots() -> void:
+	var qm := QuestManager
+	var saved_flags: Dictionary = GameManager.player.flags.duplicate()
+	var saved_quests: Array = GameManager.player.completed_quests.duplicate()
+	var npc_ah_zhong: Dictionary = qm._npcs.get("npc_ah_zhong", {})
+	var npc_zheng_ma: Dictionary = qm._npcs.get("npc_zheng_ma", {})
+	var npc_lao_wang: Dictionary = qm._npcs.get("npc_lao_wang", {})
+	_check(not npc_ah_zhong.is_empty() and not npc_zheng_ma.is_empty() and not npc_lao_wang.is_empty(),
+		"三位前置支線 NPC 都在 map_npcs.json")
+
+	# 卡在 c1_armory_gate（stage index 對上）
+	GameManager.player.flags.erase("ares_purified")
+	GameManager.set_flag("main_stage_ch01_ares", 4)
+	_check(MainQuestManager.is_blocked_at_gate("ch01_ares", "c1_armory_gate"), "stage index 4 → 判定卡在 gate")
+
+	# 0 完成：三位全橘
+	GameManager.player.completed_quests = []
+	var pending0: Array = qm.c1_armory_gate_pending_quests()
+	_check(pending0.size() == 3, "0 完成 → pending 3 位 (got %d)" % pending0.size())
+	_check(qm.location_has_main_quest(npc_ah_zhong), "0 完成 → 大村(ah_zhong)橘")
+	_check(qm.location_has_main_quest(npc_zheng_ma), "0 完成 → 水野(zheng_ma)橘")
+	_check(qm.location_has_main_quest(npc_lao_wang), "0 完成 → 源造(lao_wang)橘")
+
+	# 完成 1 個（大村）→ 該點恢復、其餘仍橘
+	GameManager.player.completed_quests = ["ah_zhong"]
+	var pending1: Array = qm.c1_armory_gate_pending_quests()
+	_check(pending1.size() == 2 and "ah_zhong" not in pending1,
+		"完成 1 個 → pending 剩 2 位且不含已完成者 (got %s)" % str(pending1))
+	_check(not qm.location_has_main_quest(npc_ah_zhong), "完成大村 → 該點恢復（不再橘）")
+	_check(qm.location_has_main_quest(npc_zheng_ma), "完成大村 → 水野仍橘")
+	_check(qm.location_has_main_quest(npc_lao_wang), "完成大村 → 源造仍橘")
+
+	# 完成 2 個（大村+水野）→ 全部恢復（即使源造仍未完成，也不再追著跑第三位）
+	GameManager.player.completed_quests = ["ah_zhong", "zheng_ma"]
+	var pending2: Array = qm.c1_armory_gate_pending_quests()
+	_check(pending2.is_empty(), "完成 2 個 → pending 清空 (got %s)" % str(pending2))
+	_check(not qm.location_has_main_quest(npc_ah_zhong), "完成 2 個 → 大村恢復")
+	_check(not qm.location_has_main_quest(npc_zheng_ma), "完成 2 個 → 水野恢復")
+	_check(not qm.location_has_main_quest(npc_lao_wang), "完成 2 個 → 源造也恢復（湊滿即回主線本身）")
+	# 了塵本人的 main_quest 點不受影響，全程恆橘（demo 未完成）
+	_check(qm.location_has_main_quest(qm._npcs.get("npc_liaochen", {})), "了塵本人 main_quest 點恆橘，承接『下一目標』")
+
+	# 未卡在 gate（stage 已推進過去）→ fail-open，不誤標，即使 0 完成
+	GameManager.player.completed_quests = []
+	GameManager.set_flag("main_stage_ch01_ares", 5)
+	_check(not MainQuestManager.is_blocked_at_gate("ch01_ares", "c1_armory_gate"), "stage index 5 → 已不卡在 gate")
+	_check(qm.c1_armory_gate_pending_quests().is_empty(), "未卡在 gate → pending 空（fail-open）")
+	_check(not qm.location_has_main_quest(npc_ah_zhong), "未卡在 gate → 大村不誤標橘")
+
+	# 已通關（ares_purified）→ fail-open
+	GameManager.set_flag("main_stage_ch01_ares", 4)
+	GameManager.set_flag("ares_purified", true)
+	_check(not MainQuestManager.is_blocked_at_gate("ch01_ares", "c1_armory_gate"), "章已完成 → 不算卡在 gate")
+	_check(qm.c1_armory_gate_pending_quests().is_empty(), "章已完成 → pending 空")
+
+	GameManager.player.flags = saved_flags
+	GameManager.player.completed_quests = saved_quests
+
+## 了塵重複對話（main_ch1_not_ready）在卡 gate 期間要點名還沒去見的前置支線 NPC。
+## 實跑 Dialogic 兩態：0 完成→點名大村+源造；完成 2 個(大村+水野)→改點名剩下的源造。
+## 用 Dialogic.History 的 simple_history 撈實際播出的文字比對，不只是「解析成功」的靜態檢查。
+func _test_gate_side_quest_dialogue_hints() -> void:
+	if not ResourceLoader.exists("res://dialogue/main_ch1_not_ready.dtl"):
+		_check(false, "main_ch1_not_ready.dtl 存在")
+		return
+	var saved_quests: Array = GameManager.player.completed_quests.duplicate()
+
+	# 結構鐵則：if/elif/else 分支數對得上（8 態＝1 if+6 elif+1 else，Dialogic 的 Condition
+	# 事件涵蓋 if/elif/else 三種 condition_type，故節點數=8），且仍無『- 選項』（Choice）
+	# ——原檔本就 0 個選項，改動不准新增。
+	var tl = load("res://dialogue/main_ch1_not_ready.dtl")
+	tl.process()
+	var cond_count := 0
+	var choice_count := 0
+	for ev in tl.events:
+		if ev == null:
+			continue
+		if ev.event_name == "Condition":
+			cond_count += 1
+		elif ev.event_name == "Choice":
+			choice_count += 1
+	_check(cond_count == 8, "main_ch1_not_ready 有 8 個 Condition 節點(if+6 elif+else) (got %d)" % cond_count)
+	_check(choice_count == 0, "main_ch1_not_ready 仍無『- 選項』分支，選項數不變 (got %d)" % choice_count)
+	tl.events.clear()
+	tl = null
+
+	GameManager.player.completed_quests = []
+	var text0: String = await _play_and_collect("main_ch1_not_ready")
+	_check(text0.find("大村") != -1, "0 完成 → 台詞點名大村 (got: %s)" % text0)
+	_check(text0.find("源造") != -1, "0 完成 → 台詞點名源造 (got: %s)" % text0)
+
+	GameManager.player.completed_quests = ["ah_zhong", "zheng_ma"]
+	var text2: String = await _play_and_collect("main_ch1_not_ready")
+	_check(text2.find("源造") != -1, "完成大村+水野 → 台詞改點名剩下的源造 (got: %s)" % text2)
+	_check(not text2.is_empty(), "完成大村+水野 → 有實際播出文字（Dialogic 真的跑完 timeline）")
+
+	GameManager.player.completed_quests = saved_quests
+
+## 播放一條 timeline 到底，回傳 Dialogic.History 收到的全部文字串接（供比對台詞內容）。
+func _play_and_collect(timeline: String) -> String:
+	Dialogic.History.simple_history_content = []
+	Dialogic.start(timeline)
+	await get_tree().process_frame
+	var guard := 0
+	# skip_text_reveal() 讓 typewriter 立即顯示完整文字，才能可靠推進到下一事件——純
+	# process_frame/短 timer 在字數多時等不到 text_finished，handle_next_event() 會對著
+	# 還卡在 reveal 中的事件空打（同 CaptureDialogueFont.gd 慣例）。
+	while Dialogic.current_timeline != null and guard < 40:
+		await get_tree().create_timer(0.15).timeout
+		if Dialogic.has_subsystem("Text"):
+			Dialogic.Text.skip_text_reveal()
+		await get_tree().create_timer(0.15).timeout
+		if Dialogic.current_timeline != null:
+			Dialogic.handle_next_event()
+		await get_tree().process_frame
+		guard += 1
+	await get_tree().process_frame
+	var out := ""
+	for e in Dialogic.History.get_simple_history():
+		out += String(e.get("text", "")) + "\n"
+	return out

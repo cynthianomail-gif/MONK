@@ -1,4 +1,3 @@
-join Liaochen (default)
 Liaochen (default): 阿瑞斯崇尚力量，瞧不起談判。你去他總部講道理，只會被打出來。但他有個破綻——他把奪來的東西，全囤在城西的軍火庫，連你的舍利塔也在那。
 [signal arg="flag:armory_known"]
 Wujie (calm): 那貧僧，這就去把它請回來。
