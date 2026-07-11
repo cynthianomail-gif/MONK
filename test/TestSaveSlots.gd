@@ -1,22 +1,39 @@
 extends Node
-## headless 測試：存檔多槽（J3，2026-07-08）。
+## headless 測試：存檔多槽（J3，2026-07-08；備份/還原機制於 2026-07-10 QC P0 重寫）。
 ## 跑法：Godot --headless res://test/TestSaveSlots.tscn
 ##
 ## ⚠ headless 的 user:// 是「真的」使用者存檔目錄（不是沙盒）。本測試會：
-## 1) 開跑前把使用者現有的 save_slot_*.json / save_meta.json / save.json(.bak) 搬到暫存備份目錄
+## 1) 開跑前把使用者現有的 save_slot_*.json / save_meta.json / save.json(.bak) 搬到
+##    使用者存檔目錄之外的獨立暫存目錄（OS.get_cache_dir() 下的隨機子目錄，不與
+##    user:// 同層），且逐檔驗證「複製成功＋大小一致」後才刪除原始檔——任一檔案
+##    驗證失敗就整批中止，不刪任何原始檔，也不跑任何子測試。
 ## 2) 測試全程只操作乾淨狀態
-## 3) 結束時（無論成敗）把備份還原、清掉測試自己造的檔案
-## 不这样做的話，這支測試會直接改到 Cynthia 電腦上的真實存檔。
+## 3) 結束時（無論成敗）把備份還原、逐檔驗證還原成功後才清掉備份目錄；
+##    還原失敗會大聲印出備份路徑並保留備份目錄，讓人工介入。
+##
+## 2026-07-10 之前的舊版只用 DirAccess.copy_absolute 複製到 user:// 底下的子目錄，
+## 且不檢查回傳值——備份失敗照樣往下刪除原始檔，曾經真的毀過 Cynthia 的真實存檔。
+## 這版改為「先驗證、後刪除」的兩階段流程，且備份目錄搬出 user:// 之外。
 
 var ok := true
 
 const SLOT_FILES := ["save_slot_1.json", "save_slot_2.json", "save_slot_3.json", "save_meta.json"]
 const LEGACY_FILES := ["save.json", "save.json.bak"]
-const BACKUP_DIR := "user://_test_save_backup"
+
+var _backup_dir: String = ""       # 本次執行使用的備份目錄（絕對路徑，跑在 user:// 之外）
+var _backed_up_files: Array[String] = []  # 已成功備份＋已刪除原始檔的檔名，收尾只還原這些
 
 func _ready() -> void:
 	await get_tree().process_frame
-	_backup_real_saves()
+
+	if not _backup_real_saves():
+		# 備份失敗＝真實存檔安全紅線。不跑任何子測試，直接中止。
+		ok = false
+		print("SAVE_SLOTS_TEST: ABORTED — 備份未通過驗證，為保護真實存檔已中止，未執行任何子測試。")
+		print("SAVE_SLOTS_TEST: ", "HAS FAILURES")
+		get_tree().quit(1)
+		return
+
 	_reset_save_manager_state()
 
 	_test_save_load_roundtrip()
@@ -45,28 +62,97 @@ func _check(cond: bool, msg: String) -> void:
 		print("FAIL: ", msg)
 
 # ─── user:// 備份／還原機制 ───────────────────────────────
-func _backup_real_saves() -> void:
-	var dir := DirAccess.open("user://")
-	if dir and not dir.dir_exists("_test_save_backup"):
-		dir.make_dir("_test_save_backup")
-	for f in SLOT_FILES + LEGACY_FILES:
-		var src := "user://%s" % f
-		if FileAccess.file_exists(src):
-			var dst := "%s/%s" % [BACKUP_DIR, f]
-			DirAccess.copy_absolute(ProjectSettings.globalize_path(src), ProjectSettings.globalize_path(dst))
-			DirAccess.remove_absolute(ProjectSettings.globalize_path(src))
 
-func _restore_real_saves() -> void:
-	var dir := DirAccess.open(BACKUP_DIR)
-	if dir == null:
-		return
+## 備份目錄：OS 的快取目錄（與 user:// 存檔目錄不同層）下的隨機子目錄。
+## 支援用環境變數 MONK_TEST_FORCE_BAD_BACKUP_DIR 覆寫（負向實驗用：指向不存在的
+## 磁碟機或唯讀路徑，驗證「備份失敗→中止→真實存檔完好」）。
+func _get_backup_root() -> String:
+	var override_dir := OS.get_environment("MONK_TEST_FORCE_BAD_BACKUP_DIR")
+	if override_dir != "":
+		return override_dir
+	var unique := "monk_test_save_backup_%d_%d" % [OS.get_process_id(), Time.get_ticks_usec()]
+	return OS.get_cache_dir().path_join(unique)
+
+func _file_size(abs_path: String) -> int:
+	if not FileAccess.file_exists(abs_path):
+		return -1
+	var f := FileAccess.open(abs_path, FileAccess.READ)
+	if f == null:
+		return -1
+	var len := f.get_length()
+	f.close()
+	return len
+
+## 兩階段備份：
+##   phase 1：把每個存在的真實檔複製到備份目錄，逐檔驗證「複製回傳 OK 且大小與來源一致」；
+##            任一檔案驗證失敗＝整批中止，回傳 false，此時所有原始檔都還沒被動過。
+##   phase 2：phase 1 全過才刪除原始檔（同樣檢查刪除回傳值）；刪除失敗也視為中止。
+## 回傳 true 才代表安全可以繼續跑子測試。
+func _backup_real_saves() -> bool:
+	_backup_dir = _get_backup_root()
+	var make_err := DirAccess.make_dir_recursive_absolute(_backup_dir)
+	if make_err != OK and not DirAccess.dir_exists_absolute(_backup_dir):
+		print("SAVE_SLOTS_TEST: 無法建立備份目錄 %s（錯誤碼 %d）。真實存檔完全未被觸碰。" % [_backup_dir, make_err])
+		return false
+
+	var to_backup: Array[String] = []
 	for f in SLOT_FILES + LEGACY_FILES:
-		var src := "%s/%s" % [BACKUP_DIR, f]
-		if FileAccess.file_exists(src):
-			var dst := "user://%s" % f
-			DirAccess.copy_absolute(ProjectSettings.globalize_path(src), ProjectSettings.globalize_path(dst))
-			DirAccess.remove_absolute(ProjectSettings.globalize_path(src))
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(BACKUP_DIR))
+		if FileAccess.file_exists("user://%s" % f):
+			to_backup.append(f)
+
+	if to_backup.is_empty():
+		print("SAVE_SLOTS_TEST: 使用者目前沒有真實存檔檔案，無需備份。")
+		return true
+
+	# phase 1：複製＋驗證，全部通過才進 phase 2。
+	for f in to_backup:
+		var src_abs := ProjectSettings.globalize_path("user://%s" % f)
+		var dst_abs := _backup_dir.path_join(f)
+		var src_size := _file_size(src_abs)
+		var copy_err := DirAccess.copy_absolute(src_abs, dst_abs)
+		var dst_size := _file_size(dst_abs)
+		if copy_err != OK or src_size < 0 or dst_size != src_size:
+			print("SAVE_SLOTS_TEST: 備份 %s 失敗或大小不符（copy_err=%d, 來源大小=%d, 備份大小=%d）。備份目錄=%s。真實存檔尚未被刪除，安全。" % [f, copy_err, src_size, dst_size, _backup_dir])
+			return false
+
+	# phase 2：驗證全數通過，才刪除原始檔（讓測試在乾淨的 user:// 上跑）。
+	for f in to_backup:
+		var src_abs := ProjectSettings.globalize_path("user://%s" % f)
+		var rm_err := DirAccess.remove_absolute(src_abs)
+		if rm_err != OK:
+			print("SAVE_SLOTS_TEST: 已驗證備份，但刪除原始檔 %s 失敗（錯誤碼 %d）。真實檔仍在原位，備份留在 %s 供核對。" % [f, rm_err, _backup_dir])
+			return false
+		_backed_up_files.append(f)
+
+	print("SAVE_SLOTS_TEST: 已備份並驗證 %d 個真實存檔檔案至 %s" % [_backed_up_files.size(), _backup_dir])
+	return true
+
+## 還原：逐檔複製回 user:// 並驗證大小一致才刪除備份副本；有任何一個還原失敗，
+## 大聲印出來並保留備份目錄（含未成功還原的那些檔案），不強行清掉。
+func _restore_real_saves() -> void:
+	if _backed_up_files.is_empty():
+		if _backup_dir != "" and DirAccess.dir_exists_absolute(_backup_dir):
+			DirAccess.remove_absolute(_backup_dir)  # 空備份目錄，直接清掉
+		return
+
+	var restore_failed: Array[String] = []
+	for f in _backed_up_files:
+		var src_abs := _backup_dir.path_join(f)
+		var dst_abs := ProjectSettings.globalize_path("user://%s" % f)
+		var src_size := _file_size(src_abs)
+		var copy_err := DirAccess.copy_absolute(src_abs, dst_abs)
+		var dst_size := _file_size(dst_abs)
+		if copy_err != OK or src_size < 0 or dst_size != src_size:
+			restore_failed.append(f)
+			ok = false
+			print("SAVE_SLOTS_TEST: !!! 還原 %s 失敗（copy_err=%d, 來源大小=%d, 目的大小=%d）——備份仍保留在 %s，需要人工核對！" % [f, copy_err, src_size, dst_size, _backup_dir])
+			continue
+		DirAccess.remove_absolute(src_abs)
+
+	if restore_failed.is_empty():
+		DirAccess.remove_absolute(_backup_dir)
+	else:
+		print("SAVE_SLOTS_TEST: !!! 備份目錄保留於 %s（含 %d 個未成功還原的檔案），需要人工介入，勿刪除此目錄。" % [_backup_dir, restore_failed.size()])
 
 ## 測試造的檔案，前後都清一次（每個子測試之間也重置，避免互相污染）。
 func _cleanup_test_artifacts() -> void:

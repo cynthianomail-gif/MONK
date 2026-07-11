@@ -82,8 +82,11 @@ func delete_save() -> void:
 ## ── 新介面：多槽 ──
 ## 新遊戲開跑前呼叫（TitleScreen「開始」）：把 active_slot 指到第一個空槽，
 ## 讓之後的自動存檔不會蓋掉既有進度（含尚未遷移的舊版 save.json——
-## slot_exists 已把它視為 slot1）。三槽全滿時維持原 active_slot（覆蓋最近
-## 使用的槽，與單槽時代語意一致）。只在需要改槽時寫 meta，不搬舊檔。
+## slot_exists 已把它視為 slot1）。三槽全滿時**不動 active_slot、不寫 meta**，
+## 呼叫端（TitleScreen）要自行判斷「全滿」並改走 SaveSlotPicker(new_game 模式)
+## 讓玩家明確選槽＋二次確認覆蓋，再呼叫 set_active_slot_for_new_game()——
+## 2026-07-10 QC P0 前的舊行為是「三槽全滿時沿用 active_slot 無聲覆蓋」，
+## 屬於資料安全缺陷，已改掉。
 func select_slot_for_new_game() -> void:
 	_load_meta()
 	for n in range(1, SLOT_COUNT + 1):
@@ -92,6 +95,20 @@ func select_slot_for_new_game() -> void:
 				active_slot = n
 				_save_meta()
 			return
+
+## 三槽全滿時，玩家已在 SaveSlotPicker(new_game 模式) 明確選定＋二次確認覆蓋某槽後，
+## TitleScreen 呼叫這個把 active_slot 指過去（不管該槽有沒有資料）。之後
+## GameManager.new_game() + 首次自動存檔（save_to_slot 內建 _ensure_migrated）
+## 會自然覆蓋該槽——若該槽其實是「未遷移的舊版 save.json」，_ensure_migrated
+## 會先把舊檔搬成 slot1 + .bak 備份，新進度才落地，舊資料仍留一份 .bak。
+func set_active_slot_for_new_game(n: int) -> void:
+	if n < 1 or n > SLOT_COUNT:
+		push_error("SaveManager: 槽位超出範圍 %d" % n)
+		return
+	_load_meta()
+	if active_slot != n:
+		active_slot = n
+		_save_meta()
 
 func save_to_slot(n: int) -> void:
 	_ensure_migrated()
