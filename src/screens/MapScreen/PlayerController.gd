@@ -11,6 +11,7 @@ var _cam_basis: Basis = Basis.IDENTITY
 
 func _ready() -> void:
 	_register_sprint_action()
+	_register_wasd_axes()
 	# 預設背對相機（第三人稱慣例）；移動時 atan2 會接管朝向。
 	model.rotation.y = PI
 
@@ -54,3 +55,22 @@ func _register_sprint_action() -> void:
 	var ev := InputEventKey.new()
 	ev.physical_keycode = KEY_SHIFT
 	InputMap.action_add_event("sprint", ev)
+
+## 2026-07-10 review 退回修正（F5）：ui_left/ui_right/ui_up/ui_down 是 Godot 內建 action，預設只
+## 綁方向鍵（不含 WASD，已實測 InputMap.action_get_events 證實）。HelpApp/MapHUD 卻一直寫著
+## 「W/A/S/D 移動」，玩家照著按完全沒反應。內建 action 一樣不動 project.godot（同 sprint 的既有
+## 模式），執行期補上 WASD 事件即可；InputMap 執行期註冊不落地存檔，MapScreen 每次進場都會重跑
+## 這個 _ready()，用 action_get_events 判斷是否已加過，避免同一 session 反覆進出地圖疊加重複事件。
+func _register_wasd_axes() -> void:
+	_ensure_key_event("ui_left", KEY_A)
+	_ensure_key_event("ui_right", KEY_D)
+	_ensure_key_event("ui_up", KEY_W)
+	_ensure_key_event("ui_down", KEY_S)
+
+func _ensure_key_event(action: StringName, physical_key: Key) -> void:
+	for ev in InputMap.action_get_events(action):
+		if ev is InputEventKey and ev.physical_keycode == physical_key:
+			return
+	var ev := InputEventKey.new()
+	ev.physical_keycode = physical_key
+	InputMap.action_add_event(action, ev)

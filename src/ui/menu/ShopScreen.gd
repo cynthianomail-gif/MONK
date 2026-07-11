@@ -29,6 +29,7 @@ var _selected: String = ""
 var _current_tab: int = 0
 var _list: VBoxContainer
 var _tab_row: HBoxContainer
+var _focus_chain: Array = []   # 2026-07-10 review 退回修正（F3b）：供測試/外部核對用，見 _wire_content_focus
 
 func _ready() -> void:
 	layer = 100
@@ -44,10 +45,25 @@ func close() -> void:
 		get_tree().paused = false
 	queue_free()
 
+## B-2（2026-07-10）：全鍵盤操作。分頁切換（消耗品↔佛具）＝ui_left/ui_right；商品清單／
+## 詳情鈕沿用 Godot 內建 focus 系統（ui_up/ui_down/ui_accept，見 _wire_content_focus）。
+## 與 MenuShell 同構同做法（同一人手筆，見檔頭註解），不共用程式碼——兩檔各自獨立
+## extends CanvasLayer，抽共用基底超出本批範圍（B-2 明文不擴大重構）。
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("cancel") or event.is_action_pressed("open_menu"):
 		get_viewport().set_input_as_handled()
 		close()
+		return
+	if event.is_action_pressed("ui_left"):
+		get_viewport().set_input_as_handled()
+		_cycle_tab(-1)
+	elif event.is_action_pressed("ui_right"):
+		get_viewport().set_input_as_handled()
+		_cycle_tab(1)
+
+func _cycle_tab(dir: int) -> void:
+	var idx: int = (_current_tab + dir + TABS.size()) % TABS.size()
+	_show_tab(idx)
 
 func _build() -> void:
 	var dim := ColorRect.new()
@@ -114,9 +130,9 @@ func _build() -> void:
 	_detail_box.add_theme_constant_override("separation", 10)
 	detail_panel.add_child(_detail_box)
 
-	# 底部提示
+	# 底部提示（B-2：補上鍵盤操作說明）
 	var hint := Label.new()
-	hint.text = "Esc 離開"
+	hint.text = "Esc 離開　｜　←/→ 切分頁　↑/↓ 選擇　Enter 購買"
 	hint.add_theme_color_override("font_color", DIM)
 	hint.add_theme_font_size_override("font_size", 20)
 	root.add_child(hint)
@@ -191,9 +207,11 @@ func _show_detail(id: String) -> void:
 		hint.add_theme_color_override("font_color", DIM)
 		hint.add_theme_font_size_override("font_size", 22)
 		_detail_box.add_child(hint)
+		_wire_content_focus()
 		return
 	if _current_tab == 1:
 		_show_equipment_detail(id)
+		_wire_content_focus()
 		return
 	var d: Dictionary = _items[id]
 	_add_label(d.get("name", id), 34, GOLD)
@@ -209,6 +227,7 @@ func _show_detail(id: String) -> void:
 	var iid: String = id
 	buy.pressed.connect(func() -> void: _on_buy(iid))
 	_detail_box.add_child(buy)
+	_wire_content_focus()
 
 func _show_equipment_detail(id: String) -> void:
 	var d: Dictionary = _equipment[id]
@@ -228,6 +247,37 @@ func _show_equipment_detail(id: String) -> void:
 		var iid: String = id
 		buy.pressed.connect(func() -> void: _on_buy_equipment(iid))
 		_detail_box.add_child(buy)
+
+## B-2（2026-07-10）：內容區（左側清單＋右側詳情買鈕）串成一條 focus 鏈，ui_up/ui_down 可上下選、
+## ui_accept 觸發（Godot Button 內建）。清單保留在最上、詳情買鈕接在最後，選中商品不因換頁重建而丟失
+## （_select/_on_buy 皆會重呼 _show_detail 走到這裡）。
+func _wire_content_focus() -> void:
+	# 2026-07-10 review 退回修正（F3b）：原本用區域變數 chain，與 MenuShell 的 _focus_chain
+	# 命名/資料結構不一致，導致測試假設 shop._focus_chain 存在時直接崩潰。改存成員變數，
+	# 兩檔各自獨立實作不變（仍不共用程式碼），只是對外可核對的欄位名稱一致。
+	_focus_chain.clear()
+	for id in _rows:
+		_focus_chain.append(_rows[id])
+	for c in _detail_box.get_children():
+		if c is Button:
+			_focus_chain.append(c)
+	for i in _focus_chain.size():
+		var ctl: Control = _focus_chain[i]
+		ctl.focus_mode = Control.FOCUS_ALL
+		var prev: Control = _focus_chain[(i - 1 + _focus_chain.size()) % _focus_chain.size()]
+		var nxt: Control = _focus_chain[(i + 1) % _focus_chain.size()]
+		ctl.focus_neighbor_top = ctl.get_path_to(prev)
+		ctl.focus_neighbor_bottom = ctl.get_path_to(nxt)
+		ctl.focus_previous = ctl.get_path_to(prev)
+		ctl.focus_next = ctl.get_path_to(nxt)
+	# 選中的商品若在鏈上，優先保留焦點在它身上（剛買完東西時焦點停在買鈕，不要跳回清單頂端）；
+	# 否則預設落在清單第一項。
+	var keep: Control = _rows.get(_selected, null) if _selected != "" else null
+	if keep != null and keep in _focus_chain:
+		if not keep.has_focus():
+			keep.call_deferred("grab_focus")
+	elif not _focus_chain.is_empty():
+		_focus_chain[0].call_deferred("grab_focus")
 
 func _on_buy(id: String) -> void:
 	var price: int = int(_items[id].get("price", 0))

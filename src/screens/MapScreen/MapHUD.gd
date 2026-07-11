@@ -29,7 +29,6 @@ const JOB_NAMES: Dictionary = {
 	"ascetic": "苦行僧", "chanter": "念經僧", "beggar": "化緣僧"
 }
 
-@onready var time_label: Label        = %TimeLabel
 @onready var stats_label: Label       = %StatsLabel
 @onready var prompt: PanelContainer   = %InteractionPrompt
 @onready var prompt_label: RichTextLabel = %PromptLabel
@@ -48,6 +47,7 @@ const TEXT_COLOR: String = "#f5f2e8"     # 近白：提示文字
 var _toast_tween: Tween = null
 var _prompt_tween: Tween = null
 var _minimap: Control = null
+var _action_hints: Control = null
 
 func _ready() -> void:
 	prompt.visible = false
@@ -55,6 +55,7 @@ func _ready() -> void:
 	action_menu.visible = false
 	toast_label.visible = false
 	_add_minimap()
+	_add_action_hints()
 	GameManager.stat_changed.connect(func(_k, _v): update_stats())
 	GameManager.job_changed.connect(func(_j): update_stats())
 	EventBus.skill_unlocked.connect(func(n): show_toast("新技能解鎖：%s" % n))
@@ -67,16 +68,14 @@ func _ready() -> void:
 ## 見 docs/superpowers/specs/2026-07-07-layout-tuner-v2-design.md（P2 擴充）。
 ## 注意：小地圖是 _add_minimap() 在本函式之前動態 add_child 進來的，此時已存在。
 func _register_layout_tunables() -> void:
-	LayoutStore.register(time_label, "map/time_label")
 	LayoutStore.register(stats_label, "map/stats_label")
 	LayoutStore.register(prompt, "map/interaction_prompt")
 	LayoutStore.register(action_menu, "map/action_menu")
 	LayoutStore.register(toast_label, "map/toast")
 	if _minimap != null:
 		LayoutStore.register(_minimap, "map/minimap")
-
-func set_time(day: int, period_name: String) -> void:
-	time_label.text = "第 %d 天 ｜ %s" % [day, period_name]
+	if _action_hints != null:
+		LayoutStore.register(_action_hints, "map/action_hints")
 
 func update_stats() -> void:
 	var p: Dictionary = GameManager.player
@@ -166,3 +165,66 @@ func _add_minimap() -> void:
 	mm.offset_right = -16.0; mm.offset_bottom = 208.0
 	add_child(mm)
 	_minimap = mm
+
+## 左側常駐操作提示列（2026-07-10：使用者實機回饋「不知道 M 開選單/Shift 跑步/A·D 轉視角」，
+## 半透明低調鍵帽＋中文說明，三行）。鍵位事實：open_menu=M（project.godot 77）、
+## sprint=Shift（PlayerController.gd 執行期註冊）、cam_left/cam_right=Q/E（CameraRig.gd 執行期
+## 註冊；2026-07-10 D-1 鍵位定案由 A/D 改 Q/E，避開與 ui_left/right(WASD 移動) 的鍵位重疊）。
+func _add_action_hints() -> void:
+	var box := VBoxContainer.new()
+	box.name = "ActionHints"
+	box.anchor_left = 0.0; box.anchor_right = 0.0
+	box.anchor_top = 1.0; box.anchor_bottom = 1.0
+	# 疊在 StatsLabel（bottom-left，y範圍 -200~-24）正上方，留 10px 間距避免重疊。
+	box.offset_left = 20.0; box.offset_top = -300.0
+	box.offset_right = 260.0; box.offset_bottom = -210.0
+	box.add_theme_constant_override("separation", 6)
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.modulate.a = 0.72
+	add_child(box)
+	box.add_child(_hint_row(["M"], "經書"))
+	box.add_child(_hint_row(["Shift"], "跑步"))
+	box.add_child(_hint_row(["◀Q", "E▶"], "轉視角"))
+	_action_hints = box
+
+## 單行提示：一或多個鍵帽（StyleBoxFlat 圓角深底＋描邊字）＋中文說明。
+func _hint_row(keys: Array, desc_text: String) -> Control:
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", 6)
+	for k in keys:
+		row.add_child(_key_cap(String(k)))
+	var desc := Label.new()
+	desc.text = desc_text
+	desc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	desc.add_theme_color_override("font_color", Color(TEXT_COLOR))
+	desc.add_theme_color_override("font_outline_color", Color(0.03, 0.03, 0.03, 1.0))
+	desc.add_theme_constant_override("outline_size", 4)
+	desc.add_theme_font_size_override("font_size", 18)
+	desc.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	row.add_child(desc)
+	return row
+
+## 鍵帽樣式：圓角深底＋朱紅描邊，字白色＋描邊保證可讀。
+func _key_cap(key_text: String) -> Control:
+	var pc := PanelContainer.new()
+	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.05, 0.05, 0.06, 0.78)
+	sb.border_color = Color(KEY_COLOR)
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(4)
+	sb.content_margin_left = 8.0; sb.content_margin_right = 8.0
+	sb.content_margin_top = 2.0; sb.content_margin_bottom = 2.0
+	pc.add_theme_stylebox_override("panel", sb)
+	pc.custom_minimum_size = Vector2(32.0, 0.0)
+	var lbl := Label.new()
+	lbl.text = key_text
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lbl.add_theme_color_override("font_color", Color(TEXT_COLOR))
+	lbl.add_theme_color_override("font_outline_color", Color(0.03, 0.03, 0.03, 1.0))
+	lbl.add_theme_constant_override("outline_size", 3)
+	lbl.add_theme_font_size_override("font_size", 16)
+	pc.add_child(lbl)
+	return pc

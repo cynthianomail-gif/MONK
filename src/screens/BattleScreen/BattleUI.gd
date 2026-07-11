@@ -54,6 +54,12 @@ var _skill_nav_ids: Array = []     # Array[String]，可選技能 id（disabled 
 var _skill_selected: int = 0
 var _skill_nav_active: bool = false
 
+# B-1（2026-07-10）：目標選擇鍵盤導航。沿用 _skill_nav_active 同款「獨立 gate 旗標＋手動索引」
+# 慣例（見 _kb_nav_survey.md 第 5 項），不用 Godot focus 系統——EnemyPanel 是「整卡透明覆蓋按鈕」
+# 手法，敵人橫向排列，左右鍵最直覺，不需要 4 向 focus_neighbor。
+var _target_nav_active: bool = false
+var _target_selected: int = 0
+
 func _ready() -> void:
 	_items = JsonLoader.load_json("res://data/items.json")
 	skill_menu.visible = false
@@ -391,6 +397,24 @@ func _skill_is_heat(id: String) -> bool:
 	return sk.get("is_heat_action", false)
 
 func _input(event: InputEvent) -> void:
+	# B-1（2026-07-10）：目標選擇導航優先於技能選單導航——兩個 gate 旗標互斥
+	# （_on_skill_card_pressed 選定技能後才 _begin_target_nav，_skill_nav_active 已在
+	# 選技能當下被設為 false，理論上不會同時為 true，這裡仍先判斷 _target_nav_active
+	# 以防萬一，避免同一顆左右鍵被兩層搶著處理）。
+	if _target_nav_active:
+		if event.is_action_pressed("ui_left"):
+			_move_target_selection(-1)
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("ui_right"):
+			_move_target_selection(1)
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("interact") or event.is_action_pressed("confirm"):
+			_confirm_target_selection()
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("cancel"):
+			_cancel_target_selection()
+			get_viewport().set_input_as_handled()
+		return
 	if not _skill_nav_active:
 		return
 	if event.is_action_pressed("ui_down"):
@@ -448,10 +472,12 @@ func _on_skill_card_pressed(skill_id: String) -> void:
 		_set_focus_dim(true)  # 聚焦演出：背景壓暗
 		for p in _panels:
 			p.set_target_mode(true)
+		_begin_target_nav()
 	else:
 		manager.player_use_skill(skill_id, _first_alive_index())
 
 func _on_target_chosen(panel: EnemyPanel) -> void:
+	_end_target_nav()
 	for p in _panels:
 		p.set_target_mode(false)
 	_set_focus_dim(false)
@@ -460,6 +486,62 @@ func _on_target_chosen(panel: EnemyPanel) -> void:
 	var skill: String = _pending_skill
 	_pending_skill = ""
 	manager.player_use_skill(skill, panel.index)
+
+# ─── 目標選擇鍵盤導航（B-1）──────────────────────────────
+## 開啟目標導航：選中索引落在第一個存活的敵人，並刷新高亮。
+func _begin_target_nav() -> void:
+	_target_nav_active = true
+	_target_selected = _first_alive_panel_index()
+	_refresh_target_highlight()
+
+## 關閉目標導航（確認出招／取消返回時都要呼叫，避免高亮殘留）。
+func _end_target_nav() -> void:
+	_target_nav_active = false
+	for p in _panels:
+		p.set_keyboard_selected(false)
+
+func _first_alive_panel_index() -> int:
+	for i in _panels.size():
+		if _panels[i].combatant.is_alive():
+			return i
+	return 0
+
+## 左右鍵切換目標：跳過已陣亡的敵人（同 _move_skill_selection 手法，跳過 disabled 項）。
+func _move_target_selection(dir: int) -> void:
+	var n: int = _panels.size()
+	if n == 0:
+		return
+	var i: int = _target_selected
+	for _k in n:
+		i = (i + dir + n) % n
+		if _panels[i].combatant.is_alive():
+			_target_selected = i
+			break
+	_refresh_target_highlight()
+
+func _refresh_target_highlight() -> void:
+	for i in _panels.size():
+		_panels[i].set_keyboard_selected(i == _target_selected)
+
+## Enter/E 確認：等同滑鼠點選中的那一個 EnemyPanel。
+func _confirm_target_selection() -> void:
+	if _target_selected < 0 or _target_selected >= _panels.size():
+		return
+	var panel: EnemyPanel = _panels[_target_selected]
+	if not panel.combatant.is_alive():
+		return
+	_on_target_chosen(panel)
+
+## ESC/cancel 取消目標選擇：回到技能子選單（同 _back_to_command 的「回上一層」語意，
+## 但目標選擇的上一層是技能選單而非指令選單——_pending_skill 保留技能未清空，
+## 只是這裡選擇不消費它、直接放棄本次出招流程並重開技能選單，行為與現有「返回」一致）。
+func _cancel_target_selection() -> void:
+	_end_target_nav()
+	for p in _panels:
+		p.set_target_mode(false)
+	_set_focus_dim(false)
+	_pending_skill = ""
+	show_skill_menu(manager.available_skills())
 
 ## 聚焦壓暗（第一期）：選目標時背景 modulate 壓暗 0.6。
 func _set_focus_dim(on: bool) -> void:
@@ -638,7 +720,7 @@ func _on_damage_dealt(target_id: String, amount: int, dtype: String) -> void:
 	if dtype == "miss":
 		opts["miss"] = true
 	else:
-		# 命中對象是敵人且屬性剛好是其弱點 → WEAK 標籤（reflect 打回玩家不算）
+		# 命中對象是敵人且屬性剛好是其弱點 → 如來爆擊標籤（reflect 打回玩家不算）
 		var tgt: Combatant = _combatant_for(target_id)
 		if tgt != null and dtype in tgt.weaknesses:
 			opts["hit_weakness"] = true

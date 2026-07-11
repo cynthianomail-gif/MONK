@@ -37,7 +37,9 @@ func _build() -> void:
 # --- ①鍵位表 ---
 # 查證出處：project.godot:157-220（interact/confirm/cancel/open_menu 等 InputMap）、
 # PlayerController.gd:49-56（sprint 執行期註冊=左Shift）、
-# CameraRig.gd:1-38+195-198（滑鼠視角預設捕捉即轉、A/D 備援轉視角）、
+# PlayerController.gd:59-73（2026-07-10 review 退回修正 F5：ui_left/right/up/down 內建 action
+# 執行期補上 WASD 事件，"W/A/S/D 移動" 這行文字原本查無實據，現在是真的）、
+# CameraRig.gd:1-38+195-198（滑鼠視角預設捕捉即轉、Q/E 備援轉視角，2026-07-10 由 A/D 改，見 D-1）、
 # DialogueHistoryPanel.gd:42-58（Tab 開關對話回想）、
 # MapScreen.gd:298-304+MapHUD.gd:11（"休息"＝定點互動，非全域熱鍵）。
 func _keymap_section() -> Control:
@@ -49,7 +51,7 @@ func _keymap_section() -> Control:
 		["W / A / S / D", "移動（方向鍵亦可）"],
 		["左 Shift（按住）", "跑步（探索中）／加速戰鬥演出（戰鬥中）"],
 		["滑鼠移動", "轉動視角（探索中預設鎖定游標）"],
-		["A / D", "轉動視角（備援，滑鼠不便時用）"],
+		["Q / E", "轉動視角（備援，滑鼠不便時用）"],
 		["E", "互動 / 灌注解鎖（修行盤）／完美格擋（戰鬥中）"],
 		["Esc", "開關選單／取消／切換滑鼠視角鎖定"],
 		["M", "開關選單"],
@@ -81,7 +83,7 @@ func _key_row(key_text: String, desc_text: String) -> Control:
 
 # --- ②戰鬥系統 ---
 # 查證出處：CommandMenu.gd:15-22（攻擊/技能/防禦/道具/護法/逃跑六指令，用詞照 COMMANDS 字樣）、
-# BattleTutorial.gd:18-39（POINTS 五教學點：回合順序/指令選單/弱點One More/完美格擋/初試身手）。
+# BattleTutorial.gd:18-39（POINTS 五教學點：回合順序/指令選單/弱點如來爆擊/完美格擋/初試身手）。
 func _battle_section() -> Control:
 	var panel := _panel()
 	var vb := VBoxContainer.new()
@@ -90,7 +92,7 @@ func _battle_section() -> Control:
 	var lines := [
 		"回合順序：依「敏捷」輪流行動，我方快過對方會先出手。",
 		"指令：攻擊（免費近身）／技能（耗業障/功德）／防禦（減傷）／道具（自我施放）／護法（第四期解鎖）／逃跑（雜魚戰可逃，Boss 不可逃）。",
-		"弱點與 One More：打中敵人弱點會觸發「One More」，可以立刻再行動一次，一路打到對方全倒。",
+		"弱點與佛祖保佑再來一擊：打中敵人弱點會觸發「如來爆擊」，佛祖保佑再來一擊，可以立刻再行動一次，一路打到對方全倒。",
 		"總攻擊：全體敵人皆倒地（或皆中弱點）時可發動的收尾強攻。",
 		"完美格擋：敵人出招前會有紅色警示，這時按下「E」，能大幅減傷。",
 		"加速：按住「Shift」讓戰鬥演出以 2.5 倍速播放，放開恢復原速。",
@@ -103,6 +105,7 @@ func _battle_section() -> Control:
 # --- ③時段規則 ---
 # 查證出處：MapScreen.gd:298-304（"rest" 動作：GameManager.heal(150) + pending_period_advance）、
 # 07-08 交接記憶：時段改版只在戰鬥/小遊戲結束後推進，對話/移動/打工不推進。
+# 2026-07-10：字卡文字已拿掉，時段推進只剩短暫轉場黑幕，畫面靠場景光影變化呈現。
 func _period_section() -> Control:
 	var panel := _panel()
 	var vb := VBoxContainer.new()
@@ -111,6 +114,7 @@ func _period_section() -> Control:
 	var lines := [
 		"時段只在「戰鬥結束」或「小遊戲完成」後推進，對話、移動、打工都不會推進時段。",
 		"「休息」＝在特定地點以 E 主動打坐：立即回血並推進到下一時段，是主動控制時段的手段。",
+		"時段推進只有一瞬間的黑幕轉場，不會顯示文字說明，新的時段以場景光影變化呈現。",
 	]
 	for l in lines:
 		vb.add_child(_line(l))

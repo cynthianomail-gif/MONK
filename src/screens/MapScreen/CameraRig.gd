@@ -5,14 +5,18 @@ extends Node3D
 ## 但體驗上更像「按著按鈕才勉強轉一點」，完全不是使用者期待的 FPS 直覺（滑鼠一動
 ## 就轉）。2026-07-05 改為：探索中滑鼠 MOUSE_MODE_CAPTURED、X 軸直轉 yaw、Y 軸轉
 ## pitch(clamp 防翻天)；任何 UI 開啟（手機選單/對話/商店/小遊戲/結算/傳送）自動
-## 釋放滑鼠、關閉後恢復；Esc 手動切換。A/D 鍵轉視角與右鍵拖曳（備援輸入裝置時）皆保留。
+## 釋放滑鼠、關閉後恢復；Esc 手動切換。Q/E 鍵轉視角與右鍵拖曳（備援輸入裝置時）皆保留。
+## 2026-07-10（D-1 鍵位定案）：轉視角備援鍵原為 A/D，與 ui_left/ui_right（Godot 內建
+## WASD 移動）鍵位重疊，導致玩家按 A/D 時「移動＋轉鏡頭」同時觸發。移動維持 ui_*
+## （WASD+方向鍵天然都通，且 B 批 UI 鍵盤化要用 ui_left/right/up/down），改動這裡的
+## cam_left/cam_right 綁鍵而非動 PlayerController，兩批工作互不影響。
 
 @export var target_path: NodePath
 @export var camera_offset: Vector3 = Vector3(0.0, 11.0, 9.0)
 @export var camera_pitch_deg: float = -12.0
 @export var follow_speed: float = 0.08
 
-const KEY_ROT_SPEED := 2.2       # A/D 旋轉速度 (rad/s)
+const KEY_ROT_SPEED := 2.2       # Q/E 旋轉速度 (rad/s)
 const MOUSE_ROT_SENS := 0.008    # 滑鼠 yaw 靈敏度 (rad/px)——捕捉模式與右鍵拖曳共用
 const MOUSE_PITCH_SENS := 0.006  # 滑鼠 pitch 靈敏度 (rad/px)
 const PITCH_MIN_DEG := -35.0     # pitch clamp：不讓相機翻到地板下
@@ -192,9 +196,10 @@ func _set_mouse_captured(want_captured: bool) -> void:
 	_captured = want_captured
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if want_captured else Input.MOUSE_MODE_VISIBLE
 
-## 執行期註冊 cam_left(A) / cam_right(D)，避免動 project.godot 的 InputEvent 序列化格式。
+## 執行期註冊 cam_left(Q) / cam_right(E)，避免動 project.godot 的 InputEvent 序列化格式。
+## 2026-07-10：原為 A/D，改 Q/E 以避開 ui_left/ui_right（WASD 移動）鍵位重疊（D-1）。
 func _register_rotate_actions() -> void:
-	for pair in [["cam_left", KEY_A], ["cam_right", KEY_D]]:
+	for pair in [["cam_left", KEY_Q], ["cam_right", KEY_E]]:
 		var action: String = pair[0]
 		if InputMap.has_action(action):
 			continue

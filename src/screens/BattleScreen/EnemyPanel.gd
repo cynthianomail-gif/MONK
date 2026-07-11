@@ -14,6 +14,7 @@ var vfx: Control = null  # boss VFX 疊層(非 boss 為 null)
 
 var _figure: BreathingFigure
 var _hit_button: Button
+var _select_ring: PanelContainer  # B-1（2026-07-10）：鍵盤/手把選中態高亮框，滑鼠 hover 無此節點沿用純色不變
 var _name_label: Label
 var _hp_bar: ProgressBar
 var _hp_text: Label
@@ -120,6 +121,20 @@ func _init(c: Combatant, idx: int) -> void:
 	_hit_button.pressed.connect(func(): target_pressed.emit(self))
 	add_child(_hit_button)
 
+	# B-1（2026-07-10）：鍵盤/手把左右鍵切換目標時的選中態高亮框（金色描邊，貼合整格）。
+	# 預設隱藏；只在 target_mode 開啟且 BattleUI 判定本卡為目前選中索引時顯示。
+	_select_ring = PanelContainer.new()
+	_select_ring.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_select_ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var ring_sb := StyleBoxFlat.new()
+	ring_sb.bg_color = Color(0, 0, 0, 0)
+	ring_sb.set_border_width_all(4)
+	ring_sb.border_color = Color("#FFD700")
+	ring_sb.set_corner_radius_all(8)
+	_select_ring.add_theme_stylebox_override("panel", ring_sb)
+	_select_ring.visible = false
+	add_child(_select_ring)
+
 	c.hp_changed.connect(_on_hp_changed)
 	c.down_changed.connect(_on_down_changed)
 	_on_hp_changed(c.current_hp, c.max_hp)
@@ -180,6 +195,13 @@ func refresh_weakness_badges() -> void:
 
 func set_target_mode(enabled: bool) -> void:
 	_hit_button.visible = enabled and combatant.is_alive()
+	if not enabled:
+		_select_ring.visible = false
+
+## B-1（2026-07-10）：鍵盤/手把選目標時的高亮框開關，供 BattleUI 依目前選中索引呼叫。
+## 與滑鼠 hover 並存不互斥——滑鼠點擊仍走 _hit_button.pressed，本方法只管視覺高亮。
+func set_keyboard_selected(selected: bool) -> void:
+	_select_ring.visible = selected and _hit_button.visible
 
 ## 持久換站姿（Boss 進階段）。
 func set_base_portrait(path: String) -> void:
