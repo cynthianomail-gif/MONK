@@ -217,6 +217,15 @@ func _play_dialogue(timeline: String) -> void:
 	if not ResourceLoader.exists("res://dialogue/%s.dtl" % timeline):
 		push_warning("MainQuest: 對話 %s 未製作，略過" % timeline)
 		return
+	# C-1 修正：held 過場（hold=true，_on_cinematic_backdrop）結束後不換場，StoryCutscene
+	# 仍是 current_scene、停在最後一幀。Dialogic 對話開場的 [background] 淡入是跟「前一張
+	# Dialogic 背景」交叉淡化，本場景從未設過 Dialogic 背景，淡入過程中 Dialogic 背景層本身
+	# 透明度是從 0 升到 1，會透出底下這張不相干的舊過場停格（＝玩家回報的「背景圖殘留」）。
+	# 對話要開始前，把仍在背景的 held 過場收成純黑，淡入期間透出的是黑幕而非舊畫面。
+	if _on_cinematic_backdrop:
+		var cur := get_tree().current_scene
+		if cur != null and cur.has_method("hold_to_black"):
+			cur.hold_to_black()
 	# 沉澱輸入 0.35s：上一幕過場的跳過鍵（Enter/空白）＝對話推進鍵，殘留輸入會連跳對話。
 	await get_tree().create_timer(0.35).timeout
 	Dialogic.start(timeline)

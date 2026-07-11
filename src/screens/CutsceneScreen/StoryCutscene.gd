@@ -498,6 +498,44 @@ func _finish() -> void:
 	_playing = false
 	finished.emit()
 
+## 供「held」流程使用（MainQuestManager stage.hold=true 時本場景播完不換場，
+## 留著當下一段對話的背景畫布）：把畫面收成純黑，蓋掉最後一幀停格與所有轉場疊層。
+## 根因（C-1 bug）：Dialogic 的 [background] 淡入是「前一張 Dialogic 背景→新背景」
+## 的 shader 交叉淡化；本過場從未設過 Dialogic 背景，所以「前一張」在 shader 眼中是
+## 全透明，淡入過程中 Dialogic 背景層本身透明度從 0 升到 1，這段時間會透出「疊在它
+## 下面、仍完整不透明」的 StoryCutscene 停格畫面——玩家看到的就是「過場背景殘留」。
+## 對話一開始通常會立刻設自己的 [background]（本專案兩處 hold 後接的對話皆是），
+## 停格幀本來就不是要給那段對話當背景用，改收黑即可讓淡入過程透出的是黑幕而非
+## 不相干的舊過場畫面，且視覺上與「淡入淡出」天然融合。
+func hold_to_black() -> void:
+	_playing = false
+	if _frame != null:
+		_frame.texture = null
+		_frame.visible = false
+	if _black != null:
+		_black.visible = true
+		_black.modulate.a = 1.0
+		_black.color = Color.BLACK
+	if _cap_box != null:
+		_cap_box.visible = false
+	if _blur != null:
+		_blur.visible = false
+	if _flash != null:
+		_flash.color.a = 0.0
+	if _eye != null and _eye.material is ShaderMaterial:
+		(_eye.material as ShaderMaterial).set_shader_parameter("close", 0.0)
+	_open_lids_instant()
+	if _skip_hint_label() != null:
+		_skip_hint_label().visible = false
+
+## _make_skip_hint() 建立的提示是動態 add_child，沒存參照；held 收黑時一併找出來隱藏
+## （held 狀態下已無跳過操作可跳，提示留著會跟黑幕一起卡在畫面上）。
+func _skip_hint_label() -> Label:
+	for child in get_children():
+		if child is Label:
+			return child
+	return null
+
 # --- UI ---
 
 func _build_ui() -> void:

@@ -52,9 +52,13 @@ const WUJIE_MOODS := ["calm", "angry", "happy", "surprised"]
 var _wujie_char: Resource = load(WUJIE_DCH)
 
 const DIALOGUE_HISTORY_PANEL := preload("res://src/ui/DialogueHistoryPanel.gd")
+const DIALOGUE_SKIP_CONTROLLER := preload("res://src/ui/DialogueSkipController.gd")
 
 ## 對話回想 log 面板：常駐掛在 root 下，跨場景可用（Tab 開關，見 DialogueHistoryPanel.gd）。
 var dialogue_history: CanvasLayer
+
+## 對話 ESC 快轉控制器：常駐掛在 root 下（C-2，見 DialogueSkipController.gd）。
+var dialogue_skip: CanvasLayer
 
 func _ready() -> void:
 	# 對話橋接：timeline 內 [signal arg="type:value"] → 改動遊戲狀態。
@@ -64,6 +68,8 @@ func _ready() -> void:
 	Dialogic.timeline_started.connect(_apply_wujie_job_portraits)
 	# 對話回想 log：建一次常駐 overlay，掛在 root 下（不依賴特定畫面）。
 	_setup_dialogue_history()
+	# 對話 ESC 快轉：建一次常駐 overlay，掛在 root 下（不依賴特定畫面）。
+	_setup_dialogue_skip()
 
 func _setup_dialogue_history() -> void:
 	if is_instance_valid(dialogue_history):
@@ -71,6 +77,13 @@ func _setup_dialogue_history() -> void:
 	dialogue_history = DIALOGUE_HISTORY_PANEL.new()
 	dialogue_history.name = "DialogueHistoryPanel"
 	get_tree().root.add_child.call_deferred(dialogue_history)
+
+func _setup_dialogue_skip() -> void:
+	if is_instance_valid(dialogue_skip):
+		return
+	dialogue_skip = DIALOGUE_SKIP_CONTROLLER.new()
+	dialogue_skip.name = "DialogueSkipController"
+	get_tree().root.add_child.call_deferred(dialogue_skip)
 
 ## 把 Wujie 角色資源的 4 表情立繪換成當前職業的 bust。Dialogic 以快取資源載入
 ## "Wujie" → 改的就是它實際用的那份；image 用 var_to_str 格式(同 .dch 存法)。
