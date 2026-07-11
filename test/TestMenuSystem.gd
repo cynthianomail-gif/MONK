@@ -3,6 +3,18 @@
 ## 跑法：Godot --headless res://test/TestMenuSystem.tscn
 ## 之後會補上 MenuShell/SkillsPage/StatusPage 場景煙霧測試。
 
+## 測試專用：SettingsApp 子類別，攔截 _go_to_title()（2026-07-11「儲存」／「回主選單」）
+## 只記旗標、手動解暫停，不真的呼叫 SceneRouter.go_to_title()——那會 change_scene_to_file
+## 把「這個測試自己的場景」換掉（TestMenuSystem.tscn 本身就是 current_scene），沒必要為了
+## 驗證「有沒有正確判斷要不要回標題」去冒炸掉整條測試鏈的風險。SaveSlotPicker 的存檔正確性
+## 已在 TestSaveSlots.gd 完整驗證（含真實存檔備份/還原紅線），這裡只驗證 SettingsApp 的
+## 判斷/接線邏輯，「儲存並離開」分支用手動 emit slot_chosen 模擬選槽成功，不觸發真正寫檔。
+class _StubSettingsApp extends "res://src/ui/menu/pages/SettingsApp.gd":
+	var went_to_title: bool = false
+	func _go_to_title() -> void:
+		went_to_title = true
+		get_tree().paused = false
+
 var ok: bool = true
 
 func _ready() -> void:
@@ -18,6 +30,8 @@ func _ready() -> void:
 	await _test_pending_arrival()
 	await _test_travel_app()
 	await _test_job_app()
+	await _test_settings_app_save_exit()
+	await _test_menu_shell_modal_guard()
 	print("MENU_TEST: ", "ALL PASS" if ok else "HAS FAILURES")
 	get_tree().quit(0 if ok else 1)
 
@@ -330,4 +344,152 @@ func _test_job_app() -> void:
 	# 打工不再直接推時段（2026-07-08 拍板：只有戰鬥/小遊戲完成才推進；打工進小遊戲，
 	# 完成時走 pending_period_advance，此處僅驗證按鈕存在即進入小遊戲，不驗時段）
 	app.queue_free()
+	await get_tree().process_frame
+
+## 手機「設定」頁「儲存」／「回主選單」（2026-07-11）：按鈕存在＋三選一確認框各分支接線。
+## 全程不觸發真的 SceneRouter.go_to_title()（見 _StubSettingsApp）、不觸發真的存檔寫檔
+## （「儲存」分支只開 picker 後 close() 取消；「儲存並離開」分支用手動 emit slot_chosen
+## 模擬選槽成功，不呼叫 SaveManager.save_to_slot）。
+func _test_settings_app_save_exit() -> void:
+	var app := _StubSettingsApp.new()
+	get_tree().root.add_child(app)
+	await get_tree().process_frame
+
+	var save_btn := _find_button_by_text(app, "儲存進度")
+	var exit_btn := _find_button_by_text(app, "回主選單")
+	_check(save_btn != null, "SettingsApp 有「儲存進度」按鈕")
+	_check(exit_btn != null, "SettingsApp 有「回主選單」按鈕")
+
+	# 「儲存進度」：開出 SaveSlotPicker(save 模式)；用 close() 收尾（不選槽＝不落地寫檔）。
+	if save_btn != null:
+		save_btn.pressed.emit()
+		await get_tree().process_frame
+		var picker: Node = get_tree().root.get_node_or_null("SaveSlotPicker")
+		_check(picker != null, "按「儲存進度」後 SaveSlotPicker 出現")
+		if picker != null:
+			_check(String(picker.mode) == "save", "picker 是 save 模式 (got %s)" % picker.mode)
+			picker.close()
+			for i in 2:
+				await get_tree().process_frame
+			_check(get_tree().root.get_node_or_null("SaveSlotPicker") == null, "取消存檔後 picker 已清除")
+
+	if exit_btn == null:
+		app.queue_free()
+		return
+
+	GameManager.new_game()
+	SaveManager._last_saved_snapshot = SaveManager._player_snapshot()  # 純記憶體同步，不落地寫檔
+
+	# --- 已儲存（無未儲存變更）：直接判定回標題，不彈框 ---
+	_check(not SaveManager.has_unsaved_changes(), "前置：剛同步快照後無未儲存變更")
+	app.went_to_title = false
+	get_tree().paused = true
+	exit_btn.pressed.emit()
+	await get_tree().process_frame
+	_check(app.went_to_title, "無未儲存變更時「回主選單」直接判定回標題")
+	_check(get_tree().root.get_node_or_null("ExitConfirmDialog") == null, "無未儲存變更時不出現確認框")
+
+	# --- 有未儲存變更 → 取消：留在原頁，不回標題、不解暫停 ---
+	GameManager.player.gold += 999
+	_check(SaveManager.has_unsaved_changes(), "前置：修改 gold 後有未儲存變更")
+	app.went_to_title = false
+	get_tree().paused = true
+	exit_btn.pressed.emit()
+	await get_tree().process_frame
+	var dlg1: Node = get_tree().root.get_node_or_null("ExitConfirmDialog")
+	_check(dlg1 != null, "有未儲存變更時「回主選單」開出確認框")
+	if dlg1 != null:
+		dlg1.choice_made.emit("cancel")
+		await get_tree().process_frame
+		_check(not app.went_to_title, "選「取消」不回標題")
+		_check(get_tree().paused, "選「取消」仍暫停，留在原頁")
+		_check(get_tree().root.get_node_or_null("ExitConfirmDialog") == null, "取消後確認框已清除")
+
+	# --- 有未儲存變更 → 不儲存離開：直接回標題 ---
+	app.went_to_title = false
+	get_tree().paused = true
+	exit_btn.pressed.emit()
+	await get_tree().process_frame
+	var dlg2: Node = get_tree().root.get_node_or_null("ExitConfirmDialog")
+	_check(dlg2 != null, "重新按「回主選單」再次開出確認框")
+	if dlg2 != null:
+		dlg2.choice_made.emit("discard")
+		await get_tree().process_frame
+		_check(app.went_to_title, "選「不儲存離開」直接回標題")
+
+	# --- 有未儲存變更 → 儲存並離開：開 picker，選槽成功（模擬訊號）才回標題 ---
+	GameManager.player.gold += 1
+	app.went_to_title = false
+	get_tree().paused = true
+	exit_btn.pressed.emit()
+	await get_tree().process_frame
+	var dlg3: Node = get_tree().root.get_node_or_null("ExitConfirmDialog")
+	_check(dlg3 != null, "第三次按「回主選單」開出確認框")
+	if dlg3 != null:
+		dlg3.choice_made.emit("save")
+		await get_tree().process_frame
+		var picker3: Node = get_tree().root.get_node_or_null("SaveSlotPicker")
+		_check(picker3 != null, "選「儲存並離開」開出 SaveSlotPicker")
+		_check(not app.went_to_title, "picker 開啟中尚未回標題")
+		if picker3 != null:
+			# 模擬玩家選槽成功；不呼叫真的 SaveManager.save_to_slot，避免落地寫檔——
+			# picker 自身的存檔正確性已在 TestSaveSlots.gd 完整驗證，這裡只驗證
+			# SettingsApp 收到 slot_chosen 後有沒有正確回標題。
+			picker3.slot_chosen.emit(1)
+			await get_tree().process_frame
+			_check(app.went_to_title, "picker 選槽完成（訊號）後回標題")
+			picker3.closed.emit()
+			await get_tree().process_frame
+			_check(get_tree().root.get_node_or_null("SaveSlotPicker") == null, "流程結束後 picker 已清除")
+
+	get_tree().paused = false
+	app.queue_free()
+	await get_tree().process_frame
+
+func _find_button_by_text(node: Node, text: String) -> Button:
+	if node is Button and node.text == text:
+		return node
+	for c in node.get_children():
+		var found := _find_button_by_text(c, text)
+		if found != null:
+			return found
+	return null
+
+## MenuShell._input() 的 modal_overlay 守衛（2026-07-11）：SaveSlotPicker／ExitConfirmDialog
+## 疊在 MenuShell 上層開啟時，MenuShell 自己的按鍵處理（含 Esc/cancel 關閉選單）要整組讓出，
+## 不然埋在場景樹較深的 MenuShell 可能搶在後補的 overlay 之前吃掉輸入（見 MenuShell.gd 開頭
+## 守衛註解）。這裡不用真的 SaveSlotPicker/ExitConfirmDialog，只要「有節點在 modal_overlay
+## 群組裡」這個條件成立即可，直接造一個空 Node 掛群組，驗證守衛只看群組成員、不挑節點類型。
+func _test_menu_shell_modal_guard() -> void:
+	var shell_ps: PackedScene = load("res://src/ui/menu/MenuShell.tscn")
+	var shell = shell_ps.instantiate()
+	shell.set("pause_game", true)
+	get_tree().root.add_child(shell)
+	for i in 3:
+		await get_tree().process_frame
+	_check(get_tree().paused, "MenuShell 開啟後（pause_game=true）tree 進入暫停")
+
+	var fake_overlay := Node.new()
+	get_tree().root.add_child(fake_overlay)
+	fake_overlay.add_to_group("modal_overlay")
+	await get_tree().process_frame
+
+	var cancel_event := InputEventAction.new()
+	cancel_event.action = "cancel"
+	cancel_event.pressed = true
+	shell._input(cancel_event)
+	await get_tree().process_frame
+	_check(is_instance_valid(shell) and get_tree().paused,
+		"modal_overlay 存在時 MenuShell._input 讓出 cancel（未關閉、tree 仍暫停）")
+
+	fake_overlay.queue_free()
+	await get_tree().process_frame
+
+	# 拿掉 modal_overlay 後，同一顆 cancel 事件應正常關閉選單並解暫停——證明剛才沒關閉
+	# 是因為守衛生效，不是別的原因（例如事件本身無效）。
+	shell._input(cancel_event)
+	await get_tree().process_frame
+	_check(not get_tree().paused, "拿掉 modal_overlay 後 MenuShell._input 正常處理 cancel（tree 解暫停）")
+
+	get_tree().paused = false
 	await get_tree().process_frame

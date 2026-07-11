@@ -49,6 +49,8 @@ func _ready() -> void:
 	_test_legacy_visible_readonly()
 	_reset_save_manager_state()
 	_test_new_game_does_not_clobber_legacy()
+	_reset_save_manager_state()
+	_test_has_unsaved_changes()
 
 	_cleanup_test_artifacts()
 	_restore_real_saves()
@@ -166,6 +168,7 @@ func _reset_save_manager_state() -> void:
 	_cleanup_test_artifacts()
 	SaveManager.active_slot = 1
 	SaveManager._migrated = false  # 強迫下次呼叫重新跑一次遷移檢查（此時應該是 no-op，因為沒有舊檔）
+	SaveManager._last_saved_snapshot = ""  # 「未儲存進度」快照歸零，避免跨子測試互相污染
 
 # ─── a) save_to_slot(2) → load_from_slot(2) 資料一致且 active_slot=2 ───
 func _test_save_load_roundtrip() -> void:
@@ -329,3 +332,31 @@ func _test_new_game_does_not_clobber_legacy() -> void:
 	_reset_save_manager_state()
 	SaveManager.select_slot_for_new_game()
 	_check(SaveManager.active_slot == 1, "零存檔新遊戲挑 slot1 (got %d)" % SaveManager.active_slot)
+
+# ─── h) has_unsaved_changes()：設定頁「回主選單」守門用的全量快照比對 ───────────
+func _test_has_unsaved_changes() -> void:
+	GameManager.new_game()
+	# 開局尚未存讀過（快照已被 _reset_save_manager_state 歸零）：刻意保守，視為「有未儲存」。
+	_check(SaveManager.has_unsaved_changes(), "new_game 後、首次存檔前＝有未儲存變更（刻意保守）")
+
+	SaveManager.save_to_slot(1)
+	_check(not SaveManager.has_unsaved_changes(), "save_to_slot 後＝無未儲存變更")
+
+	GameManager.player.gold = 12345
+	_check(SaveManager.has_unsaved_changes(), "存檔後修改 gold＝偵測到未儲存變更")
+
+	SaveManager.save_to_slot(1)
+	_check(not SaveManager.has_unsaved_changes(), "再次存檔後＝變更已清除")
+
+	GameManager.player.day = 99
+	_check(SaveManager.has_unsaved_changes(), "存檔後修改 day＝偵測到未儲存變更")
+	var loaded := SaveManager.load_from_slot(1)
+	_check(loaded, "load_from_slot(1) 成功")
+	_check(not SaveManager.has_unsaved_changes(), "load_from_slot 後＝視為已與存檔一致，無未儲存變更")
+	_check(int(GameManager.player.day) != 99, "load_from_slot 覆蓋了 day 的未存變更 (got %d)" % int(GameManager.player.day))
+
+	# 巢狀欄位（flags/inventory 等 Dictionary）變更也要偵測到——全量序列化比對不看欄位種類。
+	GameManager.set_flag("test_unsaved_flag", true)
+	_check(SaveManager.has_unsaved_changes(), "巢狀 flags 變更也被偵測到")
+	GameManager.player.flags.erase("test_unsaved_flag")
+	_check(not SaveManager.has_unsaved_changes(), "還原巢狀變更後＝無未儲存變更")

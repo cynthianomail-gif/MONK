@@ -75,6 +75,12 @@ func close() -> void:
 ## 這裡先攔截切裝置，摧毀修行盤節點，長按永遠打不完。改用不與任何既有 action/鍵位重疊的
 ## [ / ]（bracket），CameraRig 的 Q/E 轉視角（D-1，地圖場景另一個獨立情境）不受影響、未改動。
 func _input(event: InputEvent) -> void:
+	# 2026-07-11（設定頁「儲存」／「回主選單」）：SaveSlotPicker／ExitConfirmDialog 疊在
+	# MenuShell 上層開啟時整組讓出鍵盤——它們是後補到 get_tree().root 的兄弟節點，_input()
+	# 呼叫順序（同優先度時依場景樹序）比埋在 MapScreen 底下較早的 MenuShell 晚，若不讓出，
+	# MenuShell 這裡的 set_input_as_handled() 會搶先吃掉 Esc/方向鍵/Enter，overlay 收不到。
+	if get_tree().get_first_node_in_group("modal_overlay") != null:
+		return
 	if event.is_action_pressed("cancel") or event.is_action_pressed("open_menu"):
 		get_viewport().set_input_as_handled()
 		close()

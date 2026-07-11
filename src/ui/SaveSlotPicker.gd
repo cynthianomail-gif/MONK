@@ -41,8 +41,16 @@ var _confirm_target: int = -1
 
 func _ready() -> void:
 	name = "SaveSlotPicker"
-	layer = 100
+	# 101（非 100）：2026-07-11 起設定頁「儲存」會在 MenuShell（layer 100）開啟中疊出這個
+	# picker，同層 CanvasLayer 疊放順序不保證跟著 add_child 的先後（未見官方文件保證），
+	# 明確高一層才確定蓋得住 MenuShell；對既有呼叫端（MapScreen/TitleScreen，皆無同層競爭
+	# CanvasLayer）無影響。
+	layer = 101
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# "modal_overlay" 群組（2026-07-11 設定頁「儲存」新用法加）：MenuShell._input() 見到此群組
+	# 有成員時會整個略過自己的按鍵處理，避免 picker 疊在 MenuShell 上層開啟時，Esc/方向鍵/Enter
+	# 被埋得較深、_input() 呼叫順序較早的 MenuShell 搶先攔截（兩邊都會 set_input_as_handled()）。
+	add_to_group("modal_overlay")
 	visible = false
 	_build()
 

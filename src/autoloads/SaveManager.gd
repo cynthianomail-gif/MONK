@@ -13,6 +13,24 @@ const LEGACY_SAVE_PATH: String = "user://save.json"
 var active_slot: int = 1
 var _migrated: bool = false
 
+## 「未儲存進度」偵測（2026-07-11，設定頁「回主選單」守門用）：記住最近一次
+## save_to_slot()／load_from_slot() 當下 GameManager.player 的序列化快照。
+## 用全量序列化比對而非逐處插「dirty旗標」——player dict 全專案多處直接賦值
+## （如 GameManager.player.day = 7），不保證每個寫入路徑都會呼叫同一個 setter，
+## 插旗標容易漏；全量比對零遺漏，符合「寧可多問一次，不可漏問」。
+## 純執行期記憶體狀態，不落地、不進存檔本身。
+var _last_saved_snapshot: String = ""
+
+func _player_snapshot() -> String:
+	return JSON.stringify(GameManager.player)
+
+## 供 UI（設定頁「回主選單」）判斷：目前玩家狀態是否與最近一次存檔／讀檔時不同。
+## 開局尚未存讀過（_last_saved_snapshot 仍是初始空字串）時，任何非空 player 狀態
+## 都會判定為「有未儲存變更」——這是刻意保守：全新一局在第一次存檔之前離開，
+## 嚴格來說確實還沒有任何存檔可對應，寧可多問一次。
+func has_unsaved_changes() -> bool:
+	return _player_snapshot() != _last_saved_snapshot
+
 func _slot_path(n: int) -> String:
 	return SLOT_PATH_FMT % n
 
@@ -126,6 +144,7 @@ func save_to_slot(n: int) -> void:
 	file.close()
 	active_slot = n
 	_save_meta()
+	_last_saved_snapshot = _player_snapshot()
 
 func load_from_slot(n: int) -> bool:
 	_ensure_migrated()
@@ -150,6 +169,7 @@ func load_from_slot(n: int) -> bool:
 		GameManager.player[key] = parsed[key]
 	active_slot = n
 	_save_meta()
+	_last_saved_snapshot = _player_snapshot()
 	return true
 
 func slot_exists(n: int) -> bool:
