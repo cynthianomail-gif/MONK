@@ -13,6 +13,7 @@ func _ready() -> void:
 	_build_env(self)
 	_build_district(self)
 	_build_forge(self)
+	_build_industrial_architecture(self)
 	_build_lanterns(self)
 	_build_props(self)
 	_build_parlor_door(self)
@@ -80,8 +81,8 @@ func _ground_mat() -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = COBBLE_SHADER
 	m.set_shader_parameter("albedo", Color(0.30, 0.29, 0.31))   # 暗石板
-	m.set_shader_parameter("stone_size", 1.1)
-	m.set_shader_parameter("bump", 0.45)                        # 夜街壓低凹凸，免得每顆變發亮鈕扣
+	m.set_shader_parameter("stone_size", 0.42)
+	m.set_shader_parameter("bump", 0.28)                        # 夜街壓低凹凸，免得每顆變發亮鈕扣
 	m.set_shader_parameter("rough_stone", 0.45)                 # 微濕面，反燈籠/爐火光
 	m.set_shader_parameter("mortar_darken", 0.55)
 	return m
@@ -336,14 +337,78 @@ func _merged_aabb(node: Node) -> AABB:
 	return aabb
 
 # ── 紅燈籠列(沿街，暗街的暖點) ────────────────────────────
+func _build_industrial_architecture(root: Node3D) -> void:
+	var architecture := Node3D.new()
+	architecture.name = "ArmoryArchitecture"
+	root.add_child(architecture)
+
+	var gantries := Node3D.new()
+	gantries.name = "Gantries"
+	architecture.add_child(gantries)
+	for z in [-6.0, -16.0]:
+		_box(gantries, Vector3(0, 5.05, z), Vector3(11.4, 0.28, 1.15), Color(0.10, 0.10, 0.12))
+		_box(gantries, Vector3(0, 5.25, z - 0.48), Vector3(11.4, 0.12, 0.10), Color(0.24, 0.18, 0.14))
+		_box(gantries, Vector3(0, 5.25, z + 0.48), Vector3(11.4, 0.12, 0.10), Color(0.24, 0.18, 0.14))
+		for x in [-5.45, 5.45]:
+			_box(gantries, Vector3(x, 2.55, z), Vector3(0.24, 5.1, 0.24), Color(0.09, 0.09, 0.11))
+			_box(gantries, Vector3(x, 3.35, z), Vector3(0.14, 0.14, 1.7), Color(0.22, 0.15, 0.12))
+
+	var pipes := Node3D.new()
+	pipes.name = "PipeRuns"
+	architecture.add_child(pipes)
+	for side in [-1.0, 1.0]:
+		for z in [-3.5, -11.5, -19.5, -27.0]:
+			_industrial_pipe(pipes, Vector3(side * 5.9, 3.25, z), 6.8, 0.15, Color(0.20, 0.18, 0.17), Vector3(90, 0, 0))
+			_industrial_pipe(pipes, Vector3(side * 5.9, 3.25, z - 3.0), 0.42, 0.22, Color(0.34, 0.20, 0.14), Vector3(90, 0, 0))
+		_industrial_pipe(pipes, Vector3(side * 5.9, 4.0, -30.0), 1.5, 0.15, Color(0.20, 0.18, 0.17), Vector3.ZERO)
+
+	var tanks := Node3D.new()
+	tanks.name = "StorageTanks"
+	architecture.add_child(tanks)
+	for tank_pos in [Vector3(-5.9, 1.35, -8.5), Vector3(5.9, 1.35, -13.5), Vector3(-5.9, 1.35, -23.5)]:
+		_industrial_pipe(tanks, tank_pos, 2.5, 0.72, Color(0.16, 0.16, 0.18), Vector3.ZERO)
+		_industrial_pipe(tanks, tank_pos + Vector3(0, 0.95, 0), 0.16, 0.79, Color(0.34, 0.20, 0.14), Vector3.ZERO)
+		_industrial_pipe(tanks, tank_pos - Vector3(0, 0.95, 0), 0.16, 0.79, Color(0.34, 0.20, 0.14), Vector3.ZERO)
+
+	var facades := Node3D.new()
+	facades.name = "FacadeFrames"
+	architecture.add_child(facades)
+	for z in [-2.0, -10.0, -18.0, -26.0]:
+		for side in [-1.0, 1.0]:
+			var x := float(side) * 5.48
+			_box(facades, Vector3(x, 2.1, z - 1.1), Vector3(0.12, 4.2, 0.16), Color(0.07, 0.07, 0.09))
+			_box(facades, Vector3(x, 2.1, z + 1.1), Vector3(0.12, 4.2, 0.16), Color(0.07, 0.07, 0.09))
+			_box(facades, Vector3(x, 4.05, z), Vector3(0.14, 0.18, 2.35), Color(0.26, 0.14, 0.11))
+
+	var cool_fill := OmniLight3D.new()
+	cool_fill.name = "ArmoryCoolFill"
+	cool_fill.position = Vector3(0, 5.8, -4.0)
+	cool_fill.light_color = Color(0.42, 0.52, 0.72)
+	cool_fill.light_energy = 0.85
+	cool_fill.omni_range = 21.0
+	architecture.add_child(cool_fill)
+
+func _industrial_pipe(root: Node3D, pos: Vector3, height: float, radius: float, color: Color, rotation_deg: Vector3) -> MeshInstance3D:
+	var pipe := MeshInstance3D.new()
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = radius
+	mesh.bottom_radius = radius
+	mesh.height = height
+	pipe.mesh = mesh
+	pipe.position = pos
+	pipe.rotation_degrees = rotation_deg
+	pipe.material_override = _flat_mat(color)
+	root.add_child(pipe)
+	return pipe
+
 func _build_lanterns(root: Node3D) -> void:
 	var z := 0.0
 	while z > -28.0:
 		for side in [-1, 1]:
 			var x := float(side) * 5.6
 			_box(root, Vector3(x, 2.2, z), Vector3(0.2, 4.4, 0.2), Color(0.11, 0.10, 0.12))   # 桿
-			_emissive(root, Vector3(x, 4.2, z), Vector3(0.42, 0.6, 0.42), Color(0.88, 0.22, 0.13), 1.9)
-			_omni(root, Vector3(x, 4.2, z), Color(0.95, 0.34, 0.20), 1.9, 9.0)
+			_emissive(root, Vector3(x, 4.2, z), Vector3(0.42, 0.6, 0.42), Color(0.88, 0.22, 0.13), 1.35)
+			_omni(root, Vector3(x, 4.2, z), Color(0.95, 0.34, 0.20), 1.15, 6.5)
 		z -= 6.0
 
 # ── 路邊道具：油桶堆、武器箱、垂吊鐵鏈 ────────────────────

@@ -48,6 +48,7 @@ func _ready() -> void:
 	_build_env(self)
 	_build_room(self)
 	_build_ceiling_beams(self)
+	_build_architectural_zones(self)
 	_build_pillars(self)
 	_build_carpet(self)
 	_build_medallion(self)
@@ -187,11 +188,11 @@ func _build_env(root: Node3D) -> void:
 	env.background_color = Color(0.07, 0.05, 0.06)
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color(0.50, 0.41, 0.32)          # 偏金的環境光，取代原本偏灰白
-	env.ambient_light_energy = 0.95                            # 室內無月光，ambient 要撐住可視度（0.55 實測全黑）
+	env.ambient_light_energy = 0.82                            # 室內保留可視度，避免紅金材質整片過曝
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.tonemap_exposure = 1.0
 	env.glow_enabled = true
-	env.glow_intensity = 0.75                                  # 拉高，讓金屬包邊/水晶燈有賭場該有的浮光
+	env.glow_intensity = 0.48                                  # 只讓地標與吊燈保留局部浮光
 	env.glow_bloom = 0.04
 	env.glow_hdr_threshold = 1.30                               # ⚠踩雷：1.05 太低，連皮膚色一般漫反射面都被糊成光斑（荷官頭變一團），
 	                                                             # 拉回接近 armory 原值(1.18)再加一點，只讓真正 emissive(金邊/吊燈) 發光
@@ -203,7 +204,7 @@ func _build_env(root: Node3D) -> void:
 	env.fog_light_color = Color(0.22, 0.15, 0.10)             # 室內雪茄煙霧，偏暖金
 	env.fog_density = 0.004
 	env.adjustment_enabled = true
-	env.adjustment_saturation = 1.08                            # 紅絨/金色要飽和一點才「金碧輝煌」
+	env.adjustment_saturation = 0.94                            # 壓低全室紅金洗色，保留地標色階
 	env.adjustment_contrast = 1.12
 	var we := WorldEnvironment.new()
 	we.environment = env
@@ -439,6 +440,61 @@ func _sconce(root: Node3D, pos: Vector3) -> void:
 ## 集中在入口到桌區之間（南半段），飛鏢靶所在的北牆角落(z<-4)
 ## 刻意不擺柱子——呼應真實賭場「大廳氣派、機檯區純功能」的分區直覺。
 ## 純視覺，無碰撞（同其餘桌具道具慣例，牆本身已擋人）。
+func _build_architectural_zones(root: Node3D) -> void:
+	var architecture := Node3D.new()
+	architecture.name = "ParlorArchitecture"
+	root.add_child(architecture)
+
+	var alcoves := Node3D.new()
+	alcoves.name = "StationAlcoves"
+	architecture.add_child(alcoves)
+	_build_station_frame(alcoves, Vector3(0, 0, -6.78), 2.8, Color(0.12, 0.07, 0.08))
+	_build_station_frame(alcoves, Vector3(-3.2, 0, -3.15), 2.25, Color(0.10, 0.08, 0.09))
+	_build_station_frame(alcoves, Vector3(3.2, 0, -3.15), 2.25, Color(0.10, 0.08, 0.09))
+	_build_station_frame(alcoves, Vector3(0, 0, 6.78), 2.4, Color(0.12, 0.07, 0.08))
+
+	var trusses := Node3D.new()
+	trusses.name = "CeilingTrusses"
+	architecture.add_child(trusses)
+	for z in [-4.5, 0.0, 4.5]:
+		_box(trusses, Vector3(0, 4.68, z), Vector3(9.8, 0.16, 0.18), Color(0.055, 0.045, 0.05))
+		var brace_a := _box(trusses, Vector3(-3.9, 4.48, z - 0.28), Vector3(2.5, 0.10, 0.10), Color(0.15, 0.10, 0.08))
+		brace_a.rotation_degrees.z = -12.0
+		var brace_b := _box(trusses, Vector3(3.9, 4.48, z + 0.28), Vector3(2.5, 0.10, 0.10), Color(0.15, 0.10, 0.08))
+		brace_b.rotation_degrees.z = 12.0
+
+	var partitions := Node3D.new()
+	partitions.name = "Partitions"
+	architecture.add_child(partitions)
+	for side in [-1.0, 1.0]:
+		var x := float(side) * 4.62
+		for z in [0.4, 3.8]:
+			_box(partitions, Vector3(x, 1.35, z), Vector3(0.12, 2.7, 1.65), Color(0.075, 0.055, 0.06))
+			for y in [0.55, 1.25, 1.95]:
+				_box(partitions, Vector3(x - side * 0.07, y, z), Vector3(0.06, 0.08, 1.55), Color(0.40, 0.25, 0.13))
+
+	var panels := Node3D.new()
+	panels.name = "WallPanels"
+	architecture.add_child(panels)
+	for side in [-1.0, 1.0]:
+		var x := float(side) * 4.94
+		for z in [-4.6, 0.0, 4.6]:
+			_box(panels, Vector3(x, 2.35, z), Vector3(0.10, 2.55, 2.15), Color(0.15, 0.035, 0.05))
+			_gold_box(panels, Vector3(x - side * 0.06, 3.62, z), Vector3(0.06, 0.06, 2.18), 0.10)
+
+	var exit_fill := OmniLight3D.new()
+	exit_fill.name = "ParlorExitFill"
+	exit_fill.position = Vector3(0, 2.6, 5.8)
+	exit_fill.light_color = Color(0.68, 0.72, 0.86)
+	exit_fill.light_energy = 0.75
+	exit_fill.omni_range = 5.0
+	architecture.add_child(exit_fill)
+
+func _build_station_frame(root: Node3D, center: Vector3, width: float, color: Color) -> void:
+	_box(root, center + Vector3(-width * 0.5, 2.0, 0), Vector3(0.16, 3.8, 0.16), color)
+	_box(root, center + Vector3(width * 0.5, 2.0, 0), Vector3(0.16, 3.8, 0.16), color)
+	_box(root, center + Vector3(0, 3.85, 0), Vector3(width + 0.2, 0.18, 0.18), color.lightened(0.12))
+
 func _build_pillars(root: Node3D) -> void:
 	for x in [-4.3, 4.3]:
 		for z in [-3.0, 0.5, 4.0]:
@@ -670,7 +726,7 @@ func _flat_mat(color: Color) -> ShaderMaterial:
 func _ground_mat() -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.albedo_color = Color(0.11, 0.07, 0.07)
-	m.roughness = 0.25
+	m.roughness = 0.52
 	m.metallic = 0.0
 	return m
 

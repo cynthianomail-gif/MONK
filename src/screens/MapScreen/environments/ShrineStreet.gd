@@ -37,15 +37,21 @@ const WOOD_MID := Color(0.42, 0.31, 0.21)      # 欄杆/框
 # 深夜＝藍墨夜、燈籠變主光源；傍晚＝橘霞低陽。lantern_mult 乘在暖光/發光體的基準能量上。
 # sky_top/sky_hor 驅動 ProceduralSky；cloud_col 染卡通雲；sat 每時段飽和度；
 # 霧密度全面調淡＋fog_sky_affect 壓低＝霧只做遠景空氣感，不再把天空糊掉。
+const ROOF_PALETTE := [
+	Color(0.22, 0.29, 0.43),
+	Color(0.30, 0.32, 0.36),
+	Color(0.22, 0.38, 0.36),
+]
+
 const TIME_PROFILES := [
-	{ "sun_rot": Vector3(-42, -38, 0), "sun_col": Color(1.0, 0.96, 0.86), "sun_e": 1.15,
+	{ "sun_rot": Vector3(-42, -38, 0), "sun_col": Color(1.0, 0.96, 0.86), "sun_e": 1.00,
 	  "sky_top": Color(0.22, 0.46, 0.86), "sky_hor": Color(0.74, 0.86, 0.96),
-	  "amb_col": Color(0.72, 0.78, 0.88), "amb_e": 0.42, "sat": 1.10,
+	  "amb_col": Color(0.72, 0.78, 0.88), "amb_e": 0.58, "sat": 1.04,
 	  "fog_col": Color(0.86, 0.90, 0.96), "fog_d": 0.001,
 	  "cloud_col": Color(1.0, 1.0, 1.0), "lantern_mult": 0.3, "glow": 0.5 },   # 白天燈籠/障子幾乎不發光
-	{ "sun_rot": Vector3(-30, 48, 0), "sun_col": Color(1.0, 0.90, 0.72), "sun_e": 1.05,
+	{ "sun_rot": Vector3(-30, 48, 0), "sun_col": Color(1.0, 0.90, 0.72), "sun_e": 0.98,
 	  "sky_top": Color(0.25, 0.48, 0.84), "sky_hor": Color(0.88, 0.88, 0.80),
-	  "amb_col": Color(0.80, 0.78, 0.72), "amb_e": 0.40, "sat": 1.08,
+	  "amb_col": Color(0.80, 0.78, 0.72), "amb_e": 0.54, "sat": 1.04,
 	  "fog_col": Color(0.90, 0.88, 0.80), "fog_d": 0.0012,
 	  "cloud_col": Color(1.0, 0.97, 0.90), "lantern_mult": 0.45, "glow": 0.5 },
 	{ "sun_rot": Vector3(-13, 62, 0), "sun_col": Color(1.0, 0.52, 0.28), "sun_e": 0.9,
@@ -79,6 +85,7 @@ func _ready() -> void:
 	_build_shops(self)
 	_build_minigame_signs(self)
 	_build_torii(self)
+	_build_shrine_architecture(self)
 	_build_lanterns(self)
 	_build_stone_lanterns(self)
 	_build_backdrop(self)
@@ -241,7 +248,8 @@ func _ground_mat() -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = COBBLE_SHADER
 	m.set_shader_parameter("albedo", Color(0.69, 0.66, 0.60))   # 亮暖石，配彩色街景
-	m.set_shader_parameter("stone_size", 0.55)
+	m.set_shader_parameter("stone_size", 0.38)
+	m.set_shader_parameter("bump", 0.28)
 	m.set_shader_parameter("mortar_darken", 0.48)
 	m.set_shader_parameter("rough_stone", 0.80)   # 乾石無光澤（低粗糙會變拋光蛋）
 	return m
@@ -449,27 +457,48 @@ func _build_shops(root: Node3D) -> void:
 
 ## 主街店家：建在 x=side*MAIN_BUILD_X，店面朝 -side*X（街心）。沿街寬度在 Z。
 func _shop_x(root: Node3D, x: float, z: float, side: int, i: int, rng: RandomNumberGenerator) -> void:
+	var shop_root := Node3D.new()
+	shop_root.name = "ShrineShopX_%02d" % i
+	shop_root.add_to_group("shrine_shop")
+	var archetype := i % 3
+	shop_root.set_meta("archetype", archetype)
+	root.add_child(shop_root)
 	var hgt := rng.randf_range(3.5, 6.5)
 	var w := rng.randf_range(4.0, 6.0)
 	var d := rng.randf_range(4.5, 6.5)
-	_box(root, Vector3(x, hgt * 0.5, z), Vector3(w, hgt, d), _inks[i % _inks.size()])
+	_box(shop_root, Vector3(x, hgt * 0.5, z), Vector3(w, hgt, d), _inks[i % _inks.size()])
 	var roof_h := rng.randf_range(1.6, 2.6)
-	_roof(root, Vector3(x, hgt + roof_h * 0.5, z), Vector3(w + 1.4, roof_h, d + 1.4), ROOF_TILE)
-	_cam_blocker(root, Vector3(x, (hgt + roof_h) * 0.5, z), Vector3(w, hgt + roof_h, d))
+	var roof_col: Color = ROOF_PALETTE[archetype]
+	_roof(shop_root, Vector3(x, hgt + roof_h * 0.5, z), Vector3(w + 1.4, roof_h, d + 1.4), roof_col)
+	_cam_blocker(shop_root, Vector3(x, (hgt + roof_h) * 0.5, z), Vector3(w, hgt + roof_h, d))
 	var fx := x - float(side) * (w * 0.5 + 0.05)
 	var sh := minf(hgt, 3.0)
-	_lit(root, Vector3(fx, sh * 0.45, z), Vector3(0.12, sh * 0.72, d * 0.62))
-	_box(root, Vector3(fx - float(side) * 0.10, sh * 0.80, z), Vector3(0.08, sh * 0.32, d * 0.64), _norens[i % _norens.size()])
-	_roof(root, Vector3(fx - float(side) * 0.55, sh + 0.05, z), Vector3(1.3, 0.8, d * 0.95), ROOF_AWNING)
+	_lit(shop_root, Vector3(fx, sh * 0.45, z), Vector3(0.12, sh * 0.72, d * 0.62))
+	_box(shop_root, Vector3(fx - float(side) * 0.10, sh * 0.80, z), Vector3(0.08, sh * 0.32, d * 0.64), _norens[i % _norens.size()])
+	_roof(shop_root, Vector3(fx - float(side) * 0.55, sh + 0.05, z), Vector3(1.3, 0.8, d * 0.95), roof_col.darkened(0.10))
 	for bi in range(4):
 		var bz := z - d * 0.26 + float(bi) * (d * 0.52 / 3.0)
-		_box(root, Vector3(fx - float(side) * 0.04, sh * 0.45, bz), Vector3(0.05, sh * 0.66, 0.05), WOOD_DARK)
-	_box(root, Vector3(fx - float(side) * 0.04, sh * 0.62, z), Vector3(0.05, 0.06, d * 0.58), WOOD_DARK)
+		_box(shop_root, Vector3(fx - float(side) * 0.04, sh * 0.45, bz), Vector3(0.05, sh * 0.66, 0.05), WOOD_DARK)
+	_box(shop_root, Vector3(fx - float(side) * 0.04, sh * 0.62, z), Vector3(0.05, 0.06, d * 0.58), WOOD_DARK)
 	var sign_col: Color = [WOOD_MID, Color(0.30, 0.13, 0.10)][i % 2]
-	_box(root, Vector3(fx - float(side) * 0.52, sh - 0.25, z), Vector3(0.06, 0.55, 0.8), sign_col)
+	_box(shop_root, Vector3(fx - float(side) * 0.52, sh - 0.25, z), Vector3(0.06, 0.55, 0.8), sign_col)
 	if i % 2 == 0:
-		_box(root, Vector3(x, hgt + 0.4, z), Vector3(w + 1.2, 0.8, d + 1.2), _accents[i % _accents.size()])
-	_facade_x(root, x, z, side, w, hgt, d, i)
+		_box(shop_root, Vector3(x, hgt + 0.4, z), Vector3(w + 1.2, 0.8, d + 1.2), _accents[i % _accents.size()])
+	_facade_x(shop_root, x, z, side, w, hgt, d, i)
+	_decorate_shop_x(shop_root, x, z, side, w, hgt, d, archetype)
+
+func _decorate_shop_x(root: Node3D, x: float, z: float, side: int, w: float, hgt: float, d: float, archetype: int) -> void:
+	var front_x := x - float(side) * (w * 0.5 + 0.18)
+	if archetype == 0:
+		for offset in [-0.34, 0.0, 0.34]:
+			_box(root, Vector3(front_x, 2.15, z + offset * d), Vector3(0.08, 0.10, d * 0.18), Color(0.64, 0.46, 0.24))
+	elif archetype == 1 and hgt >= 4.2:
+		_box(root, Vector3(front_x - float(side) * 0.22, 3.15, z), Vector3(0.10, 0.10, d * 0.70), WOOD_MID)
+		for offset in [-0.30, -0.10, 0.10, 0.30]:
+			_box(root, Vector3(front_x - float(side) * 0.22, 2.92, z + offset * d), Vector3(0.08, 0.46, 0.08), WOOD_DARK)
+	else:
+		_box(root, Vector3(x, hgt + 1.0, z), Vector3(w + 0.8, 0.14, 0.16), Color(0.18, 0.20, 0.22))
+		_box(root, Vector3(front_x - float(side) * 0.34, 2.3, z), Vector3(0.08, 1.25, 0.62), Color(0.32, 0.12, 0.10))
 
 ## 主街店家 2F 立面細節（沿街軸=Z）：木骨架角柱/腰樑＋屋簷垂木列＋格子窗(障子夜透光)＋隔棟欄杆。
 func _facade_x(root: Node3D, x: float, z: float, side: int, w: float, hgt: float, d: float, i: int) -> void:
@@ -507,26 +536,47 @@ func _facade_x(root: Node3D, x: float, z: float, side: int, w: float, hgt: float
 
 ## 支街店家：建在 z=lane±off，店面朝 -side*Z（街心）。沿街寬度在 X（＝_shop_x 的 x/z 對調）。
 func _shop_z(root: Node3D, x: float, z: float, side: int, i: int, rng: RandomNumberGenerator) -> void:
+	var shop_root := Node3D.new()
+	shop_root.name = "ShrineShopZ_%02d" % i
+	shop_root.add_to_group("shrine_shop")
+	var archetype := i % 3
+	shop_root.set_meta("archetype", archetype)
+	root.add_child(shop_root)
 	var hgt := rng.randf_range(3.5, 6.5)
 	var w := rng.randf_range(4.0, 6.0)   # 沿街(X)
 	var d := rng.randf_range(4.5, 6.5)   # 深(Z)
-	_box(root, Vector3(x, hgt * 0.5, z), Vector3(w, hgt, d), _inks[i % _inks.size()])
+	_box(shop_root, Vector3(x, hgt * 0.5, z), Vector3(w, hgt, d), _inks[i % _inks.size()])
 	var roof_h := rng.randf_range(1.6, 2.6)
-	_roof(root, Vector3(x, hgt + roof_h * 0.5, z), Vector3(w + 1.4, roof_h, d + 1.4), ROOF_TILE)
-	_cam_blocker(root, Vector3(x, (hgt + roof_h) * 0.5, z), Vector3(w, hgt + roof_h, d))
+	var roof_col: Color = ROOF_PALETTE[archetype]
+	_roof(shop_root, Vector3(x, hgt + roof_h * 0.5, z), Vector3(w + 1.4, roof_h, d + 1.4), roof_col)
+	_cam_blocker(shop_root, Vector3(x, (hgt + roof_h) * 0.5, z), Vector3(w, hgt + roof_h, d))
 	var fz := z - float(side) * (d * 0.5 + 0.05)
 	var sh := minf(hgt, 3.0)
-	_lit(root, Vector3(x, sh * 0.45, fz), Vector3(w * 0.62, sh * 0.72, 0.12))
-	_box(root, Vector3(x, sh * 0.80, fz - float(side) * 0.10), Vector3(w * 0.64, sh * 0.32, 0.08), _norens[i % _norens.size()])
-	_roof(root, Vector3(x, sh + 0.05, fz - float(side) * 0.55), Vector3(w * 0.95, 0.8, 1.3), ROOF_AWNING)
+	_lit(shop_root, Vector3(x, sh * 0.45, fz), Vector3(w * 0.62, sh * 0.72, 0.12))
+	_box(shop_root, Vector3(x, sh * 0.80, fz - float(side) * 0.10), Vector3(w * 0.64, sh * 0.32, 0.08), _norens[i % _norens.size()])
+	_roof(shop_root, Vector3(x, sh + 0.05, fz - float(side) * 0.55), Vector3(w * 0.95, 0.8, 1.3), roof_col.darkened(0.10))
 	for bi in range(4):
 		var bx := x - w * 0.26 + float(bi) * (w * 0.52 / 3.0)
-		_box(root, Vector3(bx, sh * 0.45, fz - float(side) * 0.04), Vector3(0.05, sh * 0.66, 0.05), WOOD_DARK)
+		_box(shop_root, Vector3(bx, sh * 0.45, fz - float(side) * 0.04), Vector3(0.05, sh * 0.66, 0.05), WOOD_DARK)
 	var sign_col: Color = [WOOD_MID, Color(0.30, 0.13, 0.10)][i % 2]
-	_box(root, Vector3(x, sh - 0.25, fz - float(side) * 0.52), Vector3(0.8, 0.55, 0.06), sign_col)
+	_box(shop_root, Vector3(x, sh - 0.25, fz - float(side) * 0.52), Vector3(0.8, 0.55, 0.06), sign_col)
 	if i % 2 == 0:
-		_box(root, Vector3(x, hgt + 0.4, z), Vector3(w + 1.2, 0.8, d + 1.2), _accents[i % _accents.size()])
-	_facade_z(root, x, z, side, w, hgt, d, i)
+		_box(shop_root, Vector3(x, hgt + 0.4, z), Vector3(w + 1.2, 0.8, d + 1.2), _accents[i % _accents.size()])
+	_facade_z(shop_root, x, z, side, w, hgt, d, i)
+	_decorate_shop_z(shop_root, x, z, side, w, hgt, d, archetype)
+
+func _decorate_shop_z(root: Node3D, x: float, z: float, side: int, w: float, hgt: float, d: float, archetype: int) -> void:
+	var front_z := z - float(side) * (d * 0.5 + 0.18)
+	if archetype == 0:
+		for offset in [-0.34, 0.0, 0.34]:
+			_box(root, Vector3(x + offset * w, 2.15, front_z), Vector3(w * 0.18, 0.10, 0.08), Color(0.64, 0.46, 0.24))
+	elif archetype == 1 and hgt >= 4.2:
+		_box(root, Vector3(x, 3.15, front_z - float(side) * 0.22), Vector3(w * 0.70, 0.10, 0.10), WOOD_MID)
+		for offset in [-0.30, -0.10, 0.10, 0.30]:
+			_box(root, Vector3(x + offset * w, 2.92, front_z - float(side) * 0.22), Vector3(0.08, 0.46, 0.08), WOOD_DARK)
+	else:
+		_box(root, Vector3(x, hgt + 1.0, z), Vector3(0.16, 0.14, d + 0.8), Color(0.18, 0.20, 0.22))
+		_box(root, Vector3(x, 2.3, front_z - float(side) * 0.34), Vector3(0.62, 1.25, 0.08), Color(0.32, 0.12, 0.10))
 
 ## 支街店家 2F 立面細節（＝_facade_x 的 x/z 對調，沿街軸=X）。
 func _facade_z(root: Node3D, x: float, z: float, side: int, w: float, hgt: float, d: float, i: int) -> void:
@@ -708,16 +758,120 @@ func _alms_spot(root: Node3D, pos: Vector3) -> void:
 	_box(root, pos + Vector3(0.3, 0.185, 0.15), Vector3(0.16, 0.02, 0.16), Color(0.85, 0.72, 0.35))
 
 func _build_torii(root: Node3D) -> void:
-	var red := Color(0.82, 0.18, 0.13)
+	var red := Color(0.68, 0.10, 0.08)
 	var zt := NORTH_Z + 1.5   # 主街盡頭
 	for side in [-1, 1]:
-		_box(root, Vector3(float(side) * 4.6, 5.0, zt), Vector3(0.7, 10.0, 0.7), red)
-	_box(root, Vector3(0, 9.8, zt), Vector3(11.5, 0.8, 0.9), red)
-	_box(root, Vector3(0, 8.4, zt), Vector3(9.6, 0.5, 0.7), red)
+		_box(root, Vector3(float(side) * 4.6, 4.6, zt), Vector3(0.56, 9.2, 0.62), red)
+	_box(root, Vector3(0, 9.25, zt), Vector3(11.8, 0.55, 0.78), red)
+	_box(root, Vector3(0, 8.0, zt), Vector3(9.6, 0.38, 0.62), red)
 	_build_shrine_hall(root)
 
 ## Hero 地標：神社本殿精模（magnific 水墨圖→Meshy image-to-3d），鳥居後方視覺錨點。
 ## 缺檔優雅跳過（模型未生成時場景照常）。AABB 正規化到 HALL_H 高、貼地置中。
+func _build_shrine_architecture(root: Node3D) -> void:
+	var architecture := Node3D.new()
+	architecture.name = "ShrineArchitecture"
+	root.add_child(architecture)
+	_build_side_street_endcap(architecture)
+	_build_shrine_forecourt(architecture)
+	_build_torii_details(architecture)
+	_build_backdrop_depth(architecture)
+	_build_town_details(architecture)
+
+func _build_side_street_endcap(root: Node3D) -> void:
+	var endcap := Node3D.new()
+	endcap.name = "SideStreetEndcap"
+	root.add_child(endcap)
+	var stone := Color(0.42, 0.40, 0.35)
+	var timber := Color(0.20, 0.14, 0.11)
+	_box(endcap, Vector3(WEST_X + 0.28, 2.25, JUNC_Z), Vector3(0.46, 4.5, SIDE_HALF_D * 2.0 - 0.5), stone)
+	for z in [JUNC_Z - 1.55, JUNC_Z + 1.55]:
+		_box(endcap, Vector3(WEST_X + 0.58, 1.55, z), Vector3(0.34, 3.1, 0.30), timber)
+	_box(endcap, Vector3(WEST_X + 0.58, 3.10, JUNC_Z), Vector3(0.34, 0.30, 3.4), timber)
+	for z in [JUNC_Z - 0.72, JUNC_Z + 0.72]:
+		_box(endcap, Vector3(WEST_X + 0.56, 1.42, z), Vector3(0.18, 2.65, 1.32), Color(0.28, 0.17, 0.12))
+	_roof(endcap, Vector3(WEST_X + 0.50, 3.85, JUNC_Z), Vector3(2.0, 1.1, 4.6), ROOF_PALETTE[1])
+	for z in [JUNC_Z - 3.7, JUNC_Z + 3.7]:
+		_box(endcap, Vector3(WEST_X + 0.54, 0.28, z), Vector3(0.64, 0.56, 1.6), stone.darkened(0.10))
+
+func _build_shrine_forecourt(root: Node3D) -> void:
+	var forecourt := Node3D.new()
+	forecourt.name = "ShrineForecourt"
+	root.add_child(forecourt)
+	var paver := Color(0.50, 0.48, 0.43)
+	for i in 8:
+		var z := NORTH_Z - 0.15 - float(i) * 0.92
+		_box(forecourt, Vector3(0, 0.025, z), Vector3(4.2, 0.05, 0.78), paver.lightened(0.025 if i % 2 == 0 else 0.0))
+	for x in [-4.85, 4.85]:
+		_box(forecourt, Vector3(x, 0.34, NORTH_Z - 3.4), Vector3(0.48, 0.68, 7.2), Color(0.37, 0.36, 0.33))
+		_box(forecourt, Vector3(x, 0.73, NORTH_Z - 3.4), Vector3(0.62, 0.12, 7.35), Color(0.30, 0.29, 0.27))
+	_stone_lantern(forecourt, -4.0, NORTH_Z - 4.8)
+	_stone_lantern(forecourt, 4.0, NORTH_Z - 4.8)
+	var basin_pos := Vector3(3.75, 0, NORTH_Z - 1.9)
+	_box(forecourt, basin_pos + Vector3(0, 0.32, 0), Vector3(0.52, 0.64, 0.52), Color(0.34, 0.33, 0.30))
+	_box(forecourt, basin_pos + Vector3(0, 0.76, 0), Vector3(1.25, 0.28, 0.82), Color(0.40, 0.39, 0.36))
+	_box(forecourt, basin_pos + Vector3(0, 0.92, 0), Vector3(1.02, 0.05, 0.60), Color(0.25, 0.46, 0.52))
+
+func _build_torii_details(root: Node3D) -> void:
+	var details := Node3D.new()
+	details.name = "ToriiDetails"
+	root.add_child(details)
+	var zt := NORTH_Z + 1.5
+	for side in [-1.0, 1.0]:
+		_box(details, Vector3(side * 4.6, 0.28, zt), Vector3(0.88, 0.56, 0.90), Color(0.12, 0.10, 0.10))
+		_box(details, Vector3(side * 4.6, 0.62, zt), Vector3(0.70, 0.16, 0.74), Color(0.30, 0.18, 0.13))
+		var end_cap := _box(details, Vector3(side * 5.72, 9.34, zt), Vector3(1.8, 0.30, 0.80), Color(0.50, 0.055, 0.045))
+		end_cap.rotation_degrees.z = side * 7.0
+	_box(details, Vector3(0, 9.58, zt), Vector3(12.3, 0.18, 0.86), Color(0.16, 0.12, 0.11))
+	_architecture_cylinder(details, Vector3(0, 7.42, zt + 0.38), 0.075, 7.0, Color(0.55, 0.40, 0.20), Vector3(0, 0, 90))
+	for x in [-2.6, -1.3, 0.0, 1.3, 2.6]:
+		_box(details, Vector3(x, 7.02, zt + 0.42), Vector3(0.10, 0.72, 0.06), Color(0.92, 0.89, 0.80))
+		_box(details, Vector3(x + 0.10, 6.73, zt + 0.42), Vector3(0.28, 0.12, 0.06), Color(0.92, 0.89, 0.80))
+	_box(details, Vector3(0, 8.56, zt + 0.44), Vector3(1.12, 0.62, 0.10), Color(0.18, 0.13, 0.10))
+	_box(details, Vector3(0, 8.56, zt + 0.50), Vector3(0.76, 0.34, 0.04), Color(0.72, 0.56, 0.24))
+
+func _build_backdrop_depth(root: Node3D) -> void:
+	var backdrop := Node3D.new()
+	backdrop.name = "BackdropDepth"
+	root.add_child(backdrop)
+	var positions := [
+		Vector3(WEST_X - 3.2, 2.6, JUNC_Z - 3.4),
+		Vector3(WEST_X - 5.8, 3.1, JUNC_Z + 0.4),
+		Vector3(WEST_X - 3.8, 2.3, JUNC_Z + 4.0),
+	]
+	for i in positions.size():
+		var pos: Vector3 = positions[i]
+		_box(backdrop, pos, Vector3(4.8, pos.y * 2.0, 4.2), Color(0.46, 0.42, 0.36).darkened(float(i) * 0.05))
+		_roof(backdrop, Vector3(pos.x, pos.y * 2.0 + 0.75, pos.z), Vector3(5.6, 1.5, 5.0), ROOF_PALETTE[(i + 1) % ROOF_PALETTE.size()])
+	for z in [JUNC_Z - 4.2, JUNC_Z, JUNC_Z + 4.2]:
+		_architecture_cylinder(backdrop, Vector3(WEST_X - 7.0, 4.5, z), 0.55, 9.0, Color(0.16, 0.28, 0.20), Vector3.ZERO)
+
+func _build_town_details(root: Node3D) -> void:
+	var details := Node3D.new()
+	details.name = "TownDetails"
+	root.add_child(details)
+	for z in [-2.0, -10.0, -20.5]:
+		for side in [-1.0, 1.0]:
+			var side_f := float(side)
+			var x := side_f * 5.22
+			_box(details, Vector3(x, 2.55, z), Vector3(0.10, 4.6, 0.10), WOOD_DARK)
+			_box(details, Vector3(x - side_f * 0.22, 3.68, z), Vector3(0.08, 0.12, 1.4), WOOD_MID)
+			_box(details, Vector3(x - side_f * 0.28, 2.85, z), Vector3(0.06, 1.2, 0.64), _norens[int(absf(z)) % _norens.size()].darkened(0.08))
+
+func _architecture_cylinder(root: Node3D, pos: Vector3, radius: float, height: float, color: Color, rotation_deg: Vector3) -> MeshInstance3D:
+	var mesh_instance := MeshInstance3D.new()
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = radius
+	mesh.bottom_radius = radius
+	mesh.height = height
+	mesh.radial_segments = 12
+	mesh_instance.mesh = mesh
+	mesh_instance.position = pos
+	mesh_instance.rotation_degrees = rotation_deg
+	mesh_instance.material_override = _flat_mat(color)
+	root.add_child(mesh_instance)
+	return mesh_instance
+
 const HALL_GLB := "res://assets/3d/landmarks/shrine_hall.glb"
 const HALL_H := 10.0
 
@@ -781,26 +935,31 @@ func _merged_aabb(node: Node) -> AABB:
 func _lantern(root: Node3D, x: float, z: float) -> void:
 	_box(root, Vector3(x, 2.0, z), Vector3(0.25, 4.0, 0.25), WOOD_DARK)
 	var glow := MeshInstance3D.new()
-	var sm := SphereMesh.new()
-	sm.radius = 0.55
-	sm.height = 1.1
-	glow.mesh = sm
-	glow.position = Vector3(x, 4.2, z)
+	glow.add_to_group("shrine_paper_lantern")
+	var cm := CylinderMesh.new()
+	cm.top_radius = 0.36
+	cm.bottom_radius = 0.36
+	cm.height = 0.72
+	cm.radial_segments = 12
+	glow.mesh = cm
+	glow.position = Vector3(x, 4.0, z)
 	var gm := StandardMaterial3D.new()
 	gm.albedo_color = Color(1.0, 0.80, 0.42)
 	gm.emission_enabled = true
 	gm.emission = Color(1.0, 0.74, 0.34)
-	gm.emission_energy_multiplier = 2.4
+	gm.emission_energy_multiplier = 1.25
 	glow.material_override = gm
 	root.add_child(glow)
-	_warm_mats.append([gm, 2.4])
+	_warm_mats.append([gm, 1.25])
+	_box(root, Vector3(x, 4.40, z), Vector3(0.48, 0.09, 0.48), WOOD_DARK)
+	_box(root, Vector3(x, 3.60, z), Vector3(0.48, 0.09, 0.48), WOOD_DARK)
 	var l := OmniLight3D.new()
-	l.position = Vector3(x, 4.2, z)
+	l.position = Vector3(x, 4.0, z)
 	l.light_color = Color(1.0, 0.82, 0.5)
-	l.light_energy = 1.6
-	l.omni_range = 9.0
+	l.light_energy = 1.0
+	l.omni_range = 6.5
 	root.add_child(l)
-	_warm_lights.append([l, 1.6])
+	_warm_lights.append([l, 1.0])
 
 func _build_lanterns(root: Node3D) -> void:
 	var z := 0.0
@@ -835,22 +994,23 @@ func _build_backdrop(root: Node3D) -> void:
 func _tree_row(root: Node3D, rng: RandomNumberGenerator, a: float, b: float, c: float, dd: float, along_z: bool) -> void:
 	var t := c
 	while t < dd:
-		var th := rng.randf_range(10.0, 20.0)
+		var th := rng.randf_range(9.0, 17.0)
 		var tree := MeshInstance3D.new()
+		tree.add_to_group("shrine_backdrop_tree")
 		var cyl := CylinderMesh.new()
-		cyl.top_radius = 0.02
-		cyl.bottom_radius = rng.randf_range(0.9, 1.6)
+		cyl.top_radius = rng.randf_range(0.14, 0.24)
+		cyl.bottom_radius = rng.randf_range(0.75, 1.25)
 		cyl.height = th
-		cyl.radial_segments = 6
+		cyl.radial_segments = 8
 		tree.mesh = cyl
 		if along_z:
 			tree.position = Vector3(rng.randf_range(a, b), th * 0.5 - 0.5, t)
 		else:
 			tree.position = Vector3(t, th * 0.5 - 0.5, rng.randf_range(a, b))
-		var g := rng.randf_range(0.8, 1.15)
-		tree.material_override = _flat_mat(Color(0.18 * g, 0.36 * g, 0.24 * g))
+		var g := rng.randf_range(0.82, 1.10)
+		tree.material_override = _flat_mat(Color(0.17 * g, 0.31 * g, 0.22 * g))
 		root.add_child(tree)
-		t += rng.randf_range(1.6, 2.6)
+		t += rng.randf_range(2.4, 3.5)
 
 func _stone_lantern(root: Node3D, x: float, z: float) -> void:
 	var stone := Color(0.34, 0.33, 0.30)
@@ -957,6 +1117,8 @@ func _sakura_tree(root: Node3D, pos: Vector3, h: float) -> void:
 	trunk.position = pos + Vector3(0, h * 0.5, 0)
 	trunk.material_override = _flat_mat(Color(0.30, 0.21, 0.16))
 	root.add_child(trunk)
+	for angle in [-48.0, -18.0, 38.0]:
+		_architecture_cylinder(root, pos + Vector3(0, h * 0.78, 0), 0.075, h * 0.42, Color(0.30, 0.21, 0.16), Vector3(0, 0, angle))
 	# 樹冠＝數顆交疊粉球，兩色粉交錯避免死板
 	var blobs := [
 		[Vector3(0.0, 0.0, 0.0), 1.25], [Vector3(0.80, -0.30, 0.35), 0.90],
@@ -966,11 +1128,14 @@ func _sakura_tree(root: Node3D, pos: Vector3, h: float) -> void:
 	for bi in blobs.size():
 		var b: Array = blobs[bi]
 		var blob := MeshInstance3D.new()
+		blob.add_to_group("shrine_sakura_canopy")
 		var sm := SphereMesh.new()
 		sm.radius = b[1]
 		sm.height = b[1] * 1.7
 		blob.mesh = sm
 		blob.position = pos + Vector3(0, h + 0.35, 0) + (b[0] as Vector3)
+		blob.scale = Vector3(1.0 + float(bi % 2) * 0.12, 0.58, 0.82 + float((bi + 1) % 2) * 0.10)
+		blob.rotation_degrees.y = float(bi) * 31.0
 		var pink := Color(0.96, 0.74, 0.81) if bi % 2 == 0 else Color(0.93, 0.60, 0.72)
 		blob.material_override = _flat_mat(pink)
 		root.add_child(blob)
@@ -995,7 +1160,7 @@ func _sakura_tree(root: Node3D, pos: Vector3, h: float) -> void:
 	pm.turbulence_noise_scale = 2.2
 	p.process_material = pm
 	var petal := QuadMesh.new()
-	petal.size = Vector2(0.10, 0.10)
+	petal.size = Vector2(0.07, 0.12)
 	var lm := StandardMaterial3D.new()
 	lm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	lm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA

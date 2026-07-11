@@ -210,6 +210,7 @@ func _ready() -> void:
 	add_child(_world)
 	_build_env()
 	_build_room()
+	_build_restaurant_architecture()
 	_build_tables()
 	_build_pickup()
 	_build_npcs()
@@ -438,10 +439,10 @@ func _build_env() -> void:
 	env.background_color = Color(0.04, 0.03, 0.03)
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color(0.42, 0.35, 0.29)
-	env.ambient_light_energy = 0.65
+	env.ambient_light_energy = 0.92
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.glow_enabled = true
-	env.glow_intensity = 0.5
+	env.glow_intensity = 0.38
 	env.glow_hdr_threshold = 1.3
 	env.ssao_enabled = true
 	env.ssao_radius = 1.2
@@ -570,6 +571,89 @@ func _build_side_decor() -> void:
 func _hang_lantern(pos: Vector3) -> void:
 	_cylinder(pos, 0.16, 0.32, Color(0.85, 0.72, 0.45))
 	_omni(pos, LANTERN_GLOW, 0.7, 2.2)
+
+func _build_restaurant_architecture() -> void:
+	var architecture := Node3D.new()
+	architecture.name = "SoupArchitecture"
+	_world.add_child(architecture)
+
+	var floor_layer := Node3D.new()
+	floor_layer.name = "WoodFloor"
+	architecture.add_child(floor_layer)
+	var plank_count := 20
+	var plank_w := (HALF_W * 2.0) / float(plank_count)
+	for i in plank_count:
+		var x := -HALF_W + plank_w * (float(i) + 0.5)
+		var tone := WOOD_DARK.lightened(0.035 if i % 2 == 0 else 0.0)
+		_architecture_box(floor_layer, Vector3(x, 0.015, 0), Vector3(plank_w - 0.025, 0.03, HALF_D * 2.0 - 0.24), tone)
+
+	var wall_frames := Node3D.new()
+	wall_frames.name = "WallFrames"
+	architecture.add_child(wall_frames)
+	for side in [-1.0, 1.0]:
+		var x := float(side) * (HALF_W - 0.13)
+		for z in [-6.4, -3.2, 0.0, 3.2, 6.4]:
+			_architecture_box(wall_frames, Vector3(x, 2.05, z), Vector3(0.16, 4.05, 0.18), WOOD_DARK)
+		_architecture_box(wall_frames, Vector3(x, 3.75, 0), Vector3(0.18, 0.18, HALF_D * 2.0 - 0.5), WOOD_WARM.darkened(0.18))
+	for x in [-4.8, -2.4, 0.0, 2.4, 4.8]:
+		_architecture_box(wall_frames, Vector3(x, 2.05, -HALF_D + 0.13), Vector3(0.18, 4.05, 0.16), WOOD_DARK)
+	_architecture_box(wall_frames, Vector3(0, 3.75, -HALF_D + 0.13), Vector3(HALF_W * 2.0 - 0.5, 0.18, 0.16), WOOD_WARM.darkened(0.18))
+
+	var shelves := Node3D.new()
+	shelves.name = "KitchenShelves"
+	architecture.add_child(shelves)
+	for x in [-4.45, -2.75, 2.75, 4.45]:
+		_architecture_box(shelves, Vector3(x, 2.0, -HALF_D + 0.34), Vector3(1.45, 1.8, 0.28), Color(0.16, 0.10, 0.07))
+		for y in [1.35, 1.95, 2.55]:
+			_architecture_box(shelves, Vector3(x, y, -HALF_D + 0.12), Vector3(1.5, 0.08, 0.52), WOOD_WARM)
+			for bowl_x in [-0.42, 0.0, 0.42]:
+				_architecture_cylinder(shelves, Vector3(x + bowl_x, y + 0.10, -HALF_D + 0.02), 0.13, 0.08, PAPER_WARM.darkened(0.12))
+
+	var menu_boards := Node3D.new()
+	menu_boards.name = "MenuBoards"
+	architecture.add_child(menu_boards)
+	for i in 5:
+		var x := -2.8 + float(i) * 1.4
+		_architecture_box(menu_boards, Vector3(x, 2.8, COUNTER_Z - 0.98), Vector3(1.08, 1.15, 0.07), Color(0.12, 0.08, 0.06))
+		for row in 3:
+			_architecture_box(menu_boards, Vector3(x, 3.12 - float(row) * 0.30, COUNTER_Z - 0.93), Vector3(0.72 - float(row) * 0.08, 0.035, 0.025), PAPER_WARM.darkened(0.08))
+
+	var route_fill := OmniLight3D.new()
+	route_fill.name = "SoupRouteFill"
+	route_fill.position = Vector3(0, 3.3, 1.0)
+	route_fill.light_color = Color(0.86, 0.76, 0.62)
+	route_fill.light_energy = 1.15
+	route_fill.omni_range = 10.5
+	architecture.add_child(route_fill)
+	var pickup_fill := OmniLight3D.new()
+	pickup_fill.name = "SoupPickupFill"
+	pickup_fill.position = PICKUP_POS + Vector3(0, 2.2, 0.3)
+	pickup_fill.light_color = Color(0.96, 0.72, 0.42)
+	pickup_fill.light_energy = 1.35
+	pickup_fill.omni_range = 5.2
+	architecture.add_child(pickup_fill)
+
+func _architecture_box(root: Node3D, pos: Vector3, size: Vector3, color: Color) -> MeshInstance3D:
+	var mesh_instance := MeshInstance3D.new()
+	var mesh := BoxMesh.new()
+	mesh.size = size
+	mesh_instance.mesh = mesh
+	mesh_instance.position = pos
+	mesh_instance.material_override = _flat_mat(color)
+	root.add_child(mesh_instance)
+	return mesh_instance
+
+func _architecture_cylinder(root: Node3D, pos: Vector3, radius: float, height: float, color: Color) -> MeshInstance3D:
+	var mesh_instance := MeshInstance3D.new()
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = radius
+	mesh.bottom_radius = radius
+	mesh.height = height
+	mesh_instance.mesh = mesh
+	mesh_instance.position = pos
+	mesh_instance.material_override = _flat_mat(color)
+	root.add_child(mesh_instance)
+	return mesh_instance
 
 func _build_tables() -> void:
 	for t in TABLES:
@@ -851,13 +935,14 @@ func _build_hud() -> void:
 	var mlabel := _label(Vector2(1500, 84), 22, Color(0.8, 0.8, 0.78))
 	mlabel.text = "湯晃動(平衡計)"
 	# 開場規則提示（照現有小遊戲慣例，短暫顯示後淡出）
-	var rule := _label(Vector2(420, 460), 32, Color(1.0, 0.95, 0.85))
+	var rule := _label(Vector2(420, 210), 26, Color(1.0, 0.95, 0.85))
+	rule.name = "IntroRules"
 	rule.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	rule.custom_minimum_size = Vector2(1080, 0)
 	rule.text = "WASD 移動／滑鼠修正托盤平衡／Shift 穩步\n出餐口取碗→送到金箭頭指的桌子→按 E 上菜\n75 秒內看你能送幾桌！"
-	rule.position = Vector2(420, 420)
+	rule.position = Vector2(420, 210)
 	var tw := create_tween()
-	tw.tween_interval(3.0)
+	tw.tween_interval(2.2)
 	tw.tween_property(rule, "modulate:a", 0.0, 0.8)
 	tw.tween_callback(rule.queue_free)
 
