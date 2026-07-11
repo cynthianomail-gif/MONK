@@ -35,7 +35,20 @@ func register(node: CanvasItem, key: String, group: String = "") -> void:
 	if not node.tree_exited.is_connected(_on_node_tree_exited):
 		node.tree_exited.connect(_on_node_tree_exited.bind(key))
 	if _overrides.has(key):
-		call_deferred("apply_override", node, key)
+		# 用 WeakRef 包住節點再排入 call_deferred：若節點在佇列排到前就被釋放，
+		# 直接把 Node 當強型別參數傳給 call_deferred 會在執行時噴
+		# "Error calling deferred method ... Cannot convert argument 1 from Object to Object"
+		# （已釋放的 Node 無法轉型成 CanvasItem，is_instance_valid 守衛救不了，因為
+		# 錯誤發生在參數轉換階段，函式本體根本沒被呼叫到）。WeakRef.get_ref() 在節點
+		# 已釋放時安全回傳 null，於 _apply_override_deferred 消化時判斷即可。
+		call_deferred("_apply_override_deferred", weakref(node), key)
+
+## call_deferred 的安全轉接層，見 register() 內註解。
+func _apply_override_deferred(node_ref: WeakRef, key: String) -> void:
+	var node = node_ref.get_ref()
+	if node == null or not is_instance_valid(node):
+		return
+	apply_override(node, key)
 
 func _on_node_tree_exited(key: String) -> void:
 	unregister(key)
